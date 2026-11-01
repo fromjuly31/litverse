@@ -1,0 +1,11 @@
+node_modules/
+dist/
+github-pages/
+release/
+.env
+.env.*
+!.env.example
+.netlify/
+test-results/
+playwright-report/
+*.log

@@ -1,0 +1,1695 @@
+/* LITVERSE — a light, editorial literature gallery. */
+:root {
+  --serif: "Noto Serif KR", "Batang", Georgia, serif;
+  --paper: #f7f5f0;
+  --ink: #292922;
+  --bg: var(--paper);
+  --panel: #fffefa;
+  --raised: #eeece5;
+  --text: var(--ink);
+  --muted: #6d6c63;
+  --accent: #365b70;
+  --line: #d9d6cb;
+  --sidebar: 0px;
+  color: var(--ink);
+  background: var(--paper);
+  color-scheme: light;
+}
+body {
+  background: var(--paper);
+}
+h1,
+h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+}
+h1 {
+  line-height: 1.55;
+}
+.brand {
+  font:
+    48px/0.95 Georgia,
+    "Times New Roman",
+    serif;
+  font-weight: 400;
+  letter-spacing: -3px;
+  gap: 0;
+}
+.brand-dot {
+  color: var(--accent);
+}
+.brand img {
+  display: none;
+}
+.eyebrow {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1.7px;
+  font-weight: 400;
+}
+.btn {
+  border-radius: 3px;
+  font-weight: 500;
+  padding: 12px 19px;
+}
+.btn.primary {
+  background: var(--accent);
+  color: #fffefa;
+  border-color: var(--accent);
+}
+.btn.primary:hover {
+  background: #29485b;
+  border-color: #29485b;
+}
+.btn.secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: #bab8ab;
+}
+.btn.secondary:hover {
+  background: #eeece4;
+  border-color: #8c8b7d;
+}
+.btn.ghost {
+  color: var(--muted);
+}
+.btn.ghost:hover {
+  background: #ebe9e1;
+  color: var(--ink);
+}
+.btn.danger {
+  color: #9c4237;
+  background: #a85b4e0a;
+  border-color: #a85b4e33;
+}
+.icon-btn {
+  border-radius: 3px;
+  background: transparent;
+}
+.icon-btn:hover {
+  background: #ebe9e1;
+}
+.badge,
+.badge.blue,
+.demo-pill {
+  background: transparent;
+  border-color: var(--line);
+  color: #5a6053;
+  border-radius: 2px;
+  font-weight: 400;
+}
+.badge.blue {
+  background: #edf0e9;
+  border-color: #d4dbcc;
+}
+.tag {
+  border-radius: 0;
+  color: #64695a;
+  background: transparent;
+  padding: 3px 0;
+}
+.tag-button {
+  border-radius: 2px;
+  background: #eeece5;
+  color: var(--muted);
+}
+.tag-button.active {
+  background: #e5ebe9;
+  color: var(--accent);
+  border-color: #8caaa9;
+}
+input,
+textarea,
+.worksheet-form textarea {
+  background: #fffefa;
+  border-color: #d7d4c9;
+  border-radius: 3px;
+  color: var(--ink);
+}
+input:focus,
+textarea:focus,
+.worksheet-form textarea:focus {
+  background: #fffefa;
+  border-color: #748d96;
+  box-shadow: 0 0 0 3px #365b700b;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #817f75;
+}
+input[type="checkbox"] {
+  border-color: #8c8e80;
+  border-radius: 2px;
+  background: #fffefa;
+}
+input[type="checkbox"]:checked {
+  background-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='m5 10 3 3 7-7' fill='none' stroke='%23fffefa' stroke-width='2'/%3E%3C/svg%3E");
+}
+.field {
+  color: #42443b;
+}
+.panel {
+  background: #fffefa;
+  border-radius: 3px;
+  border-color: var(--line);
+}
+.notice {
+  background: #eeefe7;
+  color: #575f4e;
+  border-color: #dce0d2;
+  border-radius: 3px;
+}
+.notice.error-notice {
+  background: #f7ece7;
+  color: #923f35;
+  border-color: #dec4ba;
+}
+.empty {
+  border-radius: 2px;
+}
+.text-link {
+  color: #5f6659;
+}
+.select-trigger {
+  background: #fffefa;
+  color: #41453a;
+  border-color: #d0cfc3;
+  border-radius: 3px;
+}
+.select-trigger:hover,
+.select-trigger[aria-expanded="true"] {
+  border-color: #768b8e;
+}
+.select-menu {
+  background: #fffefa;
+  border-color: #d1cec2;
+  border-radius: 4px;
+  box-shadow: 0 12px 35px #37362c1c;
+}
+.select-option {
+  border-radius: 2px;
+  color: var(--ink);
+}
+.select-option.highlighted,
+.select-option:hover {
+  background: #eeeee5;
+}
+.select-option[aria-selected="true"],
+.select-option svg {
+  color: var(--accent);
+}
+.modal-overlay {
+  background: #2c2d2552;
+  backdrop-filter: blur(5px);
+}
+.modal {
+  background: #fffefa;
+  border-color: #e2dfd4;
+  border-radius: 5px;
+  box-shadow: 0 30px 90px #35362a30;
+}
+.modal-head {
+  padding-top: 29px;
+}
+.modal-head h2 {
+  font-size: 25px;
+}
+.modal-head .eyebrow {
+  color: #7b7c6f;
+}
+.modal-footer {
+  background: #f5f3ed;
+  border-radius: 0 0 5px 5px;
+}
+.toast {
+  color: #343b2e;
+  background: #fffefa;
+  border-color: #cfd3c3;
+  border-radius: 4px;
+  box-shadow: 0 8px 32px #36372d18;
+}
+.toast svg {
+  color: #54694d;
+}
+.toast.error {
+  border-color: #b98274;
+}
+.toast.error svg {
+  color: #9c4237;
+}
+
+/* The teacher enters through an exhibition masthead, not an app sidebar. */
+.museum-masthead {
+  max-width: 1440px;
+  margin: auto;
+  padding: 32px 64px 27px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+.museum-identity {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.museum-identity > span {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  padding-top: 9px;
+}
+.museum-header-note {
+  margin-left: auto;
+  color: #76786b;
+  font-size: 11px;
+}
+.museum-utilities {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.museum-utilities .icon-btn {
+  border: 0;
+  width: 34px;
+}
+.museum-utilities .btn {
+  padding-inline: 4px;
+  font-size: 11px;
+}
+.museum-nav {
+  max-width: 1312px;
+  margin: auto;
+  display: flex;
+  gap: 35px;
+  align-items: center;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+  padding: 0 0;
+}
+.museum-nav > a {
+  min-height: 58px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  color: #6b6b60;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.museum-nav > a.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+.museum-nav > a:hover {
+  color: var(--accent);
+}
+.nav-number {
+  color: #969587;
+  font:
+    11px Georgia,
+    serif;
+}
+.museum-date {
+  margin-left: auto;
+  color: #77786c;
+  font-size: 11px;
+}
+.teacher-layout {
+  margin-left: 0;
+}
+.teacher-main {
+  max-width: 1440px;
+  padding: 45px 64px 65px;
+}
+.page-heading {
+  margin-bottom: 40px;
+  gap: 25px;
+  align-items: center;
+}
+.page-heading h1 {
+  font-size: 35px;
+  font-weight: 500;
+}
+.page-heading .eyebrow {
+  margin-bottom: 12px;
+}
+.page-heading p {
+  font-size: 13px;
+}
+.teacher-main[data-page="dashboard"] > .page-heading h1 {
+  font: 25px/1.7 var(--serif);
+  letter-spacing: -0.04em;
+}
+.teacher-main[data-page="dashboard"] > .page-heading .eyebrow {
+  display: none;
+}
+.teacher-main[data-page="dashboard"] .new-activity-btn {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.exhibition-feature {
+  display: grid;
+  grid-template-columns: 0.84fr 1.16fr;
+  align-items: center;
+  gap: 75px;
+  padding: 16px 0 48px;
+}
+.exhibition-intro {
+  padding: 5px 0 15px;
+  min-width: 0;
+}
+.exhibition-kicker {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: #717367;
+  letter-spacing: 0.7px;
+}
+.exhibition-kicker span {
+  font:
+    italic 15px Georgia,
+    serif;
+}
+.exhibition-kicker:before {
+  content: "";
+  width: 30px;
+  height: 1px;
+  background: #9a9d8a;
+}
+.exhibition-title {
+  margin: 32px 0 26px;
+}
+.exhibition-title h2 {
+  font: 500 clamp(48px, 6vw, 82px)/1.3 var(--serif);
+  letter-spacing: -0.065em;
+  overflow-wrap: anywhere;
+}
+.exhibition-title > span {
+  display: block;
+  font: 14px/1.8 var(--serif);
+  color: #76786a;
+  margin-top: 17px;
+}
+.exhibition-description {
+  font-size: 14px;
+  color: #686b5e;
+  line-height: 2;
+  max-width: 380px;
+  word-break: keep-all;
+}
+.exhibition-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 33px;
+}
+.exhibition-actions .btn {
+  font-size: 12px;
+}
+.exhibition-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  font-size: 10px;
+  color: #707367;
+  margin-top: 26px;
+}
+.exhibition-status .status-dot {
+  color: #7c896d;
+}
+.exhibition-class {
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+}
+.exhibition-status a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 4px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  min-height: 30px;
+}
+.exhibition-status a svg {
+  width: 13px;
+  height: 13px;
+}
+.exhibition-work {
+  margin: 0;
+  min-width: 0;
+}
+.exhibition-mat {
+  padding: 22px;
+  display: block;
+  background: #fffefa;
+  border: 1px solid #d8d4c7;
+  box-shadow:
+    0 3px 4px #56534108,
+    0 18px 30px -18px #514f3e38;
+}
+.exhibition-mat img {
+  width: 100%;
+  aspect-ratio: 3/2;
+  object-fit: contain;
+  background: #eeece3;
+}
+.exhibition-work figcaption {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 2px 0;
+  font-size: 11px;
+}
+.exhibition-work figcaption strong {
+  font-weight: 400;
+  font-size: 12px;
+}
+.exhibition-work figcaption small {
+  display: block;
+  margin-top: 7px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.work-index {
+  color: #878a7a;
+  font:
+    12px Georgia,
+    serif;
+  white-space: nowrap;
+  padding-top: 1px;
+}
+.dashboard-stats {
+  border-top: 1px solid var(--line);
+  padding: 24px 0 27px;
+  margin-bottom: 43px;
+}
+.stat-value {
+  font:
+    33px/1.3 Georgia,
+    serif;
+  margin-top: 12px;
+}
+.stat-label {
+  color: #63675a;
+}
+.stat-caption {
+  color: #77786d;
+}
+.dashboard-bottom {
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 46px;
+}
+.section-heading {
+  margin-bottom: 26px;
+}
+.section-heading h2 {
+  font: 500 25px/1.6 var(--serif);
+  letter-spacing: -0.045em;
+}
+.section-heading p {
+  margin-top: 10px;
+}
+.preview-grid {
+  gap: 26px;
+}
+.art-image {
+  --mat-padding: 20px;
+  border: 1px solid #dedbce;
+  border-radius: 0;
+  background: #eeece5;
+  padding: 20px;
+}
+.art-image img {
+  position: absolute;
+  inset: var(--mat-padding);
+  width: calc(100% - var(--mat-padding) * 2);
+  height: calc(100% - var(--mat-padding) * 2);
+  object-fit: contain;
+  box-shadow: 0 3px 9px #45483712;
+}
+.art-card[data-image-type="scene"] .art-image {
+  aspect-ratio: 3/2;
+}
+.art-hit:hover .art-image img {
+  transform: scale(1.012);
+}
+.art-image .badge {
+  background: #fffefaed;
+  border-color: #d7d9cd;
+  backdrop-filter: none;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  padding: 4px 6px;
+  color: #596451;
+}
+.art-caption {
+  padding: 18px 0;
+}
+.art-caption h3 {
+  font: 500 16px/1.6 var(--serif);
+  letter-spacing: -0.04em;
+}
+.art-caption .between {
+  align-items: baseline;
+}
+.art-caption small {
+  flex-shrink: 0;
+  color: #76796b;
+}
+.art-caption p {
+  color: #72756a;
+  margin-top: 9px;
+}
+.art-caption .tag {
+  color: #707965;
+  font-size: 10px;
+  padding: 0;
+}
+.art-caption .chip-row {
+  gap: 9px;
+  margin-top: 10px;
+}
+.card-select {
+  top: 5px;
+  left: 5px;
+}
+.card-select input {
+  background: #fffefa;
+  border-color: #a8ad9a;
+  backdrop-filter: none;
+}
+.quick-panel {
+  padding-left: 28px;
+}
+.quick-link {
+  padding-block: 18px;
+}
+.quick-link > svg:first-child {
+  color: #707b65;
+}
+.quote-block {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 2.2;
+  margin-top: 35px;
+  color: #696d5d;
+}
+.quote-block .eyebrow {
+  font-family: Pretendard, sans-serif;
+  font-size: 9px;
+}
+.dashboard-footer {
+  margin-top: 45px;
+  color: #7f8174;
+  padding-top: 25px;
+}
+.gallery-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 38px 30px;
+}
+.gallery-grid.focus {
+  gap: 50px;
+}
+.gallery-toolbar {
+  padding-top: 5px;
+}
+.gallery-tags {
+  gap: 9px;
+  margin-top: 20px;
+  margin-bottom: 27px;
+}
+.selection-bar {
+  background: #fffefaf5;
+  border-color: #bfc7b5;
+  border-radius: 4px;
+  box-shadow: 0 7px 26px #393c2e18;
+}
+.detail-image {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: #eeece4;
+}
+.detail-copy h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+.detail-copy h4 {
+  color: #6c745d;
+}
+.detail-copy .prompt-preview {
+  background: #f1f0e8;
+  border-radius: 2px;
+}
+.comparison-grid img {
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: #eeece4;
+}
+.comparison-grid h3 {
+  font-family: var(--serif);
+}
+.book-mark {
+  background: #ebece1;
+  color: #67765b;
+  border-radius: 2px;
+}
+.activity-row {
+  padding-block: 27px;
+}
+.activity-row h3 {
+  font-family: var(--serif);
+  font-size: 23px;
+}
+.constellation {
+  background: #f0f0e7;
+  border-radius: 3px;
+}
+.constellation line {
+  stroke: #7c8e78;
+  opacity: 0.4;
+}
+.node {
+  background: #fffefae8;
+  border-color: #bdc6b4;
+  color: #566749;
+  box-shadow: 0 5px 17px #66704f0c;
+}
+.node.active {
+  background: #e0e7d7;
+  border-color: #7d916a;
+  box-shadow: 0 0 0 5px #7d916a12;
+}
+.node strong {
+  color: #4d6341;
+}
+.node small {
+  color: #66745d;
+}
+.bar-track {
+  background: #e6e8dc;
+}
+.bar-fill {
+  background: #879777;
+}
+
+/* Quiet reading pages, with ink, paper and deliberate writing space. */
+.student-shell,
+.auth-page {
+  background: var(--paper);
+}
+.student-topbar {
+  padding-top: 31px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--line);
+}
+.student-topbar .brand {
+  font-size: 39px;
+}
+.student-context {
+  color: #727669;
+}
+.student-demo {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #74776a;
+  font-size: 10px;
+  padding-block: 14px;
+}
+.student-container {
+  padding-top: 48px;
+}
+.student-intro h1 {
+  font-family: var(--serif);
+  font-size: 66px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+.student-intro .lead {
+  color: #53594a;
+}
+.student-intro .objective {
+  background: #eeeee4;
+  border-left-color: #9ba88c;
+  color: #69735c;
+}
+.student-intro .objective strong {
+  color: #687b58;
+}
+.student-task-list li {
+  color: #666b5c;
+}
+.student-task-list li:before {
+  color: #808c70;
+}
+.step-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: -0.05em;
+}
+.step-hint {
+  color: #6d7264;
+  line-height: 1.95;
+}
+.step-meta .eyebrow,
+.writing-section > .eyebrow {
+  color: #788268;
+}
+.worksheet-form textarea {
+  line-height: 2;
+  padding: 21px;
+}
+.work-tabs {
+  border-color: var(--line);
+}
+.work-tabs [role="tab"] {
+  color: #797d6e;
+}
+.work-tabs [role="tab"][aria-selected="true"] {
+  color: #3d5548;
+  border-bottom-color: #6e8064;
+  background: transparent;
+}
+.work-tabs .tab-number {
+  color: #7a886e;
+}
+.background-summary {
+  background: #eeefe6;
+  border-color: #d6dccb;
+  border-radius: 2px;
+}
+.background-summary summary {
+  color: #5c6a50;
+}
+.background-summary-grid p {
+  color: #565e4e;
+}
+.background-response p {
+  color: #525a4a;
+}
+.background-response > span {
+  color: #758465;
+}
+.lesson-flow {
+  color: #777b6e;
+}
+.lesson-flow .active {
+  color: #3f614a;
+}
+.teacher-summary {
+  background: #edf0e5;
+  border: 0;
+  border-left: 2px solid #91a47c;
+  border-radius: 0;
+}
+.teacher-summary p {
+  color: #4f6045;
+}
+.submission-context {
+  background: #eeeee4;
+  border-left-color: #8d9d7a;
+  border-radius: 0;
+}
+.paired-status span {
+  background: #edece5;
+  color: #727665;
+}
+.paired-status span.done {
+  background: #e6ecde;
+  color: #4c6641;
+}
+.prompt-card {
+  background: #fffefa;
+  border: 1px solid #d7d7c8;
+  border-radius: 2px;
+}
+.prompt-card pre {
+  color: #555f4b;
+}
+.submission-code {
+  background: #eeeee6;
+  border-color: #d6dbcb;
+  border-radius: 3px;
+}
+.submission-code code {
+  color: #4f6656;
+}
+.success-mark {
+  background: #e8edde;
+  color: #698159;
+}
+.upload-dropzone {
+  border-radius: 3px;
+  border-color: #9ca88c;
+  background: #f0f1e8;
+}
+.upload-dropzone.dragging {
+  background: #e8eddc;
+}
+.upload-dropzone > svg {
+  color: #788c65;
+}
+.upload-dropzone p {
+  color: #68785a;
+}
+.student-bottom {
+  background: var(--paper);
+}
+.student-footer,
+.student-note {
+  color: #727768;
+}
+.auth-card {
+  max-width: 440px;
+  padding: 40px 0;
+}
+.auth-card .brand {
+  margin-bottom: 45px;
+  font-size: 53px;
+}
+.auth-card h1 {
+  font-family: var(--serif);
+  font-size: 32px;
+}
+.auth-card > p,
+.auth-note {
+  color: #707763;
+}
+
+/* The exhibition is a bright wall; the paintings supply its color. */
+.showcase {
+  background: #f2f0e9;
+  color: var(--ink);
+}
+.showcase-header {
+  padding: 25px 35px;
+  border-bottom: 1px solid #dfddd1;
+}
+.showcase-header .brand {
+  font-size: 33px;
+}
+.showcase-title {
+  color: #727965;
+}
+.showcase-intro {
+  background: transparent;
+  font-family: var(--serif);
+  font-weight: 400;
+  color: #414b37;
+}
+.showcase-wall {
+  gap: 20px;
+  inset: 22px 35px;
+}
+.showcase-piece {
+  background: #fffefa;
+  border: 1px solid #e0ddcf;
+  padding: 10px;
+  box-shadow: 0 2px 4px #42473508;
+}
+.showcase-piece img {
+  flex: 1;
+  min-height: 0;
+}
+.showcase-piece small {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  background: #fffefaeb;
+  padding: 4px 6px;
+  color: #4f5b42;
+  font-size: 9px;
+  border-top: 1px solid #e1e2d8;
+}
+.showcase-piece.emphasized {
+  outline-color: #7f9469;
+}
+.showcase-controls {
+  padding-bottom: 18px;
+  border-top: 1px solid #dfddd1;
+  gap: 10px;
+}
+.showcase-counter,
+.showcase-offline {
+  color: #737b67;
+}
+
+/* Public entrance: a cover, a framed painting and three reading rooms. */
+.landing {
+  background: var(--paper);
+}
+.landing-nav {
+  max-width: 1440px;
+  margin: auto;
+  padding: 32px 64px;
+  border-bottom: 0;
+}
+.landing-nav .brand {
+  font-size: 50px;
+}
+.landing-nav-links {
+  gap: 30px;
+}
+.landing-nav-links > a:not(.btn) {
+  color: #626a57;
+  font-size: 12px;
+}
+.museum-entrance {
+  max-width: 1312px;
+  margin: auto;
+  border-top: 1px solid var(--ink);
+  padding: 60px 0 0;
+}
+.entrance-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+  color: #717964;
+  font-size: 10px;
+  letter-spacing: 1.7px;
+}
+.entrance-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 40px;
+  margin: 25px 0 43px;
+}
+.entrance-title h1 {
+  font: 500 clamp(38px, 5.8vw, 78px)/1.5 var(--serif);
+  letter-spacing: -0.065em;
+}
+.entrance-title h1 em {
+  font-style: normal;
+  color: #7e8c6b;
+}
+.entrance-aside {
+  max-width: 310px;
+  padding-bottom: 15px;
+}
+.entrance-aside > p {
+  font-size: 13px;
+  line-height: 1.95;
+  color: #676f5b;
+  margin-bottom: 20px;
+  word-break: keep-all;
+}
+.entrance-aside .text-link {
+  display: block;
+  padding-top: 8px;
+}
+.entrance-wall {
+  background: #ecebe2;
+  padding: 36px 12%;
+  border-block: 1px solid #deded0;
+}
+.entrance-picture {
+  background: #fffefa;
+  padding: 19px;
+  border: 1px solid #d9d7ca;
+  box-shadow: 0 16px 22px -18px #4f513e55;
+  margin: 0;
+}
+.entrance-picture img {
+  width: 100%;
+  aspect-ratio: 2.4;
+  object-fit: cover;
+  object-position: center 57%;
+}
+.entrance-caption {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 0;
+  color: #777f69;
+  font-size: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.reading-rooms {
+  max-width: 1312px;
+  margin: 75px auto;
+}
+.reading-rooms header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 35px;
+}
+.reading-rooms h2 {
+  font-size: 32px;
+}
+.reading-rooms header > p {
+  font-size: 12px;
+  color: var(--muted);
+}
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+}
+.reading-room {
+  border-top: 1px solid #bfc4b2;
+  padding-top: 18px;
+}
+.reading-room .room-number {
+  font:
+    italic 24px Georgia,
+    serif;
+  color: #8a9578;
+}
+.reading-room h3 {
+  font: 500 22px/1.8 var(--serif);
+  margin: 18px 0 12px;
+}
+.reading-room p {
+  color: #727966;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.reading-room .text-link {
+  margin-top: 15px;
+  color: #4e6658;
+}
+.landing-footer {
+  max-width: 1312px;
+  margin: auto;
+  padding: 25px 0 33px;
+  color: #7a816d;
+}
+
+@media (max-width: 1439px) {
+  .museum-nav {
+    margin-inline: 64px;
+  }
+  .museum-entrance,
+  .reading-rooms,
+  .landing-footer {
+    margin-inline: 64px;
+  }
+}
+@media (max-width: 1100px) {
+  .museum-masthead,
+  .landing-nav {
+    padding-inline: 36px;
+  }
+  .museum-header-note {
+    display: none;
+  }
+  .museum-utilities {
+    margin-left: auto;
+  }
+  .museum-nav {
+    margin-inline: 36px;
+    gap: 25px;
+  }
+  .teacher-main {
+    padding-inline: 36px;
+  }
+  .exhibition-feature {
+    gap: 40px;
+  }
+  .exhibition-title h2 {
+    font-size: 64px;
+  }
+  .exhibition-actions {
+    gap: 8px;
+  }
+  .exhibition-actions .btn {
+    padding-inline: 13px;
+  }
+  .dashboard-bottom {
+    grid-template-columns: minmax(0, 1fr) 210px;
+    gap: 28px;
+  }
+  .preview-grid {
+    gap: 18px;
+  }
+  .art-image {
+    --mat-padding: 14px;
+    padding: 14px;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px 24px;
+  }
+  .museum-entrance,
+  .reading-rooms,
+  .landing-footer {
+    margin-inline: 36px;
+  }
+  .entrance-aside {
+    max-width: 260px;
+  }
+  .entrance-title h1 {
+    font-size: 53px;
+  }
+}
+@media (max-width: 850px) {
+  .museum-identity > span {
+    display: none;
+  }
+  .museum-nav {
+    gap: 24px;
+  }
+  .museum-nav > a {
+    gap: 6px;
+  }
+  .museum-date {
+    display: none;
+  }
+  .exhibition-feature {
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 28px;
+  }
+  .exhibition-title h2 {
+    font-size: 55px;
+  }
+  .exhibition-description {
+    font-size: 12px;
+  }
+  .exhibition-mat {
+    padding: 14px;
+  }
+  .exhibition-mat img {
+    aspect-ratio: 4/3;
+  }
+  .dashboard-bottom {
+    grid-template-columns: 1fr;
+  }
+  .quick-panel {
+    padding: 22px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    grid-template-columns: repeat(3, 1fr);
+    display: grid;
+    gap: 20px;
+  }
+  .quick-panel .section-heading {
+    grid-column: 1/-1;
+    margin-bottom: 0;
+  }
+  .quote-block {
+    display: none;
+  }
+  .quick-link {
+    border: 0;
+  }
+  .entrance-title {
+    gap: 30px;
+  }
+  .entrance-title h1 {
+    font-size: 43px;
+  }
+  .entrance-aside {
+    max-width: 230px;
+  }
+  .room-grid {
+    gap: 25px;
+  }
+  .reading-room h3 {
+    font-size: 19px;
+  }
+}
+@media (max-width: 760px) {
+  .museum-masthead {
+    padding: 24px 24px 21px;
+    border-bottom: 1px solid var(--line);
+    gap: 14px;
+  }
+  .museum-masthead .brand {
+    font-size: 39px;
+  }
+  .museum-nav {
+    display: none;
+  }
+  .museum-utilities .btn,
+  .museum-utilities #logout {
+    display: none;
+  }
+  .museum-utilities {
+    gap: 0;
+  }
+  .teacher-main {
+    padding: 30px 24px calc(100px + env(safe-area-inset-bottom));
+  }
+  .page-heading {
+    margin-bottom: 26px;
+  }
+  .page-heading h1 {
+    font-size: 29px;
+  }
+  .teacher-main[data-page="dashboard"] > .page-heading {
+    align-items: start;
+  }
+  .teacher-main[data-page="dashboard"] > .page-heading h1 {
+    font-size: 21px;
+  }
+  .teacher-main[data-page="dashboard"] > .page-heading p {
+    font-size: 11px;
+  }
+  .new-activity-btn {
+    min-height: 40px;
+  }
+  .mobile-nav {
+    background: #faf9f2f5;
+    border-color: #d4d8c6;
+  }
+  .mobile-nav a {
+    color: #717b64;
+  }
+  .mobile-nav a.active {
+    color: #2e5346;
+  }
+  .mobile-nav a.active:before {
+    content: "";
+    width: 18px;
+    height: 2px;
+    background: #748766;
+    position: absolute;
+    top: 0;
+  }
+  .exhibition-feature {
+    padding-bottom: 32px;
+  }
+  .exhibition-title {
+    margin-top: 25px;
+  }
+  .exhibition-title h2 {
+    font-size: 48px;
+  }
+  .exhibition-status {
+    margin-top: 17px;
+  }
+  .exhibition-work figcaption {
+    padding-top: 14px;
+  }
+  .dashboard-stats {
+    margin-bottom: 30px;
+  }
+  .preview-grid {
+    gap: 16px;
+  }
+  .section-heading h2 {
+    font-size: 23px;
+  }
+  .art-caption h3 {
+    font-size: 14px;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px 18px;
+  }
+  .gallery-grid.focus {
+    grid-template-columns: 1fr;
+  }
+  .live-grid .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .student-topbar {
+    padding: 24px;
+    margin-inline: 0;
+  }
+  .student-topbar .brand {
+    font-size: 36px;
+  }
+  .student-container {
+    padding-top: 36px;
+  }
+  .step-title {
+    font-size: 31px;
+  }
+  .showcase-header {
+    padding: 16px 20px;
+  }
+  .showcase-header .brand {
+    font-size: 29px;
+  }
+  .showcase-wall {
+    inset: 14px 20px;
+    gap: 12px;
+  }
+  .showcase-piece {
+    padding: 5px;
+  }
+  .showcase-piece small {
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
+    padding: 3px;
+    font-size: 8px;
+  }
+  .landing-nav {
+    padding: 25px 24px;
+  }
+  .landing-nav .brand {
+    font-size: 40px;
+  }
+  .landing-nav-links {
+    gap: 15px;
+  }
+  .museum-entrance,
+  .reading-rooms,
+  .landing-footer {
+    margin-inline: 24px;
+  }
+  .museum-entrance {
+    padding-top: 32px;
+  }
+  .entrance-title {
+    flex-direction: column;
+    align-items: start;
+    gap: 25px;
+  }
+  .entrance-title h1 {
+    font-size: 47px;
+  }
+  .entrance-aside {
+    max-width: none;
+    padding-bottom: 0;
+  }
+  .entrance-aside > p {
+    max-width: 400px;
+    font-size: 13px;
+  }
+  .entrance-aside .text-link {
+    display: inline-flex;
+    margin-left: 12px;
+  }
+  .entrance-wall {
+    padding: 25px 7%;
+  }
+  .entrance-picture img {
+    aspect-ratio: 1.7;
+  }
+  .reading-rooms {
+    margin-top: 48px;
+    margin-bottom: 45px;
+  }
+  .reading-rooms header {
+    flex-direction: column;
+    align-items: start;
+    gap: 12px;
+  }
+  .reading-rooms h2 {
+    font-size: 27px;
+  }
+  .room-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .reading-room {
+    position: relative;
+    padding: 24px 0 0 48px;
+  }
+  .reading-room .room-number {
+    position: absolute;
+    left: 0;
+    top: 25px;
+  }
+  .reading-room h3 {
+    margin-top: 0;
+    font-size: 22px;
+  }
+  .reading-room .text-link {
+    margin-top: 5px;
+  }
+}
+@media (max-width: 520px) {
+  .museum-masthead {
+    padding-inline: 20px;
+  }
+  .teacher-main {
+    padding-inline: 20px;
+  }
+  .page-heading h1 {
+    font-size: 27px;
+  }
+  .teacher-main[data-page="dashboard"] > .page-heading {
+    flex-direction: column;
+    gap: 14px;
+  }
+  .teacher-main[data-page="dashboard"] > .page-heading h1 {
+    font-size: 22px;
+  }
+  .exhibition-feature {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding-top: 17px;
+  }
+  .exhibition-intro {
+    padding: 0;
+  }
+  .exhibition-kicker {
+    font-size: 10px;
+  }
+  .exhibition-title {
+    margin: 23px 0 20px;
+  }
+  .exhibition-title h2 {
+    font-size: 63px;
+  }
+  .exhibition-title > span {
+    margin-top: 13px;
+    font-size: 13px;
+  }
+  .exhibition-description {
+    max-width: none;
+    font-size: 13px;
+  }
+  .exhibition-actions {
+    margin-top: 24px;
+  }
+  .exhibition-actions .btn {
+    min-height: 46px;
+    flex: 1;
+    font-size: 11px;
+    padding-inline: 10px;
+  }
+  .exhibition-mat {
+    padding: 15px;
+  }
+  .exhibition-mat img {
+    aspect-ratio: 3/2;
+  }
+  .exhibition-work figcaption strong {
+    font-size: 11px;
+  }
+  .exhibition-work figcaption small {
+    font-size: 9px;
+  }
+  .dashboard-stats {
+    gap: 23px 0;
+    padding-block: 23px;
+  }
+  .stat-value {
+    font-size: 30px;
+  }
+  .stat-label {
+    font-size: 10px;
+  }
+  .stat-caption {
+    font-size: 9px;
+  }
+  .stat {
+    padding-inline: 17px;
+  }
+  .stat:nth-child(odd) {
+    padding-left: 0;
+  }
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+  }
+  .preview-grid .art-card:nth-child(3) {
+    display: block;
+  }
+  .preview-grid .art-card[data-image-type="scene"] {
+    grid-column: 1/-1;
+  }
+  .preview-grid .art-image {
+    aspect-ratio: 4/5;
+    padding: 10px;
+  }
+  .art-image {
+    --mat-padding: 10px;
+    padding: 10px;
+  }
+  .art-caption {
+    padding-top: 14px;
+  }
+  .art-caption .between {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .art-caption .tag {
+    font-size: 9px;
+  }
+  .art-caption .chip-row {
+    gap: 7px;
+  }
+  .quick-panel {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .quick-panel .section-heading {
+    margin-bottom: 10px;
+  }
+  .quick-link {
+    flex-direction: row;
+    align-items: center;
+    padding: 17px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .quick-link > svg:last-child {
+    display: block;
+  }
+  .gallery-grid {
+    gap: 22px 13px;
+  }
+  .gallery-grid.focus {
+    gap: 27px;
+  }
+  .gallery-grid.focus .art-image {
+    --mat-padding: 20px;
+    padding: 20px;
+  }
+  .selection-bar {
+    bottom: 85px;
+  }
+  .modal-overlay {
+    padding: 14px;
+  }
+  .modal {
+    max-height: calc(100dvh - 28px);
+    border-radius: 4px;
+  }
+  .modal-head h2 {
+    font-size: 22px;
+  }
+  .modal-head {
+    padding: 22px 20px;
+  }
+  .modal-body {
+    padding-inline: 20px;
+  }
+  .modal-footer {
+    padding-inline: 20px;
+  }
+  .student-container {
+    padding: 32px 24px 70px;
+  }
+  .student-intro h1 {
+    font-size: 54px;
+  }
+  .student-intro .lead {
+    font-size: 16px;
+  }
+  .student-demo {
+    padding-inline: 20px;
+  }
+  .step-title {
+    font-size: 28px;
+    line-height: 1.7;
+    margin-top: 29px;
+  }
+  .step-hint {
+    font-size: 12px;
+  }
+  .work-tabs [role="tab"] {
+    font-size: 12px;
+  }
+  .background-student-question h2 {
+    font: 500 24px/1.8 var(--serif);
+  }
+  .background-summary-grid p,
+  .background-response p {
+    font-size: 13px;
+  }
+  .background-summary summary {
+    font-size: 12px;
+  }
+  .teacher-summary {
+    padding: 22px;
+  }
+  .worksheet-form textarea {
+    min-height: 170px;
+    padding: 17px;
+  }
+  .student-bottom {
+    background: #f7f5f0f5;
+    padding: 20px 0;
+  }
+  .showcase-header {
+    padding: 15px 14px;
+  }
+  .showcase-title {
+    gap: 9px;
+  }
+  .showcase-wall {
+    inset: 10px;
+    gap: 7px;
+  }
+  .showcase-piece {
+    padding: 4px;
+  }
+  .showcase-controls {
+    padding: 10px 10px 12px;
+    gap: 6px;
+  }
+  .showcase-controls .btn {
+    font-size: 11px;
+    padding-inline: 10px;
+  }
+  .entrance-meta {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .entrance-meta span:last-child {
+    display: none;
+  }
+  .entrance-title h1 {
+    font-size: clamp(33px, 9.7vw, 47px);
+  }
+  .entrance-aside .text-link {
+    margin-left: 0;
+    display: flex;
+  }
+  .entrance-wall {
+    padding: 20px;
+    margin-inline: -24px;
+  }
+  .entrance-picture {
+    padding: 12px;
+  }
+  .entrance-picture img {
+    aspect-ratio: 1.5;
+  }
+  .entrance-caption {
+    gap: 14px;
+    font-size: 9px;
+    line-height: 1.7;
+  }
+  .landing-nav-links > a:not(.btn) {
+    display: none;
+  }
+  .landing-nav-links .btn {
+    font-size: 11px;
+    padding-inline: 12px;
+  }
+  .landing-footer {
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 9px;
+  }
+}

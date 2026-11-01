@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 760" role="img" aria-label="문학적 해석을 표현한 데모 일러스트레이션">
+  <defs><linearGradient id="bg" x2=".8" y2="1"><stop stop-color="#6b7d7f"/><stop offset="1" stop-color="#273544"/></linearGradient><linearGradient id="face"><stop stop-color="#ad8d76"/><stop offset=".58" stop-color="#b9c6b6"/><stop offset="1" stop-color="#ad8d76"/></linearGradient><linearGradient id="coat" x2="1" y2=".5"><stop stop-color="#14222c"/><stop offset=".6" stop-color="#6b7d7f"/><stop offset="1" stop-color="#273544"/></linearGradient><filter id="grain"><feTurbulence baseFrequency=".45" numOctaves="3" seed="6" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".15"/></feComponentTransfer><feBlend in="SourceGraphic" mode="soft-light"/></filter></defs>
+  <g filter="url(#grain)"><path fill="url(#bg)" d="M0 0h600v760H0z"/><circle cx="150" cy="180" r="135" fill="#b9c6b6" opacity=".45"/><path d="M0 410Q100 290 230 355T600 290V760H0" fill="#273544" opacity=".6"/><path d="M0 530Q160 405 310 460T600 400V760H0" fill="#14222c" opacity=".35"/>
+  <g opacity=".7" fill="none" stroke="#b9c6b6" stroke-width="2"><path d="M44 760Q115 510 54 340M532 760Q470 480 575 287"/><path d="m67 489-32-32m37 73 34-43m416 48-31-46m32 6 37-31m-15-59 34-33"/></g>
+  <path d="M100 760c-5-159 58-251 150-269l2-84h107l8 83c103 30 157 116 151 270" fill="url(#coat)"/>
+  <path d="m250 409 4 95 50 53 60-62-10-96" fill="#ad8d76"/><path d="m253 433 101-23-2 43-62 47" fill="#14222c" opacity=".2"/>
+  <path d="M207 229q-19 62 7 155 20 75 83 94 66-7 98-88 19-47 7-134-20-75-99-76-67 2-96 49" fill="url(#face)"/>
+  <path d="m207 288q-25-24-28 4 2 44 39 55m182-60q27-25 24 5-1 35-28 54" fill="#ad8d76"/>
+  <path d="m197 311-25-80q-12-89 83-112 70-37 128 29 54 28 26 140l-18 24-3-93-26-40-30 39-18-38-42 39-17-27-44 52-7 69" fill="#14222c"/><path d="m221 183 39-33m16 19 28-28m17 29 31-10" stroke="#6b7d7f" stroke-width="5" fill="none"/>
+  <path d="m231 310q25-16 48-2m48 0q26-15 47 2" fill="none" stroke="#14222c" stroke-width="7" stroke-linecap="round"/><path d="m232 331q22-14 46 0m48 0q24-14 47-1" fill="none" stroke="#14222c" stroke-width="3"/><ellipse cx="257" cy="331" rx="5" ry="7" fill="#14222c"/><ellipse cx="347" cy="331" rx="5" ry="7" fill="#14222c"/>
+  <path d="m304 328-12 49q13 7 25 0" fill="none" stroke="#ad8d76" stroke-width="5"/><path d="m270 407q30 3 57-3" fill="none" stroke="#273544" stroke-width="3"/><path d="m282 422 35-2" stroke="#b9c6b6" opacity=".7" stroke-width="3"/>
+  <path d="m242 488 61 72-50 120-47-148m157-44-60 72 45 119 48-145" fill="#b9c6b6" opacity=".4"/><path d="m304 562-4 198" fill="none" stroke="#14222c" stroke-width="3"/>
+
+  <path d="M0 728q120-35 210 32H0m600-19q-100-25-190 19h190" fill="#273544" opacity=".75"/>
+  </g></svg>

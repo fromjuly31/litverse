@@ -1,0 +1,324 @@
+.work-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--line);
+  gap: 6px;
+  margin-bottom: 26px;
+}
+.work-tabs [role="tab"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 55px;
+  padding: 14px 10px;
+  font-size: 13px;
+  color: #6d6c63;
+  border-bottom: 2px solid transparent;
+  line-height: 1.6;
+}
+.work-tabs [role="tab"][aria-selected="true"] {
+  color: #365b70;
+  border-bottom-color: #a29d8e55;
+  background: linear-gradient(transparent, #365b7008);
+}
+.work-tabs .tab-number {
+  font-size: 10px;
+  color: #365b70;
+}
+.work-tabs svg {
+  width: 16px;
+  height: 16px;
+}
+.writing-section {
+  display: grid;
+  gap: 25px;
+  padding: 26px 0;
+  border-top: 1px solid var(--line);
+}
+.writing-section > .eyebrow {
+  color: #365b70;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+.writing-section:first-child {
+  padding-top: 0;
+  border: 0;
+}
+.background-summary {
+  margin: 25px 0 30px;
+  border: 1px solid #a29d8e24;
+  border-radius: 10px;
+  background: #365b7006;
+  padding: 0 18px;
+}
+.background-summary summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  min-height: 52px;
+  font-size: 12px;
+  color: #6d6c63;
+  list-style: none;
+}
+.background-summary summary::-webkit-details-marker {
+  display: none;
+}
+.background-summary summary svg:last-child {
+  margin-left: auto;
+  width: 14px;
+}
+.background-summary[open] summary svg:last-child {
+  transform: rotate(180deg);
+}
+.background-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-top: 22px;
+}
+.background-summary-grid article {
+  padding: 10px 0 20px;
+  min-width: 0;
+}
+.background-summary-grid p {
+  margin-top: 12px;
+  color: #36372f;
+  font-size: 13px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.submission-context {
+  margin: 20px 0 27px;
+  padding: 22px;
+  background: #f7f5f0;
+  border-left: 2px solid #a29d8e55;
+  border-radius: 0 8px 8px 0;
+}
+.submission-context p {
+  font-size: 13px;
+  line-height: 1.85;
+  margin-top: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.lesson-flow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 0 0 26px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+  font-size: 12px;
+  color: #6d6c63;
+}
+.lesson-flow .active {
+  color: #365b70;
+}
+.lesson-flow svg {
+  width: 13px;
+}
+.background-teacher-layout {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.question-editor {
+  position: sticky;
+  top: 24px;
+}
+.question-editor h2 {
+  font-size: 21px;
+}
+.question-card {
+  min-width: 0;
+}
+.background-responses {
+  max-height: 350px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--line);
+}
+.background-response {
+  display: grid;
+  grid-template-columns: 65px 1fr;
+  gap: 15px;
+  padding: 17px 0;
+  border-bottom: 1px solid var(--line);
+}
+.background-response > span {
+  color: #365b70;
+  font-size: 11px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.background-response p {
+  font-size: 13px;
+  color: #36372f;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.background-student-question h2 {
+  font-size: 25px;
+  line-height: 1.7;
+  margin: 25px 0 30px;
+}
+.teacher-summary {
+  padding: 25px;
+  background: #365b700a;
+  border: 1px solid #a29d8e26;
+  border-radius: 10px;
+  margin-top: 25px;
+}
+.teacher-summary p {
+  font-size: 14px;
+  color: #36372f;
+  margin-top: 16px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+.teacher-category-tabs {
+  margin: 0 0 20px;
+  max-width: 440px;
+}
+.teacher-category-tabs [role="tab"] {
+  font-size: 13px;
+}
+.paired-status {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+.paired-status span {
+  font-size: 9px;
+  padding: 3px 5px;
+  background: #365b7005;
+  color: #6d6c63;
+  border-radius: 4px;
+}
+.paired-status span.done {
+  background: #365b7014;
+  color: #365b70;
+}
+.scene-title {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 1199px) {
+  .background-teacher-layout {
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 20px;
+  }
+  .background-response {
+    grid-template-columns: 50px 1fr;
+    gap: 10px;
+  }
+}
+@media (max-width: 980px) {
+  .background-teacher-layout {
+    grid-template-columns: 1fr;
+  }
+  .question-editor {
+    position: static;
+  }
+  .question-editor form textarea {
+    min-height: 110px;
+  }
+  .lesson-flow {
+    gap: 10px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 760px) {
+  .background-summary-grid {
+    gap: 18px;
+  }
+  .mobile-nav a {
+    padding-inline: 6px;
+  }
+  .background-response p {
+    font-size: 12px;
+  }
+}
+@media (max-width: 520px) {
+  .work-tabs [role="tab"] {
+    font-size: 12px;
+    gap: 7px;
+    padding-inline: 5px;
+    min-height: 52px;
+  }
+  .work-tabs svg {
+    width: 14px;
+    height: 14px;
+  }
+  .work-tabs .tab-number {
+    font-size: 9px;
+  }
+  .writing-section {
+    gap: 23px;
+  }
+  .background-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .background-summary {
+    padding-inline: 15px;
+    margin-top: 20px;
+  }
+  .background-summary-grid p {
+    font-size: 12px;
+  }
+  .background-summary summary {
+    font-size: 11px;
+  }
+  .background-student-question h2 {
+    font-size: 22px;
+  }
+  .background-response {
+    grid-template-columns: 45px 1fr;
+  }
+  .background-response p {
+    font-size: 12px;
+  }
+  .lesson-flow {
+    gap: 7px;
+    font-size: 10px;
+  }
+  .lesson-flow svg {
+    display: none;
+  }
+  .lesson-flow > span {
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: #365b7004;
+  }
+  .submission-context {
+    padding: 18px;
+  }
+  .submission-context p {
+    font-size: 12px;
+  }
+  .question-card .flex .btn {
+    font-size: 11px;
+    padding-inline: 12px;
+  }
+}
+@media (max-width: 520px) {
+  .mobile-nav a {
+    flex: 1;
+    min-width: 0;
+    padding-inline: 2px;
+  }
+  .mobile-nav a span {
+    white-space: nowrap;
+    font-size: 8px;
+  }
+}

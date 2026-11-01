@@ -1,0 +1,371 @@
+.literary-poster {
+  --ink: #282c28;
+  --gold: #89734b;
+  --paper: #f9f6ed;
+  box-sizing: border-box;
+  background: var(--paper);
+  color: var(--ink);
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 5.5%;
+  font-family: "Noto Serif KR", "Batang", serif;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+  border: 1px solid #d5cdbc;
+}
+.literary-poster * {
+  box-sizing: border-box;
+}
+.literary-poster h2,
+.literary-poster h3,
+.literary-poster p,
+.literary-poster figure {
+  margin: 0;
+}
+.poster-edition {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font:
+    9px/1.5 Arial,
+    sans-serif;
+  letter-spacing: 2.2px;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 15px;
+}
+.poster-original {
+  font-size: 12px;
+  margin-top: 27px !important;
+  color: var(--gold);
+}
+.poster-heading {
+  text-align: center;
+}
+.poster-heading h2 {
+  font-size: clamp(36px, 6vw, 70px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  padding: 6px 0 18px;
+}
+.poster-rule {
+  border-bottom: 1px solid #b8ac93;
+  position: relative;
+  margin-bottom: 26px;
+  height: 8px;
+}
+.poster-rule span {
+  background: var(--paper);
+  padding: 0 15px;
+  position: relative;
+  top: -8px;
+  font:
+    8px Arial,
+    sans-serif;
+  letter-spacing: 2px;
+}
+.poster-index {
+  display: block;
+  font:
+    9px/1.5 Arial,
+    sans-serif;
+  letter-spacing: 1.7px;
+  color: var(--gold);
+  margin-bottom: 5px;
+}
+.literary-poster h3 {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.literary-poster p {
+  font-size: 12px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  word-break: keep-all;
+}
+.poster-story {
+  margin-bottom: 23px;
+}
+.poster-context {
+  border-top: 1px solid #dbd4c5;
+  padding-top: 20px;
+  margin-bottom: 24px;
+}
+.poster-context > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+.poster-context b {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+.poster-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+.poster-interpretation figure {
+  height: 280px;
+  margin-bottom: 17px;
+  overflow: hidden;
+  border: 1px solid #bfb39a;
+  background: #e9e1cf;
+}
+.poster-interpretation img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.poster-interpretation .poster-index {
+  margin-top: 10px;
+}
+.poster-evidence {
+  border-left: 2px solid #b6a786;
+  padding-left: 12px;
+  margin-top: 14px;
+  color: #696659;
+}
+.poster-evidence b {
+  font-size: 10px;
+  font-weight: 500;
+}
+.poster-evidence p {
+  font-size: 10px;
+  line-height: 1.7;
+}
+.poster-signature {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  border-top: 1px solid var(--ink);
+  margin-top: 30px;
+  padding-top: 16px;
+}
+.poster-signature span {
+  font:
+    8px Arial,
+    sans-serif;
+  letter-spacing: 1.5px;
+}
+.poster-signature small {
+  display: block;
+  font-size: 9px;
+  color: #777568;
+}
+.poster-signature > div:last-child {
+  text-align: right;
+}
+.poster-signature strong {
+  display: block;
+  font-family: "Nanum Pen Script", "궁서", "Batang", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 27px;
+  letter-spacing: -1px;
+}
+.poster-mini {
+  max-width: none;
+  padding: 9%;
+  pointer-events: none;
+}
+.poster-mini .poster-edition {
+  font-size: 5px;
+  letter-spacing: 0.8px;
+  padding-bottom: 7px;
+}
+.poster-mini .poster-edition span:last-child {
+  display: none;
+}
+.poster-mini .poster-original {
+  font-size: 8px;
+  margin-top: 15px !important;
+}
+.poster-mini .poster-heading h2 {
+  font-size: 32px;
+  padding: 4px 0 12px;
+}
+.poster-mini .poster-rule {
+  margin-bottom: 14px;
+}
+.poster-mini .poster-rule span {
+  font-size: 4px;
+  letter-spacing: 0.6px;
+  padding: 0 6px;
+}
+.poster-mini .poster-index {
+  font-size: 5px;
+  letter-spacing: 0.6px;
+}
+.poster-mini h3 {
+  font-size: 9px;
+  margin-bottom: 4px;
+}
+.poster-mini p {
+  font-size: 6px;
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.poster-mini .poster-context b {
+  font-size: 6px;
+  margin-bottom: 2px;
+}
+.poster-mini .poster-story {
+  margin-bottom: 12px;
+}
+.poster-mini .poster-context {
+  padding-top: 10px;
+  margin-bottom: 12px;
+}
+.poster-mini .poster-context > div,
+.poster-mini .poster-pair {
+  gap: 12px;
+}
+.poster-mini .poster-interpretation figure {
+  height: 140px;
+  margin-bottom: 10px;
+}
+.poster-mini .poster-evidence {
+  display: none;
+}
+.poster-mini .poster-signature {
+  margin-top: 15px;
+  padding-top: 8px;
+}
+.poster-mini .poster-signature span {
+  font-size: 4px;
+  letter-spacing: 0.5px;
+}
+.poster-mini .poster-signature small {
+  font-size: 5px;
+}
+.poster-mini .poster-signature strong {
+  font-size: 18px;
+}
+@media (max-width: 600px) {
+  .literary-poster:not(.poster-mini) {
+    padding: 7%;
+  }
+  .poster-edition {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .poster-edition span:last-child {
+    display: none;
+  }
+  .literary-poster p {
+    font-size: 11px;
+  }
+  .poster-context > div {
+    gap: 16px;
+  }
+  .poster-pair {
+    gap: 16px;
+  }
+  .poster-interpretation figure {
+    height: 190px;
+  }
+  .literary-poster h3 {
+    font-size: 16px;
+  }
+  .poster-signature {
+    gap: 10px;
+  }
+  .poster-signature span {
+    letter-spacing: 0.5px;
+    font-size: 7px;
+  }
+  .poster-mini p {
+    font-size: 6px;
+  }
+  .poster-mini h3 {
+    font-size: 9px;
+  }
+  .poster-mini .poster-interpretation figure {
+    height: 120px;
+  }
+}
+@page {
+  size: A3 portrait;
+  margin: 10mm;
+}
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  body:has(> .literary-poster) > * {
+    visibility: visible;
+  }
+  .poster-print-area,
+  .poster-print-area *,
+  .literary-poster,
+  .literary-poster * {
+    visibility: visible;
+  }
+  .poster-print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0 !important;
+  }
+  .literary-poster {
+    max-width: none;
+    width: 277mm;
+    min-height: 0;
+    margin: 0;
+    padding: 12mm;
+    border: 0;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .poster-heading h2 {
+    font-size: 42pt;
+  }
+  .literary-poster p {
+    font-size: 9pt;
+    line-height: 1.6;
+  }
+  .poster-interpretation figure {
+    height: 75mm;
+  }
+  .poster-evidence p {
+    font-size: 7.5pt;
+  }
+  .poster-pair {
+    gap: 8mm;
+  }
+  .poster-story {
+    margin-bottom: 5mm;
+  }
+  .poster-context {
+    padding-top: 4mm;
+    margin-bottom: 5mm;
+  }
+  .poster-signature {
+    margin-top: 7mm;
+  }
+  .literary-poster section,
+  .poster-signature {
+    break-inside: avoid;
+  }
+  .archive-header,
+  .archive-footer,
+  .exhibit-toolbar,
+  .toast-container {
+    display: none !important;
+  }
+}

@@ -1,0 +1,1111 @@
+/* Responsive rules are imported after base styles in main.js. */
+@media (max-width: 520px) {
+  .student-bottom {
+    bottom: var(--keyboard-inset, 0px) !important;
+  }
+  .student-shell input,
+  .student-shell textarea {
+    scroll-margin-block: 100px;
+  }
+  .skip-link:not(:focus) {
+    transform: translateY(-200%);
+  }
+}
+@media (min-width: 1600px) {
+  .gallery-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .teacher-main {
+    padding-top: 45px;
+  }
+  .hero-activity {
+    min-height: 330px;
+  }
+  .hero-content {
+    padding: 38px 42px;
+  }
+  .hero-title-row h2 {
+    font-size: 54px;
+  }
+  .hero-actions {
+    margin-top: 30px;
+  }
+}
+@media (max-width: 1199px) {
+  :root {
+    --sidebar: 205px;
+  }
+  .sidebar {
+    padding-inline: 16px;
+  }
+  .sidebar .brand {
+    font-size: 18px;
+  }
+  .topbar {
+    padding: 0 28px;
+  }
+  .teacher-main {
+    padding: 30px 28px 50px;
+  }
+  .dashboard-bottom {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 22px;
+  }
+  .quick-panel {
+    padding-left: 20px;
+  }
+  .hero-content {
+    width: 72%;
+    padding: 29px;
+  }
+  .hero-title-row h2 {
+    font-size: 40px;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .analytics-layout {
+    grid-template-columns: minmax(0, 1fr) 250px;
+  }
+  .live-grid {
+    grid-template-columns: minmax(0, 1fr) 250px;
+  }
+  .live-grid .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stat {
+    padding: 0 16px;
+  }
+  .page-heading h1 {
+    font-size: 30px;
+  }
+  .hero-art {
+    opacity: 0.6;
+  }
+  .topbar-right .top-date {
+    display: none;
+  }
+}
+@media (max-width: 980px) {
+  :root {
+    --sidebar: 185px;
+  }
+  .sidebar {
+    padding-inline: 12px;
+  }
+  .sidebar .brand {
+    font-size: 16px;
+    gap: 4px;
+  }
+  .sidebar .brand img {
+    width: 30px;
+  }
+  .sidebar .nav-en {
+    display: none;
+  }
+  .nav-link {
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+  .dashboard-bottom {
+    grid-template-columns: 1fr;
+  }
+  .quick-panel {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 24px 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  .quick-panel .section-heading {
+    grid-column: 1/-1;
+    margin-bottom: 0;
+  }
+  .quick-link {
+    border-bottom: 0;
+    align-items: flex-start;
+    padding: 10px 0;
+  }
+  .quick-link > svg:last-child {
+    display: none;
+  }
+  .quote-block {
+    display: none;
+  }
+  .analytics-layout {
+    grid-template-columns: 1fr;
+  }
+  .ranking-panel .ranking {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .live-grid {
+    grid-template-columns: 1fr;
+  }
+  .student-list {
+    max-height: 350px;
+  }
+  .gallery-grid {
+    gap: 20px 14px;
+  }
+  .gallery-toolbar .custom-select {
+    flex: 1;
+  }
+  .gallery-toolbar .search-field {
+    flex-basis: 100%;
+  }
+  .landing-hero {
+    gap: 25px;
+    padding-top: 65px;
+    min-height: 580px;
+  }
+  .landing-art {
+    height: 340px;
+  }
+  .landing-copy h1 {
+    font-size: 45px;
+  }
+  .landing-copy > p {
+    font-size: 13px;
+  }
+  .landing-copy .flex {
+    flex-wrap: wrap;
+  }
+  .landing-frame {
+    width: 55%;
+  }
+  .page-heading {
+    align-items: flex-start;
+  }
+  .page-heading > .flex {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .dashboard-greeting {
+    font-size: 27px;
+  }
+  .stat-value {
+    font-size: 26px;
+  }
+  .activity-row {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .activity-row-actions {
+    margin-left: auto;
+  }
+  .hero-content {
+    width: 90%;
+  }
+}
+@media (max-width: 760px) {
+  :root {
+    --sidebar: 0px;
+  }
+  .sidebar {
+    display: none;
+  }
+  .teacher-layout {
+    margin-left: 0;
+  }
+  .topbar {
+    height: 65px;
+    padding: 0 22px;
+  }
+  .topbar .breadcrumb {
+    display: none;
+  }
+  .mobile-brand {
+    display: flex;
+  }
+  .mobile-brand .brand {
+    font-size: 17px;
+  }
+  .topbar-right {
+    gap: 10px;
+  }
+  .topbar-right .btn {
+    display: none;
+  }
+  .teacher-main {
+    padding: 27px 22px calc(95px + env(safe-area-inset-bottom));
+    max-width: 100%;
+  }
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 35;
+    background: #f7f5f0f5;
+    border-top: 1px solid var(--line);
+    padding: 7px 8px calc(8px + env(safe-area-inset-bottom));
+    backdrop-filter: blur(20px);
+    justify-content: space-around;
+  }
+  .mobile-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 47px;
+    padding: 4px 10px;
+    font-size: 9px;
+    color: #6d6c63;
+    min-width: 44px;
+  }
+  .mobile-nav a.active {
+    color: #365b70;
+  }
+  .mobile-nav svg {
+    width: 19px;
+    height: 19px;
+  }
+  .page-heading {
+    margin-bottom: 23px;
+    gap: 15px;
+  }
+  .page-heading h1 {
+    font-size: 28px;
+  }
+  .page-heading .eyebrow {
+    font-size: 9px;
+    margin-bottom: 9px;
+  }
+  .page-heading p {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .page-heading > .flex {
+    gap: 6px;
+  }
+  .page-heading > .flex .btn {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+  .hero-activity {
+    min-height: 300px;
+  }
+  .hero-content {
+    padding: 27px;
+    width: 100%;
+  }
+  .hero-content p {
+    max-width: 330px;
+  }
+  .hero-art {
+    width: 48%;
+    opacity: 0.35;
+  }
+  .hero-title-row h2 {
+    font-size: 42px;
+  }
+  .hero-actions {
+    margin-top: 25px;
+  }
+  .dashboard-stats {
+    margin-bottom: 26px;
+  }
+  .stat {
+    padding: 0 13px;
+  }
+  .stat-label {
+    font-size: 10px;
+  }
+  .stat-label svg {
+    display: none;
+  }
+  .stat-value {
+    font-size: 27px;
+  }
+  .stat-caption {
+    font-size: 9px;
+    line-height: 1.7;
+  }
+  .dashboard-footer {
+    font-size: 9px;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .selection-bar {
+    bottom: 80px;
+    padding: 13px;
+  }
+  .selection-bar .btn {
+    padding: 7px 10px;
+    min-height: 38px;
+    font-size: 11px;
+  }
+  .editor-section {
+    padding: 23px;
+  }
+  .form-grid {
+    gap: 20px;
+  }
+  .modal-overlay {
+    padding: 18px;
+  }
+  .modal {
+    max-height: calc(100dvh - 36px);
+  }
+  .modal-head {
+    padding: 22px;
+  }
+  .modal-body {
+    padding: 0 22px 22px;
+  }
+  .modal-footer {
+    padding: 17px 22px;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 23px;
+  }
+  .detail-image {
+    max-height: 45dvh;
+  }
+  .detail-copy h3 {
+    font-size: 25px;
+  }
+  .modal-wide {
+    width: 100%;
+  }
+  .student-topbar {
+    padding: 22px;
+  }
+  .student-topbar .brand {
+    font-size: 18px;
+  }
+  .student-context {
+    font-size: 10px;
+    gap: 8px;
+  }
+  .student-context .badge {
+    display: none;
+  }
+  .student-container {
+    padding: 48px 25px 80px;
+    max-width: 680px;
+  }
+  .student-intro h1 {
+    font-size: 55px;
+  }
+  .student-intro .lead {
+    font-size: 17px;
+  }
+  .step-title {
+    font-size: 32px;
+    margin-top: 30px;
+    letter-spacing: -1px;
+  }
+  .worksheet-container {
+    padding-top: 33px;
+  }
+  .worksheet-form textarea {
+    min-height: 190px;
+  }
+  .student-demo {
+    margin-inline: 22px;
+  }
+  .landing-nav {
+    padding: 22px;
+  }
+  .landing-nav-links > a:not(.btn) {
+    display: none;
+  }
+  .landing-nav-links .btn {
+    font-size: 12px;
+    padding: 9px 13px;
+  }
+  .landing-hero {
+    grid-template-columns: 1fr;
+    padding: 55px 27px 65px;
+    gap: 40px;
+    text-align: center;
+  }
+  .landing-copy h1 {
+    font-size: 50px;
+    letter-spacing: -2.6px;
+  }
+  .landing-copy > p {
+    font-size: 14px;
+    max-width: 420px;
+    margin-inline: auto;
+  }
+  .landing-copy .flex {
+    justify-content: center;
+  }
+  .landing-art {
+    width: min(430px, 95%);
+    height: 400px;
+    margin: auto;
+  }
+  .landing-caption {
+    left: 0;
+    width: 100%;
+    bottom: -10px;
+    font-size: 9px;
+  }
+  .landing-features {
+    padding: 38px 27px 50px;
+    gap: 25px;
+  }
+  .landing-feature h2 {
+    font-size: 17px;
+  }
+  .landing-feature p {
+    font-size: 12px;
+  }
+  .landing-footer {
+    padding: 22px;
+    gap: 15px;
+    font-size: 8px;
+  }
+  .showcase-header {
+    padding: 15px 18px;
+  }
+  .showcase-title > span {
+    display: none;
+  }
+  .showcase-wall {
+    inset: 10px 15px;
+    gap: 8px;
+  }
+  .showcase-controls {
+    gap: 6px;
+    padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
+  }
+  .showcase-controls .btn {
+    padding: 8px 10px;
+    min-height: 40px;
+    font-size: 11px;
+  }
+  .showcase-controls .icon-btn {
+    width: 40px;
+    min-height: 40px;
+  }
+  .showcase-controls .custom-select {
+    min-width: 115px;
+    max-width: 150px;
+  }
+  .showcase-controls .select-trigger {
+    font-size: 11px;
+  }
+  .showcase-counter {
+    padding: 0 4px;
+    font-size: 10px;
+  }
+  #toasts {
+    bottom: calc(85px + env(safe-area-inset-bottom));
+    right: 16px;
+  }
+  .constellation {
+    min-height: 400px;
+  }
+  .qr-grid {
+    gap: 20px;
+  }
+}
+@media (max-width: 520px) {
+  .teacher-main {
+    padding: 24px 18px calc(95px + env(safe-area-inset-bottom));
+  }
+  .topbar {
+    padding: 0 18px;
+  }
+  .page-heading {
+    flex-wrap: wrap;
+  }
+  .page-heading > .flex {
+    justify-content: flex-start;
+  }
+  .page-heading h1 {
+    font-size: 27px;
+  }
+  .dashboard-greeting {
+    font-size: 25px;
+  }
+  .page-heading .new-activity-btn {
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+  .hero-content {
+    padding: 25px 22px;
+  }
+  .hero-content .eyebrow {
+    margin-bottom: 18px;
+    font-size: 8px;
+    letter-spacing: 1.6px;
+  }
+  .hero-title-row {
+    margin-block: 16px;
+  }
+  .hero-title-row h2 {
+    font-size: 39px;
+  }
+  .hero-content p {
+    font-size: 11px;
+    max-width: 240px;
+  }
+  .hero-actions .btn {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+  .hero-art {
+    width: 55%;
+    opacity: 0.3;
+  }
+  .hero-number {
+    display: none;
+  }
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px 0;
+    padding: 24px 0;
+  }
+  .stat {
+    padding: 0 0 0 20px;
+  }
+  .stat:nth-child(2) {
+    border: 0;
+  }
+  .stat:nth-child(3) {
+    padding-left: 0;
+  }
+  .stat-label {
+    font-size: 11px;
+  }
+  .stat-value {
+    margin-top: 7px;
+    font-size: 29px;
+  }
+  .stat-caption {
+    font-size: 10px;
+  }
+  .preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .preview-grid .art-card:nth-child(3) {
+    display: none;
+  }
+  .quick-panel {
+    gap: 10px;
+  }
+  .quick-link {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .quick-link strong {
+    font-size: 11px;
+  }
+  .quick-link small {
+    font-size: 9px;
+    line-height: 1.7;
+  }
+  .quick-link svg {
+    width: 17px;
+  }
+  .dashboard-footer {
+    display: grid;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 13px;
+  }
+  .gallery-grid.focus {
+    grid-template-columns: 1fr;
+  }
+  .gallery-toolbar {
+    gap: 8px;
+  }
+  .gallery-toolbar .custom-select {
+    min-width: calc(50% - 4px);
+  }
+  .gallery-toolbar .custom-select:last-child {
+    flex-basis: auto;
+  }
+  .gallery-tags {
+    gap: 6px;
+  }
+  .gallery-tags .tag-button {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+  .art-caption h3 {
+    font-size: 13px;
+  }
+  .art-caption small {
+    font-size: 9px;
+  }
+  .art-caption p {
+    font-size: 10px;
+  }
+  .art-caption .tag {
+    font-size: 9px;
+  }
+  .art-image .badge {
+    font-size: 9px;
+    padding: 4px 6px;
+    top: 8px;
+    right: 8px;
+  }
+  .section-heading h2 {
+    font-size: 18px;
+  }
+  .section-heading p {
+    font-size: 11px;
+  }
+  .selection-bar {
+    gap: 10px;
+    font-size: 12px;
+    bottom: 84px;
+    justify-content: center;
+  }
+  .selection-bar > .flex {
+    justify-content: center;
+  }
+  .activity-row {
+    padding: 19px;
+    gap: 15px;
+  }
+  .book-mark {
+    width: 44px;
+    height: 58px;
+  }
+  .activity-row-main h3 {
+    font-size: 18px;
+  }
+  .activity-row-main p {
+    font-size: 10px;
+  }
+  .activity-row-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .editor-section {
+    padding: 22px 19px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-grid .full {
+    grid-column: auto;
+  }
+  .editor-section h2 {
+    font-size: 18px;
+  }
+  .task-item {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .task-item input {
+    flex: 1;
+    width: calc(100% - 30px);
+  }
+  .task-controls {
+    margin-left: auto;
+  }
+  .task-item .task-index {
+    width: 16px;
+  }
+  .form-actions {
+    position: sticky;
+    bottom: 76px;
+    background: #f7f5f0e8;
+    backdrop-filter: blur(12px);
+    padding: 15px 0;
+    z-index: 5;
+  }
+  .panel {
+    padding: 21px;
+  }
+  .modal-overlay {
+    padding: 12px;
+    align-items: center;
+  }
+  .modal {
+    max-height: calc(100dvh - 24px);
+    border-radius: 15px;
+  }
+  .modal-head {
+    padding: 19px 19px 17px;
+  }
+  .modal-head h2 {
+    font-size: 19px;
+  }
+  .modal-body {
+    padding: 0 19px 21px;
+  }
+  .modal-footer {
+    padding: 15px 19px calc(15px + env(safe-area-inset-bottom));
+  }
+  .modal-footer .btn {
+    flex: 1;
+    min-width: 0;
+    white-space: normal;
+  }
+  .qr-grid {
+    grid-template-columns: 1fr;
+  }
+  .qr-paper {
+    max-width: 250px;
+    margin: auto;
+    width: 100%;
+    padding: 15px;
+  }
+  .qr-info {
+    gap: 13px;
+  }
+  .qr-info h3 {
+    text-align: center;
+  }
+  .comparison-grid {
+    gap: 15px;
+  }
+  .comparison-grid img {
+    height: 230px;
+  }
+  .comparison-grid h3 {
+    font-size: 16px;
+  }
+  .comparison-grid p {
+    font-size: 11px;
+    line-height: 1.9;
+  }
+  .comparison-grid .tag {
+    font-size: 9px;
+    padding: 4px 5px;
+  }
+  .comparison-grid .chip-row {
+    gap: 4px;
+  }
+  .analytics-layout {
+    gap: 18px;
+  }
+  .constellation {
+    min-height: 350px;
+  }
+  .node strong {
+    font-size: 10px;
+  }
+  .node small {
+    font-size: 9px;
+  }
+  .ranking-panel .ranking {
+    grid-template-columns: 1fr;
+  }
+  .alias-row {
+    grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr) 34px;
+    gap: 6px;
+  }
+  .alias-row input {
+    font-size: 12px;
+    padding: 10px;
+  }
+  .alias-row .icon-btn {
+    width: 34px;
+  }
+  .student-topbar {
+    padding: 20px 22px;
+  }
+  .student-topbar .brand {
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    gap: 4px;
+  }
+  .student-topbar .brand img {
+    width: 28px;
+    height: 28px;
+  }
+  .student-context {
+    font-size: 10px;
+    max-width: 115px;
+    line-height: 1.5;
+    text-align: right;
+  }
+  .student-container {
+    padding: 40px 23px 65px;
+  }
+  .student-intro h1 {
+    font-size: 52px;
+  }
+  .student-intro .eyebrow {
+    font-size: 9px;
+    margin-bottom: 24px;
+  }
+  .student-intro .author {
+    font-size: 14px;
+  }
+  .student-intro .lead {
+    font-size: 16px;
+    line-height: 2;
+  }
+  .student-intro .intro-rule {
+    margin: 32px 0;
+  }
+  .student-intro .objective {
+    font-size: 12px;
+    padding: 17px 19px;
+  }
+  .student-task-list li {
+    font-size: 13px;
+    gap: 14px;
+  }
+  .student-start {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    text-align: center;
+  }
+  .student-start .btn {
+    width: 100%;
+  }
+  .step-title {
+    font-size: 28px;
+    line-height: 1.55;
+    margin-top: 28px;
+  }
+  .step-hint {
+    font-size: 12px;
+    margin-bottom: 28px;
+  }
+  .step-meta .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.2px;
+  }
+  .saving {
+    font-size: 10px;
+  }
+  .worksheet-form {
+    gap: 25px;
+  }
+  .worksheet-form textarea {
+    padding: 16px;
+    min-height: 200px;
+  }
+  .worksheet-form .field {
+    font-size: 13px;
+  }
+  .tag-picker .tag-button {
+    font-size: 12px;
+    padding: 10px 13px;
+  }
+  .student-bottom {
+    position: sticky;
+    bottom: 0;
+    margin: 25px -8px -30px;
+    padding: 18px 8px calc(18px + env(safe-area-inset-bottom));
+    background: #f7f5f0f5;
+    backdrop-filter: blur(15px);
+    z-index: 10;
+  }
+  .student-bottom .btn {
+    font-size: 12px;
+    min-width: 100px;
+  }
+  .prompt-card {
+    padding: 21px;
+  }
+  .prompt-card pre {
+    font-size: 12px;
+  }
+  .prompt-card .between {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .prompt-card .between h3 {
+    font-size: 16px;
+  }
+  .submission-code {
+    gap: 8px;
+    padding: 14px;
+  }
+  .submission-code code {
+    font-size: 11px;
+  }
+  .student-note {
+    font-size: 11px;
+  }
+  .student-demo {
+    margin-inline: 20px;
+    font-size: 10px;
+    padding: 10px 12px;
+  }
+  .completion-actions .btn {
+    white-space: normal;
+  }
+  .landing-nav .brand {
+    font-size: 17px;
+    gap: 4px;
+    letter-spacing: 1.4px;
+  }
+  .landing-copy h1 {
+    font-size: 43px;
+    letter-spacing: -2px;
+  }
+  .landing-copy .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.7px;
+  }
+  .landing-copy > p {
+    font-size: 13px;
+  }
+  .landing-art {
+    height: 330px;
+  }
+  .landing-features {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .landing-feature {
+    padding-bottom: 25px;
+    border-bottom: 1px solid var(--line);
+  }
+  .landing-feature:last-child {
+    border: 0;
+    padding-bottom: 0;
+  }
+  .landing-feature .eyebrow {
+    margin-bottom: 10px;
+  }
+  .landing-feature h2 {
+    font-size: 19px;
+  }
+  .landing-feature p {
+    font-size: 13px;
+  }
+  .landing-footer {
+    flex-direction: column;
+    gap: 10px;
+    line-height: 1.7;
+  }
+  .auth-page {
+    padding: 28px;
+  }
+  .auth-card .brand {
+    margin-bottom: 40px;
+  }
+  .showcase-header .brand {
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+  .showcase-header .brand img {
+    width: 27px;
+  }
+  .showcase-controls .label-toggle {
+    display: none;
+  }
+  .showcase-controls {
+    gap: 5px;
+  }
+  .showcase-piece small {
+    font-size: 8px;
+    padding: 3px;
+  }
+  .showcase-wall {
+    gap: 6px;
+    inset: 5px 10px;
+  }
+  .showcase-counter {
+    display: none;
+  }
+  .showcase-offline {
+    font-size: 9px;
+  }
+}
+@media (max-width: 359px) {
+  .teacher-main {
+    padding-inline: 14px;
+  }
+  .student-container {
+    padding-inline: 19px;
+  }
+  .hero-content {
+    padding: 23px 18px;
+  }
+  .hero-actions {
+    gap: 7px;
+  }
+  .hero-actions .btn {
+    font-size: 10px;
+    padding-inline: 10px;
+  }
+  .student-topbar {
+    padding-inline: 18px;
+  }
+  .step-title {
+    font-size: 26px;
+  }
+  .landing-copy h1 {
+    font-size: 37px;
+  }
+  .landing-nav {
+    padding: 18px;
+  }
+  .landing-nav-links .btn {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+  .landing-art {
+    height: 285px;
+  }
+  .mobile-nav a {
+    font-size: 8px;
+    padding-inline: 8px;
+  }
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+  .comparison-grid img {
+    height: 260px;
+  }
+  .modal-head h2 {
+    font-size: 18px;
+  }
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  .student-container {
+    padding-top: 25px;
+  }
+  .modal {
+    max-height: calc(100dvh - 20px);
+  }
+  .modal-overlay {
+    padding: 10px;
+  }
+  .modal-head {
+    padding-block: 12px;
+  }
+  .modal-footer {
+    padding-block: 10px;
+  }
+  .showcase-header {
+    padding-block: 8px;
+  }
+  .showcase-controls {
+    padding-block: 6px;
+  }
+  .showcase-offline {
+    display: none;
+  }
+  .showcase-wall {
+    inset-block: 0;
+  }
+  .student-bottom {
+    position: static;
+  }
+  .qr-paper {
+    max-width: 200px;
+  }
+  .qr-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .showcase-piece small {
+    display: none;
+  }
+}

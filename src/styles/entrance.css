@@ -1,0 +1,520 @@
+/* The museum entrance fills the available screen; content pages keep normal scrolling. */
+.museum-entry {
+  --entry-gap: clamp(12px, 2.3vh, 26px);
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 520px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: env(safe-area-inset-top, 0px)
+    max(20px, 4vw, env(safe-area-inset-right, 0px))
+    env(safe-area-inset-bottom, 0px)
+    max(20px, 4vw, env(safe-area-inset-left, 0px));
+}
+.museum-entry > .archive-header {
+  width: 100%;
+  max-width: 1600px;
+  height: clamp(58px, 8.5vh, 82px);
+  padding: 0;
+  margin: 0 auto;
+}
+.museum-entry .archive-header nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.museum-entry .museum-home {
+  width: 100%;
+  max-width: 1600px;
+  min-height: 0;
+  margin: 0 auto;
+  padding: var(--entry-gap) 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--entry-gap);
+}
+.museum-entry .museum-welcome {
+  margin: 0;
+  align-self: center;
+}
+.museum-entry .museum-welcome .eyebrow {
+  font-size: 9px;
+  line-height: 1.4;
+}
+.museum-entry .museum-welcome h1 {
+  font-size: clamp(28px, min(3.2vw, 5vh), 48px);
+  line-height: 1.38;
+  margin: clamp(7px, 1.2vh, 13px) 0;
+  letter-spacing: -0.04em;
+  word-break: keep-all;
+}
+.museum-entry .museum-welcome p {
+  margin: 0;
+  max-width: none;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.museum-entry .museum-choices {
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 1.5vw, 24px);
+}
+.museum-entry .museum-choice {
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(20px, 3vh, 36px) clamp(24px, 3vw, 46px);
+}
+.museum-entry .choice-class > img {
+  object-position: 40% 56%;
+}
+.museum-entry .choice-visit > img {
+  object-position: 58% 48%;
+}
+.museum-entry .choice-copy {
+  min-width: 0;
+}
+.museum-entry .choice-copy h2 {
+  font-size: clamp(30px, min(3.3vw, 5.8vh), 50px);
+  line-height: 1.3;
+  margin: 8px 0 12px;
+}
+.museum-entry .choice-copy p {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+  word-break: keep-all;
+}
+.museum-entry .choice-enter {
+  margin-top: clamp(14px, 2.4vh, 25px);
+  padding-top: clamp(11px, 1.8vh, 18px);
+  font-size: 12px;
+  line-height: 1.5;
+  gap: 10px;
+}
+.museum-entry .choice-enter svg {
+  flex-shrink: 0;
+}
+.museum-entry .museum-inventory {
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(18px, 2.6vw, 36px);
+  align-items: center;
+}
+.museum-entry .inventory-heading .eyebrow {
+  display: block;
+  font-size: 7px;
+  line-height: 1.5;
+  letter-spacing: 1.7px;
+}
+.museum-entry .inventory-heading h2 {
+  margin: 5px 0 0;
+  font-size: 17px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.museum-entry .inventory-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  min-width: 0;
+}
+.museum-entry .inventory-list > a {
+  min-width: 0;
+  min-height: 44px;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #dcd3c1;
+}
+.museum-entry .inventory-list strong {
+  font-size: 15px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.museum-entry .inventory-list small {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.museum-entry .inventory-list svg {
+  flex-shrink: 0;
+  width: 14px;
+}
+.museum-entry .inventory-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  grid-column: 1/-1;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.museum-entry .inventory-empty svg {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  color: #a18d63;
+}
+.museum-entry .inventory-all {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.museum-entry .inventory-all svg {
+  width: 14px;
+}
+.museum-entry > .archive-footer {
+  width: 100%;
+  max-width: 1600px;
+  min-height: 32px;
+  margin: 0 auto;
+  padding: 10px 0;
+  align-items: center;
+  font-size: 9px;
+  line-height: 1.3;
+}
+.museum-entry > .archive-footer span:last-child {
+  font-size: 7px;
+}
+.collection-empty .empty-gallery-art {
+  width: min(100%, 340px);
+  height: 170px;
+  object-fit: cover;
+  object-position: center 40%;
+  margin: 0 auto 22px;
+  border: 6px solid #e8e1d1;
+  outline: 1px solid #baaa8c;
+}
+@media (max-width: 1100px) {
+  .museum-entry .inventory-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .museum-entry .inventory-list > a:nth-child(n + 3) {
+    display: none;
+  }
+  .museum-entry .inventory-list small {
+    display: none;
+  }
+}
+@media (max-width: 760px) and (min-height: 601px) {
+  .museum-entry .museum-choices {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+  .museum-entry .museum-choice {
+    padding: 22px 26px;
+    justify-content: end;
+  }
+  .museum-entry .choice-index {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-size: 8px;
+    letter-spacing: 1.7px;
+  }
+  .museum-entry .choice-copy > span:first-child {
+    display: none;
+  }
+  .museum-entry .choice-copy h2 {
+    font-size: 32px;
+    margin: 0 0 8px;
+  }
+  .museum-entry .choice-class > img {
+    object-position: 48% 58%;
+  }
+  .museum-entry .choice-visit > img {
+    object-position: 58% 43%;
+  }
+}
+@media (max-width: 600px) {
+  .museum-entry {
+    --entry-gap: 12px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .museum-entry > .archive-header {
+    height: 56px;
+  }
+  .museum-entry .archive-header .brand {
+    font-size: 29px;
+  }
+  .museum-entry .archive-header nav {
+    gap: 16px;
+  }
+  .museum-entry .archive-header nav a {
+    min-width: 34px;
+  }
+  .museum-entry .archive-header nav .archive-admin {
+    min-width: 32px;
+    justify-content: end;
+  }
+  .museum-entry .museum-welcome h1 {
+    font-size: clamp(23px, 6.1vw, 28px);
+    line-height: 1.4;
+    margin: 7px 0;
+  }
+  .museum-entry .museum-welcome .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.8px;
+  }
+  .museum-entry .museum-welcome p {
+    font-size: 11px;
+  }
+  .museum-entry .museum-choices {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .museum-entry .museum-choice {
+    padding: 18px 20px;
+    justify-content: end;
+  }
+  .museum-entry .choice-index {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    font-size: 7px;
+    letter-spacing: 1.3px;
+  }
+  .museum-entry .choice-copy > span:first-child {
+    display: none;
+  }
+  .museum-entry .choice-copy h2 {
+    font-size: 29px;
+    margin: 0 0 6px;
+  }
+  .museum-entry .choice-copy p {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .museum-entry .choice-enter {
+    margin-top: 10px;
+    padding-top: 9px;
+    font-size: 11px;
+  }
+  .museum-entry .choice-class > img {
+    object-position: 48% 58%;
+  }
+  .museum-entry .choice-visit > img {
+    object-position: 58% 43%;
+  }
+  .museum-entry .museum-inventory {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0 12px;
+  }
+  .museum-entry .inventory-heading {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .museum-entry .inventory-heading .eyebrow {
+    display: none;
+  }
+  .museum-entry .inventory-heading h2 {
+    font-size: 12px;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .museum-entry .inventory-list {
+    grid-column: 1;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .museum-entry .inventory-list > a:nth-child(n + 2) {
+    display: none;
+  }
+  .museum-entry .inventory-list > a {
+    min-height: 30px;
+    border: 0;
+    padding: 3px 0;
+    gap: 8px;
+  }
+  .museum-entry .inventory-list strong {
+    font-size: 13px;
+  }
+  .museum-entry .inventory-list > a > span {
+    font-size: 9px;
+  }
+  .museum-entry .inventory-list svg {
+    margin: 0;
+    width: 12px;
+  }
+  .museum-entry .inventory-empty {
+    font-size: 10px;
+    gap: 6px;
+    min-height: 27px;
+  }
+  .museum-entry .inventory-empty svg {
+    width: 15px;
+    height: 15px;
+  }
+  .museum-entry .inventory-all {
+    grid-column: 2;
+    grid-row: 1/3;
+    font-size: 10px;
+    gap: 6px;
+  }
+  .museum-entry > .archive-footer {
+    display: flex;
+    min-height: 27px;
+    padding: 7px 0;
+    font-size: 8px;
+  }
+  .museum-entry > .archive-footer span:last-child {
+    display: none;
+  }
+}
+@media (max-width: 600px) and (max-height: 680px) {
+  .museum-entry {
+    --entry-gap: 9px;
+  }
+  .museum-entry .museum-welcome h1 {
+    font-size: 23px;
+    margin-block: 5px;
+  }
+  .museum-entry .museum-welcome p {
+    font-size: 10px;
+  }
+  .museum-entry .museum-choice {
+    padding: 14px 17px;
+  }
+  .museum-entry .choice-copy h2 {
+    font-size: 26px;
+    margin-bottom: 5px;
+  }
+  .museum-entry .choice-copy p {
+    display: none;
+  }
+  .museum-entry .choice-enter {
+    padding-top: 7px;
+    margin-top: 6px;
+    font-size: 10px;
+  }
+  .museum-entry .choice-index {
+    top: 13px;
+    right: 16px;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .museum-entry {
+    --entry-gap: 10px;
+    min-height: 320px;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  .museum-entry > .archive-header {
+    height: 48px;
+  }
+  .museum-entry .archive-header .brand {
+    font-size: 27px;
+  }
+  .museum-entry .archive-wordmark {
+    display: none;
+  }
+  .museum-entry .museum-welcome .eyebrow,
+  .museum-entry .museum-welcome p {
+    display: none;
+  }
+  .museum-entry .museum-welcome h1 {
+    font-size: clamp(21px, 3.2vw, 29px);
+    line-height: 1.3;
+    margin: 0;
+  }
+  .museum-entry .museum-welcome h1 br {
+    display: none;
+  }
+  .museum-entry .museum-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .museum-entry .museum-choice {
+    padding: 14px 20px;
+    justify-content: end;
+  }
+  .museum-entry .choice-index {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .museum-entry .choice-copy > span:first-child,
+  .museum-entry .choice-copy p {
+    display: none;
+  }
+  .museum-entry .choice-copy h2 {
+    font-size: 27px;
+    margin: 0;
+    line-height: 1.35;
+  }
+  .museum-entry .choice-enter {
+    margin-top: 8px;
+    padding-top: 7px;
+    font-size: 10px;
+  }
+  .museum-entry .museum-inventory {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 14px;
+  }
+  .museum-entry .inventory-heading {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .museum-entry .inventory-heading .eyebrow {
+    display: none;
+  }
+  .museum-entry .inventory-heading h2 {
+    font-size: 12px;
+    margin: 0;
+  }
+  .museum-entry .inventory-list {
+    grid-column: 2;
+    grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .museum-entry .inventory-list > a:nth-child(n + 2) {
+    display: none;
+  }
+  .museum-entry .inventory-list > a {
+    min-height: 30px;
+    padding: 3px 0;
+  }
+  .museum-entry .inventory-list strong {
+    font-size: 12px;
+  }
+  .museum-entry .inventory-empty {
+    font-size: 10px;
+  }
+  .museum-entry .inventory-empty svg {
+    width: 17px;
+    height: 17px;
+  }
+  .museum-entry .inventory-all {
+    grid-column: 3;
+    grid-row: 1;
+    min-height: 32px;
+    font-size: 10px;
+  }
+  .museum-entry > .archive-footer {
+    min-height: 24px;
+    padding: 5px 0;
+    font-size: 8px;
+  }
+}
+@media (hover: none) {
+  .museum-entry .museum-choice > img {
+    filter: brightness(0.82) saturate(0.85);
+  }
+  .museum-entry .museum-choice:hover > img {
+    transform: none;
+  }
+}
