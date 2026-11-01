@@ -117,7 +117,7 @@ test("entrance fits phone, tablet, laptop and landscape screens without scrollin
     await page.evaluate(
       () => document.documentElement.scrollHeight > innerHeight,
     ),
-  ).toBe(true);
+  ).toBe(false);
   expect(errors).toEqual([]);
 });
 
@@ -212,6 +212,15 @@ test("a large collection stays compact on the entrance and remains reachable wit
       () => document.documentElement.scrollHeight > innerHeight,
     ),
   ).toBe(true);
+  const header = page.locator(".archive-header");
+  const initialHeader = await header.boundingBox();
+  await page.locator(".exhibit-card").last().scrollIntoViewIfNeeded();
+  await expect(header).toBeInViewport({ ratio: 1 });
+  expect(await header.boundingBox()).toEqual(initialHeader);
+  await header.getByRole("link", { name: "수업하기", exact: true }).click();
+  await expect(page.locator(".classroom-overview")).toBeVisible();
+  expect(await header.boundingBox()).toEqual(initialHeader);
+  expect(await page.evaluate(() => scrollY)).toBe(0);
   // At unusually small/zoomed viewports content remains scrollable, never trapped.
   await page.goto("/");
   await page.setViewportSize({ width: 320, height: 300 });

@@ -6,6 +6,8 @@ import "./styles/lessons.css";
 import "./styles/poster.css";
 import "./styles/archive.css";
 import "./styles/entrance.css";
+import "./styles/screens.css";
+import { museumHeader } from "./components/museum-shell.js";
 import { museumHome, exhibitionPage } from "./pages/museum.js";
 import { adminPage } from "./pages/lesson-access.js";
 import {
@@ -41,13 +43,16 @@ export async function render() {
   cleanup = null;
   closeOverlays();
   window.scrollTo(0, 0);
+  const path = currentRoute().split("?")[0];
+  const museumRoute =
+    path === "/" || /^\/(teacher|exhibition|admin|login)(\/|$)/.test(path);
   const surface = document.createElement("div");
+  if (museumRoute) surface.classList.add("museum-screen");
   app.replaceChildren(surface);
-  surface.innerHTML = `<div class="loading-page"><div class="flex">${icon("loader-circle")}<span>문학의 또 다른 시선을 준비하고 있어요.</span></div></div>`;
+  surface.innerHTML = `${museumRoute ? museumHeader() : ""}<div class="loading-page"><div class="flex">${icon("loader-circle")}<span>문학의 또 다른 시선을 준비하고 있어요.</span></div></div>`;
   refreshIcons();
   try {
     let dispose;
-    const path = currentRoute().split("?")[0];
     if (path === "/") dispose = await museumHome(surface);
     else if (["/admin", "/admin/login", "/login"].includes(path))
       dispose = await adminPage(surface);

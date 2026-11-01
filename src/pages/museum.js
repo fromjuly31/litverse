@@ -42,6 +42,7 @@ export async function exhibitionPage(root, id) {
       window.removeEventListener("afterprint", resetPosterPrint);
     };
   }
+  root.classList.add("museum-collection");
   let page = await request("public/exhibits"),
     exhibits = page.items,
     sequence = 0,
@@ -54,7 +55,10 @@ export async function exhibitionPage(root, id) {
       .value.trim()
       .toLocaleLowerCase();
     const visible = exhibits;
-    root.querySelector("#more-exhibits").hidden = exhibits.length >= page.total;
+    root.classList.toggle("collection-is-empty", exhibits.length === 0);
+    root.querySelector(".collection-more").hidden =
+      exhibits.length >= page.total;
+    root.querySelector(".collection-search").hidden = !page.total && !q;
     root.querySelector(".collection-total").textContent =
       `${q ? "검색 결과" : "총"} ${page.total}점`;
     root.querySelector("#collection-grid").innerHTML = visible.length
@@ -64,7 +68,7 @@ export async function exhibitionPage(root, id) {
               `<article class="exhibit-card"><a class="exhibit-frame" href="/exhibition/${e(a.id)}" aria-label="${e(a.title)} 전시작 자세히 보기"><div class="exhibit-mat">${posterMarkup(a.result, a.images, true)}</div></a><div class="exhibit-label"><div><h2>${e(a.title)}</h2><p>${e(a.author)} 원작</p></div><span class="exhibit-signature">${e(a.signature)}</span></div></article>`,
           )
           .join("")
-      : `<section class="empty collection-empty">${q ? icon("search") : `<img class="empty-gallery-art" src="${e(assetUrl("/art/literary-museum-interior.webp"))}" alt="첫 작품을 기다리는 따뜻한 문학 전시실" width="340" height="170"/>`}<h2>${q ? "검색한 전시작이 없어요." : "아직 걸리지 않은, 우리의 첫 작품."}</h2><p>${q ? "다른 작품명이나 제작자 이름으로 찾아보세요." : "수업을 마무리하고 두 장의 최종본을 선정하면 이곳에 전시됩니다."}</p>${q ? "" : '<a class="btn primary" href="/teacher">첫 수업 시작하기</a>'}</section>`;
+      : `<section class="empty collection-empty"><div class="collection-empty-art">${q ? icon("search") : `<img class="empty-gallery-art" src="${e(assetUrl("/art/literary-museum-interior.webp"))}" alt="첫 작품을 기다리는 따뜻한 문학 전시실" width="340" height="170"/>`}</div><div class="collection-empty-copy"><h2>${q ? "검색한 전시작이 없어요." : "아직 걸리지 않은, 우리의 첫 작품."}</h2><p>${q ? "다른 작품명이나 제작자 이름으로 찾아보세요." : "수업을 마무리하고 두 장의 최종본을 선정하면 이곳에 전시됩니다."}</p>${q ? "" : '<a class="btn primary" href="/teacher">첫 수업 시작하기</a>'}</div></section>`;
     refreshIcons();
   };
   const load = async (more = false) => {

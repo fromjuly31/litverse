@@ -1,0 +1,647 @@
+/* Shared frame: navigation occupies the same coordinates on every museum page. */
+html {
+  scrollbar-gutter: stable;
+}
+:root {
+  --screen-gutter: max(
+    20px,
+    4vw,
+    env(safe-area-inset-left, 0px),
+    env(safe-area-inset-right, 0px)
+  );
+  --screen-header: clamp(58px, 8.5vh, 82px);
+}
+.museum-screen {
+  width: 100%;
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top, 0px) var(--screen-gutter)
+    env(safe-area-inset-bottom, 0px);
+}
+.museum-screen:not(.museum-entry) {
+  display: flex;
+  flex-direction: column;
+}
+.museum-screen > .archive-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  width: 100%;
+  max-width: 1600px;
+  height: var(--screen-header);
+  min-height: var(--screen-header);
+  padding: 0;
+  margin: 0 auto;
+  flex-shrink: 0;
+  background: var(--bg, #f8f6f0);
+}
+.museum-screen .archive-header .brand {
+  flex-shrink: 0;
+  font-size: 37px;
+}
+.museum-screen .archive-header nav {
+  gap: 30px;
+  font-size: 12px;
+}
+.museum-screen .archive-header nav a {
+  min-height: 44px;
+}
+.museum-screen > .archive-footer {
+  width: 100%;
+  max-width: 1600px;
+  min-height: 32px;
+  margin: 0 auto;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  font-size: 9px;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+.museum-screen > .archive-footer span:last-child {
+  font-size: 7px;
+}
+.museum-screen > .teacher-layout {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.museum-screen .teacher-main {
+  max-width: none;
+  padding-inline: 0;
+}
+.museum-screen > .loading-page {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Compact book-jacket cards with pagination sized to the available display. */
+.museum-screen.classroom-overview {
+  height: 100dvh;
+  min-height: 520px;
+}
+.classroom-overview > .teacher-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.classroom-overview .teacher-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  padding-block: clamp(20px, 3vh, 32px) 14px;
+  gap: 22px;
+}
+.classroom-overview .page-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
+  row-gap: 6px;
+  margin: 0;
+  flex-shrink: 0;
+}
+.classroom-overview .page-heading > div:first-child {
+  display: contents;
+}
+.classroom-overview .page-heading .eyebrow {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 9px;
+}
+.classroom-overview .page-heading h1 {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+  font-size: clamp(24px, 2.6vw, 34px);
+  line-height: 1.4;
+}
+.classroom-overview .page-heading p {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.classroom-overview .page-heading > .flex {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+.classroom-lessons {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.classroom-overview .lesson-list-heading {
+  margin: 0 0 14px !important;
+  flex-shrink: 0;
+}
+.classroom-overview .lesson-list-heading h2 {
+  font-size: 21px;
+  line-height: 1.5;
+}
+.classroom-overview .lesson-grid {
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 144px;
+  gap: 14px;
+  align-content: start;
+}
+.classroom-overview .lesson-card {
+  --cover: #41675e;
+  --cover-light: #78978b;
+  position: relative;
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #d6d3c6;
+  border-radius: 3px 8px 8px 3px;
+  background: linear-gradient(110deg, #eeeee5, #fffdf7 40%);
+  box-shadow: 0 3px 10px #3b382a06;
+  transition:
+    border-color 180ms,
+    box-shadow 180ms;
+}
+.classroom-overview .lesson-card[data-tone="1"] {
+  --cover: #515e7a;
+  --cover-light: #8999b0;
+}
+.classroom-overview .lesson-card[data-tone="2"] {
+  --cover: #896e46;
+  --cover-light: #bda677;
+}
+.classroom-overview .lesson-card:hover,
+.classroom-overview .lesson-card:focus-visible {
+  border-color: var(--cover);
+  box-shadow: 0 5px 18px #3b382a12;
+}
+.lesson-cover {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 8px;
+  color: #f5eed9;
+  background:
+    linear-gradient(90deg, #0002 0 5px, transparent 5px),
+    linear-gradient(140deg, var(--cover-light), var(--cover));
+  border-radius: 2px 5px 5px 2px;
+  box-shadow:
+    3px 2px 0 #e4decf,
+    4px 3px 0 #c8c3b4;
+}
+.lesson-cover::before {
+  content: "";
+  position: absolute;
+  inset: 7px 6px 7px 10px;
+  border: 1px solid #eee3bf55;
+  pointer-events: none;
+}
+.lesson-cover-number {
+  font:
+    11px/1.2 Georgia,
+    serif;
+  letter-spacing: 2px;
+}
+.lesson-cover > svg {
+  width: 25px;
+  height: 25px;
+}
+.lesson-cover-rule {
+  width: 15px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.classroom-overview .lesson-card-copy {
+  min-width: 0;
+  padding: 0;
+}
+.lesson-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.lesson-card-top .badge {
+  max-width: 100%;
+  font-size: 9px;
+  padding: 3px 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lesson-card-top > svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: #938975;
+}
+.classroom-overview .lesson-card h3 {
+  font-size: 22px;
+  line-height: 1.4;
+  margin: 7px 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.classroom-overview .lesson-meta,
+.classroom-overview .lesson-course {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  line-height: 1.6;
+  font-size: 11px;
+}
+.classroom-overview .lesson-course {
+  font-size: 9px;
+  color: #9c9381;
+  margin-top: 4px;
+}
+.lesson-card-arrow {
+  color: var(--cover);
+  align-self: end;
+}
+.lesson-card-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+.classroom-overview .lesson-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 16px;
+  text-align: left;
+}
+.classroom-overview .lesson-empty h3 {
+  font-size: 20px;
+  margin: 0 0 6px;
+}
+.classroom-overview .lesson-empty p {
+  font-size: 12px;
+  margin: 0;
+}
+.classroom-bottom {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.classroom-bottom .classroom-note {
+  margin: 0;
+  font-size: 10px;
+}
+.classroom-pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 11px;
+}
+.classroom-pagination[hidden],
+.museum-collection .collection-more[hidden],
+.museum-collection .collection-search[hidden] {
+  display: none;
+}
+.classroom-pagination .icon-btn {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+}
+.classroom-pagination button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Empty gallery fits the display; populated exhibitions extend the document. */
+.museum-collection > .collection-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: clamp(18px, 3vh, 30px) 0;
+}
+.museum-collection .collection-title {
+  margin: 0 auto 24px;
+}
+.museum-collection .collection-title h1 {
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.4;
+  margin: 10px 0;
+}
+.museum-collection .collection-title p {
+  line-height: 1.7;
+}
+.museum-collection .collection-total {
+  margin-top: 10px;
+  padding-top: 0;
+  border: 0;
+}
+.museum-collection .collection-more {
+  margin-top: 28px;
+}
+.museum-collection.collection-is-empty {
+  height: 100dvh;
+  min-height: 520px;
+}
+.collection-is-empty > .collection-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 18px;
+}
+.collection-is-empty .collection-title,
+.collection-is-empty .collection-search {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+.collection-is-empty .collection-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  gap: 0;
+}
+.collection-is-empty .collection-empty {
+  width: min(850px, 100%);
+  min-height: 0;
+  margin: auto;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 60px);
+  text-align: left;
+  border: 0;
+  background: transparent;
+}
+.collection-empty .empty-gallery-art {
+  display: block;
+  width: 100%;
+  height: clamp(140px, 26vh, 250px);
+  margin: 0;
+  border: 8px solid #e8e1d1;
+  box-shadow: 0 12px 24px #5f513518;
+}
+.collection-empty-copy h2 {
+  font-size: clamp(20px, 2.3vw, 28px);
+  line-height: 1.5;
+  margin: 0 0 12px;
+  word-break: keep-all;
+}
+.collection-empty-copy p {
+  margin: 0 0 22px;
+  font-size: 13px;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+@media (max-width: 1000px) {
+  .classroom-overview .lesson-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  :root {
+    --screen-gutter: max(
+      16px,
+      env(safe-area-inset-left, 0px),
+      env(safe-area-inset-right, 0px)
+    );
+    --screen-header: 56px;
+  }
+  .museum-screen .archive-header .brand {
+    font-size: 29px;
+  }
+  .museum-screen .archive-header nav {
+    gap: 16px;
+    font-size: 11px;
+  }
+  .museum-screen .archive-header nav a {
+    min-width: 34px;
+  }
+  .museum-screen .archive-header nav .archive-admin {
+    min-width: 32px;
+    justify-content: end;
+  }
+  .museum-screen > .archive-footer {
+    min-height: 27px;
+    padding: 7px 0;
+    font-size: 8px;
+  }
+  .museum-screen > .archive-footer span:last-child {
+    display: none;
+  }
+  .classroom-overview .teacher-main {
+    padding-block: 18px 10px;
+    gap: 16px;
+  }
+  .classroom-overview .page-heading {
+    column-gap: 10px;
+  }
+  .classroom-overview .page-heading h1 {
+    font-size: clamp(20px, 5.6vw, 26px);
+    white-space: nowrap;
+  }
+  .classroom-overview .page-heading p {
+    font-size: 11px;
+  }
+  .classroom-overview .page-heading .btn {
+    padding: 10px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .classroom-overview .page-heading .btn svg {
+    width: 16px;
+  }
+  .classroom-overview .lesson-list-heading {
+    margin-bottom: 10px !important;
+  }
+  .classroom-overview .lesson-list-heading h2 {
+    font-size: 18px;
+  }
+  .classroom-overview .lesson-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 124px;
+    gap: 10px;
+  }
+  .classroom-overview .lesson-card {
+    grid-template-columns: 56px minmax(0, 1fr) 16px;
+    gap: 12px;
+    padding: 12px;
+  }
+  .classroom-overview .lesson-card h3 {
+    font-size: 21px;
+    margin-block: 5px 3px;
+  }
+  .classroom-overview .lesson-empty {
+    gap: 14px;
+    padding: 12px;
+  }
+  .classroom-overview .lesson-empty h3 {
+    font-size: 17px;
+  }
+  .classroom-overview .lesson-empty p {
+    font-size: 11px;
+  }
+  .classroom-bottom .classroom-note {
+    font-size: 9px;
+  }
+  .museum-collection .collection-title .eyebrow {
+    font-size: 8px;
+  }
+  .museum-collection .collection-title h1 {
+    font-size: 25px;
+    margin: 8px 0;
+  }
+  .museum-collection .collection-title p {
+    font-size: 11px;
+  }
+  .collection-is-empty > .collection-page {
+    gap: 12px;
+    padding-block: 18px 14px;
+  }
+  .collection-is-empty .collection-empty {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    text-align: center;
+  }
+  .collection-empty-art {
+    width: min(220px, 100%);
+    margin: 0 auto;
+  }
+  .collection-empty .empty-gallery-art {
+    height: clamp(80px, 17vh, 140px);
+    border-width: 5px;
+  }
+  .collection-empty-copy h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  .collection-empty-copy p {
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+}
+@media (max-width: 600px) and (max-height: 680px) {
+  .classroom-overview .lesson-grid {
+    grid-auto-rows: 108px;
+  }
+  .classroom-overview .lesson-course {
+    display: none;
+  }
+  .collection-empty .empty-gallery-art {
+    height: 85px;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  :root {
+    --screen-gutter: max(
+      20px,
+      env(safe-area-inset-left, 0px),
+      env(safe-area-inset-right, 0px)
+    );
+    --screen-header: 48px;
+  }
+  .museum-screen .archive-header .brand {
+    font-size: 27px;
+  }
+  .museum-screen .archive-wordmark {
+    display: none;
+  }
+  .museum-screen > .archive-footer {
+    min-height: 24px;
+    padding: 5px 0;
+    font-size: 8px;
+  }
+  .museum-screen.classroom-overview,
+  .museum-collection.collection-is-empty {
+    min-height: 320px;
+  }
+  .classroom-overview .teacher-main {
+    padding-block: 12px 8px;
+    gap: 10px;
+  }
+  .classroom-overview .page-heading .eyebrow,
+  .classroom-overview .page-heading p {
+    display: none;
+  }
+  .classroom-overview .page-heading h1,
+  .classroom-overview .page-heading > .flex {
+    grid-row: 1;
+  }
+  .classroom-overview .page-heading h1 {
+    font-size: 24px;
+  }
+  .classroom-overview .lesson-list-heading {
+    margin-bottom: 8px !important;
+  }
+  .classroom-overview .lesson-list-heading h2 {
+    font-size: 17px;
+  }
+  .classroom-overview .lesson-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 100px;
+    gap: 10px;
+  }
+  .classroom-overview .lesson-card {
+    grid-template-columns: 48px minmax(0, 1fr) 14px;
+    padding: 10px;
+    gap: 10px;
+  }
+  .classroom-overview .lesson-card h3 {
+    font-size: 19px;
+    margin: 4px 0 2px;
+  }
+  .classroom-overview .lesson-course {
+    display: none;
+  }
+  .museum-collection .collection-title p,
+  .museum-collection .collection-title .eyebrow {
+    display: none;
+  }
+  .museum-collection .collection-title h1 {
+    font-size: 25px;
+    margin: 0;
+  }
+  .museum-collection .collection-total {
+    margin-top: 4px;
+  }
+  .collection-is-empty > .collection-page {
+    padding-block: 12px;
+    gap: 10px;
+  }
+  .collection-is-empty .collection-empty {
+    grid-template-columns: minmax(100px, 0.8fr) minmax(0, 1.2fr);
+    gap: 24px;
+    width: min(650px, 100%);
+    text-align: left;
+  }
+  .collection-empty .empty-gallery-art {
+    height: 110px;
+  }
+  .collection-empty-copy h2 {
+    font-size: 19px;
+    margin-bottom: 6px;
+  }
+  .collection-empty-copy p {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+}
