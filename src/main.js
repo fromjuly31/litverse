@@ -7,6 +7,7 @@ import "./styles/poster.css";
 import "./styles/archive.css";
 import "./styles/entrance.css";
 import "./styles/screens.css";
+import "./styles/deepening.css";
 import { museumHeader } from "./components/museum-shell.js";
 import { museumHome, exhibitionPage } from "./pages/museum.js";
 import { adminPage } from "./pages/lesson-access.js";

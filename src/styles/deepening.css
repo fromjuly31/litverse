@@ -1,0 +1,734 @@
+.learning-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 0 8px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+.learning-tabs a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: var(--muted);
+  border-radius: 3px;
+}
+.learning-tabs a[aria-current="page"] {
+  background: #e8eee9;
+  color: #365a51;
+}
+.learning-tabs a:hover {
+  background: #efeee6;
+}
+.learning-tabs svg {
+  width: 17px;
+  height: 17px;
+}
+.classroom-overview .learning-tabs {
+  margin: 0;
+  padding-bottom: 8px;
+}
+.classroom-overview .teacher-main {
+  gap: 16px;
+}
+.classroom-overview .lesson-grid {
+  grid-auto-rows: 136px;
+}
+.deep-editor {
+  max-width: 1040px;
+  margin: auto;
+}
+.deep-editor .panel {
+  margin-bottom: 24px;
+}
+.deep-editor details {
+  margin: 16px 0;
+}
+.deep-editor summary,
+.deep-work-summary summary,
+.deep-student summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--primary);
+}
+.deep-editor .notice {
+  margin: 18px 0;
+}
+.deep-analysis-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 22px;
+  margin-top: 20px;
+}
+.deep-analysis-fields textarea {
+  min-height: 105px;
+}
+.deep-review-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 24px 0;
+  line-height: 1.7;
+  font-size: 13px;
+}
+.deep-review-check input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  accent-color: #365a51;
+}
+.deep-password {
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  background: #f5f3ea;
+  margin: 18px 0;
+  font-size: 13px;
+}
+.deep-password code,
+.deep-code code {
+  overflow-wrap: anywhere;
+  user-select: all;
+  letter-spacing: 1px;
+  margin-right: 14px;
+}
+.deep-password p {
+  line-height: 1.8;
+}
+.deep-control p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin: 10px 0;
+}
+.deep-options {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 22px 0 0;
+}
+.deep-options > .field {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 180px;
+}
+.deep-work-summary {
+  padding: 24px 28px;
+  background: #efefe6;
+  border-left: 3px solid #78978b;
+  margin: 24px 0;
+  color: #494c43;
+}
+.deep-work-summary h3 {
+  font: 24px/1.6 var(--serif);
+  margin: 12px 0;
+}
+.deep-work-summary p {
+  font-size: 14px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+.deep-work-summary dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.deep-work-summary dt {
+  font-size: 12px;
+  font-weight: 600;
+  color: #365a51;
+  margin-bottom: 6px;
+}
+.deep-work-summary dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.deep-secondary-actions {
+  margin: 20px 0 38px;
+}
+.deep-class-progress h2 {
+  font: 26px/1.4 var(--serif);
+}
+#deep-progress,
+#deep-connection {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.perspective-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 22px 0;
+}
+.perspective-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  background: #fffdf7;
+  border: 1px solid var(--line);
+  padding: 24px;
+  gap: 12px;
+  border-radius: 3px;
+  min-width: 0;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.perspective-card:hover,
+.perspective-card:focus-visible {
+  border-color: #78978b;
+  box-shadow: 0 8px 25px #4d4a3d0d;
+}
+.perspective-card h3 {
+  font: 21px/1.55 var(--serif);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.perspective-card p {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.perspective-card .text-link {
+  margin-top: auto;
+  font-size: 11px;
+}
+.reflection-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 24px 0;
+}
+.reflection-pair > section {
+  padding: 24px;
+  border: 1px solid var(--line);
+  background: #faf8f1;
+  min-width: 0;
+}
+.reflection-pair > section:last-child {
+  background: #edf1eb;
+  border-color: #bdcbbb;
+}
+.reflection-pair h3 {
+  font: 21px/1.6 var(--serif);
+  margin: 12px 0;
+}
+.reflection-pair p,
+.deep-answer-list p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.reflection-pair small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.deep-answer-list section {
+  border-top: 1px solid var(--line);
+  padding: 22px 0;
+}
+.deep-answer-list h3 {
+  font-size: 16px;
+  line-height: 1.7;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+.deep-student {
+  max-width: 820px;
+  padding-bottom: 48px;
+}
+.deep-student .step-title small {
+  display: block;
+  font: 13px/1.8 var(--sans);
+  color: var(--muted);
+  margin-top: 8px;
+}
+.deep-student .saving {
+  font-size: 11px;
+}
+.deep-student .step-title {
+  margin: 12px 0;
+}
+.deep-student-heading {
+  margin-bottom: 18px;
+}
+.deep-steps {
+  padding: 0;
+  margin: 0 0 12px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.deep-steps li {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  line-height: 1.4;
+}
+.deep-steps li > span {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.deep-steps svg {
+  width: 14px;
+  height: 14px;
+}
+.deep-steps .done > span,
+.deep-steps [aria-current="step"] > span {
+  background: #41675e;
+  border-color: #41675e;
+  color: white;
+}
+.deep-steps [aria-current="step"] {
+  color: #365a51;
+  font-weight: 600;
+}
+.deep-student progress {
+  display: block;
+  width: 100%;
+  height: 3px;
+  appearance: none;
+  border: 0;
+  background: #e3e4da;
+  margin-bottom: 30px;
+}
+.deep-student progress::-webkit-progress-bar {
+  background: #e3e4da;
+}
+.deep-student progress::-webkit-progress-value {
+  background: #78978b;
+}
+.deep-student .deep-work-summary {
+  padding: 20px;
+  margin: 20px 0;
+}
+.deep-student .deep-work-summary h3 {
+  font-size: 22px;
+}
+.deep-student > h2 {
+  font: 28px/1.5 var(--serif);
+}
+.deep-choices {
+  border: 0;
+  padding: 0;
+  margin: 24px 0;
+}
+.deep-choices legend {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.deep-choices label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 14px 16px;
+  min-height: 52px;
+  margin-bottom: 9px;
+  font-size: 14px;
+  line-height: 1.7;
+  cursor: pointer;
+  background: #fffdf8;
+}
+.deep-choices label:has(input:checked) {
+  border-color: #78978b;
+  background: #edf1eb;
+}
+.deep-choices input {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  accent-color: #41675e;
+}
+.deep-student .field textarea {
+  min-height: 150px;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.deep-question-card {
+  margin: 24px 0;
+  padding: 24px;
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-top: 3px solid #9aaf9d;
+}
+.deep-question-card h2 {
+  font: 22px/1.7 var(--serif);
+  margin: 16px 0 20px;
+  overflow-wrap: anywhere;
+}
+.deep-student .student-bottom {
+  position: static;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px 0;
+  background: transparent;
+  border: 0;
+}
+.deep-before {
+  padding: 24px;
+  margin: 20px 0;
+  background: #f0eee3;
+  border-left: 3px solid #bdac87;
+}
+.deep-before p {
+  white-space: pre-wrap;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.deep-reflection-prompt {
+  font: 22px/1.7 var(--serif);
+  margin: 22px 0;
+}
+.deep-student .perspective-grid {
+  grid-template-columns: 1fr 1fr;
+}
+.deep-student #deep-error {
+  white-space: pre-wrap;
+  margin-top: 15px;
+}
+.deep-return {
+  margin-top: 28px;
+  display: inline-flex;
+  font-size: 12px;
+}
+.deep-code {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.deep-code code {
+  display: block;
+  margin: 12px 0;
+}
+.student-phase-notice {
+  max-width: 1000px;
+  margin: 18px auto 0;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  background: #eaf0e7;
+  border: 1px solid #bccbb6;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.student-phase-notice .btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.collection-types {
+  justify-content: center;
+  margin: 0 auto 22px;
+}
+.collection-is-empty .collection-types {
+  margin: 0 auto;
+  padding-bottom: 5px;
+}
+.collection-is-empty .collection-types a {
+  min-height: 36px;
+  font-size: 12px;
+}
+.deep-exhibit-frame {
+  display: block;
+}
+.deep-exhibit-mat {
+  padding: 30px 24px;
+  min-height: 370px;
+  background: #f5f1e4;
+  color: #45473d;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.deep-exhibit-mat > h2 {
+  font: 32px/1.5 var(--serif);
+  margin: 18px 0 4px;
+}
+.deep-exhibit-mat > p {
+  font-size: 11px;
+  color: var(--muted);
+}
+.deep-exhibit-thought {
+  border-top: 1px solid #c9c3ae;
+  margin-top: 24px;
+  padding-top: 20px;
+}
+.deep-exhibit-thought > span {
+  font: 9px/1.4 var(--sans);
+  letter-spacing: 2px;
+  color: #6f836e;
+}
+.deep-exhibit-thought p {
+  font: 16px/1.8 var(--serif);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 8px 0 15px;
+  overflow-wrap: anywhere;
+}
+.deep-exhibit-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 11px;
+}
+.deep-public-detail {
+  width: 100%;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 0 40px;
+}
+.deep-public-detail > section {
+  margin: 35px 0;
+}
+.deep-public-detail .collection-title {
+  margin: 35px 0;
+}
+@media (max-width: 1000px) {
+  .perspective-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .learning-tabs {
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+  .learning-tabs a {
+    font-size: 12px;
+    padding: 8px 12px;
+    flex: 1;
+    white-space: nowrap;
+  }
+  .learning-tabs svg {
+    width: 15px;
+    height: 15px;
+  }
+  .classroom-overview .teacher-main {
+    gap: 12px;
+  }
+  .classroom-overview .learning-tabs {
+    padding-bottom: 5px;
+  }
+  .classroom-overview .lesson-grid {
+    grid-auto-rows: 112px;
+  }
+  .classroom-overview .page-heading h1 {
+    font-size: 21px;
+  }
+  .classroom-overview .page-heading .btn {
+    padding: 10px;
+    font-size: 10px;
+  }
+  .deep-analysis-fields,
+  .deep-work-summary dl,
+  .reflection-pair,
+  .perspective-grid,
+  .deep-student .perspective-grid {
+    grid-template-columns: 1fr;
+  }
+  .deep-editor .panel {
+    padding: 18px;
+  }
+  .deep-editor .page-heading h1 {
+    font-size: 27px;
+  }
+  .deep-work-summary {
+    padding: 20px;
+    margin: 20px 0;
+  }
+  .deep-work-summary h3 {
+    font-size: 21px;
+  }
+  .deep-options {
+    gap: 12px;
+  }
+  .deep-options > .field {
+    min-width: 100%;
+    margin: 0;
+  }
+  .deep-options > .btn {
+    width: 100%;
+  }
+  .deep-control .flex {
+    gap: 8px;
+  }
+  .deep-control .btn {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+  .deep-student {
+    padding-top: 22px;
+  }
+  .deep-student .step-title {
+    font-size: 28px;
+  }
+  .deep-steps {
+    gap: 5px;
+  }
+  .deep-steps li {
+    font-size: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .deep-student > h2 {
+    font-size: 24px;
+  }
+  .deep-question-card {
+    padding: 18px;
+  }
+  .deep-question-card h2 {
+    font-size: 20px;
+  }
+  .deep-choices label {
+    font-size: 14px;
+    padding: 12px;
+  }
+  .deep-reflection-prompt {
+    font-size: 20px;
+  }
+  .reflection-pair {
+    gap: 14px;
+  }
+  .reflection-pair > section {
+    padding: 20px;
+  }
+  .deep-student .student-bottom .btn {
+    font-size: 12px;
+    flex: 1;
+    padding: 12px;
+  }
+  .student-phase-notice {
+    margin: 12px 16px 0;
+    padding: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 12px;
+  }
+  .student-phase-notice .btn {
+    width: 100%;
+  }
+  .collection-is-empty > .collection-page {
+    gap: 9px;
+  }
+  .collection-is-empty .collection-types {
+    width: 100%;
+  }
+  .collection-is-empty .collection-types a {
+    font-size: 11px;
+    padding: 5px 8px;
+    min-height: 30px;
+  }
+  .collection-is-empty .collection-empty {
+    gap: 10px;
+  }
+  .collection-empty .empty-gallery-art {
+    height: clamp(65px, 13vh, 110px);
+  }
+  .collection-empty-copy p {
+    margin-bottom: 12px;
+  }
+  .deep-public-detail {
+    margin-top: 20px;
+  }
+  .deep-public-detail .collection-title h1 {
+    font-size: 28px;
+  }
+}
+@media (max-width: 600px) and (max-height: 680px) {
+  .classroom-overview .lesson-grid {
+    grid-auto-rows: 102px;
+  }
+  .classroom-overview .lesson-course {
+    display: none;
+  }
+  .collection-is-empty .collection-title p {
+    display: none;
+  }
+  .collection-empty .empty-gallery-art {
+    height: 70px;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .classroom-overview .teacher-main {
+    gap: 8px;
+    padding-top: 6px;
+  }
+  .classroom-overview .learning-tabs {
+    margin: 0;
+    padding: 0;
+  }
+  .learning-tabs a {
+    min-height: 30px;
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+  .classroom-overview .lesson-grid {
+    grid-auto-rows: 92px;
+  }
+  .classroom-overview .page-heading .btn {
+    padding: 8px 12px;
+    min-height: 34px;
+  }
+  .classroom-overview .lesson-list-heading {
+    margin-bottom: 4px !important;
+  }
+  .collection-is-empty .collection-types a {
+    min-height: 28px;
+  }
+  .collection-is-empty .collection-types {
+    padding: 0;
+  }
+  .collection-empty .empty-gallery-art {
+    height: 90px;
+  }
+  .collection-is-empty .collection-empty {
+    gap: 20px;
+  }
+  .collection-is-empty > .collection-page {
+    gap: 6px;
+    padding-block: 8px;
+  }
+}

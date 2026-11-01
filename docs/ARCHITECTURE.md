@@ -1,39 +1,144 @@
-# LITVERSE 구조
+﻿# LITVERSE 구조와 심화 기능 확장
 
-Vite + HTML + CSS + 기능별 ES Modules로 화면을 구성한다. 학생 화면은 읽기와 글쓰기에 집중하는 단일 컬럼, 교사 화면은 전시관의 상단 메뉴와 넓은 작품 영역을 사용한다. 화면 너비에 따라 교사 탐색은 모바일 하단 탐색으로 전환한다. 밝은 종이색 배경, 명조 제목과 산세리프 본문, 원본 비율을 유지하는 작품 여백을 공통 디자인으로 사용한다. 모든 선택 메뉴는 공통 커스텀 listbox, 확인·상세·QR 창은 포커스를 관리하는 공통 모달을 사용한다.
+## 기존 구조와 재사용
 
-## 데이터와 인증
+실제 저장소는 Vanilla JavaScript ES Modules + Vite + Supabase + Netlify Functions로 구성되어 있습니다. Firebase/Firestore를 사용하지 않아 Firestore 보안 규칙을 추가하지 않았습니다. SQL 마이그레이션 004로 기존 스키마를 확장하며 001~003이나 기존 수업 데이터를 교체하지 않습니다. 신규 라이브러리 없이 기존 Zod, QRCode, GSAP, Lucide를 재사용합니다.
 
-실서비스는 Supabase Auth의 사전 등록 교사만 로그인한다. Netlify Functions가 액세스 토큰과 활동 소유권을 확인한다. 교사 읽기 및 Realtime은 소유권 RLS로 제한한다. 학생은 활동 QR 토큰으로 접근하고, 개인 제출 코드를 통해 자신의 분석만 조회·수정한다. 학생·QR 토큰은 서버의 HMAC 검증값으로 저장한다. QR은 서버 비밀과 활동 ID로 결정적으로 생성해 다시 표시할 수 있다. 학생 코드 재발급 시 이전 코드는 무효화된다. 학생 API는 PostgreSQL 기반 요청 제한을 사용한다.
+메인 / 수업하기 / 관람하기의 공통 헤더, 밝은 종이색·명조 제목·청록색 강조를 유지합니다. 수업하기 안에 작품 파악하기 / 이해 심화하기, 관람하기 안에 작품 파악 전시 / 이해 심화 전시를 둡니다. 모바일도 동일한 상단 탐색을 사용합니다.
 
-activities → background_questions → background_responses로 배경 질문과 학생 응답을 보관한다. 배경은 temporal(시간적)과 spatial(공간적)으로 구분한다. 학생은 자기 응답만 보내고, 교사가 응답을 모아 최종 정리를 공개한다. 최종 정리는 활동의 temporal_background, spatial_background에 원자적으로 반영되어 두 프롬프트에 들어간다.
+- `components/ui.js`: 입력, 커스텀 선택 메뉴, 모달, 확인창, 토스트, 키보드 초점 관리.
+- `pages/teacher.js`: 교사 공통 화면, 수업 암호 확인, 기존 QR 모달. 심화 QR은 같은 활동 토큰에 명시적 심화 경로만 붙입니다.
+- `services/api.js`: demo/live 선택, 수업 접근 토큰, 관리자 세션, 실시간 구독.
+- `services/demo.js`: 기존 IndexedDB와 쓰기 잠금·BroadcastChannel. 새 배열은 필요할 때 추가하며 기존 저장소를 초기화하지 않습니다.
+- `pages/museum.js`: 기존 액자 그리드·검색·추가 조회·공통 헤더에 심화 전시 유형을 결합합니다.
 
-activities → worksheets → image_submissions 관계로 인물·사건 분석과 두 사진을 연결한다. 학생별 character 한 장과 scene 한 장을 각각 slot=0에 저장한다. 두 사진이 모두 존재해야 완료로 계산한다. tag_catalog와 tag_aliases는 원래 입력과 교사의 정규화를 분리한다. upload_jobs는 업로드 경로와 멱등성을, deletion_jobs는 Storage/DB 삭제 재시도를 관리한다. revoked_student_codes는 재발급 이전 코드의 재사용을 차단한다. 브라우저에는 서비스 역할 키를 전달하지 않는다.
+기존 코드에는 댓글 기능이 없으므로 댓글이나 비속어 감지가 이미 있는 것으로 가정하지 않았습니다. 기존 사진 업로드·승인·삭제·분석·포스터 기능은 유지합니다.
 
-## 이미지 흐름
+## 데이터 관계
 
-입력 파일 형식/용량 검증 → 브라우저 이미지 디코딩·비율 유지 압축 → 서버 제출 단계·개인 코드 검사 → 경로가 고정된 signed upload token → Private Storage 직접 업로드 → 서버 파일 존재·메타데이터·시그니처 검증 → DB 원자적 등록. 중복 업로드 예약은 DB의 학생/분류/슬롯 제약으로 차단한다. 완료된 작업 재호출은 같은 결과를 반환한다. 미완료 파일은 정리 API와 스케줄 함수로 삭제한다. 교사 열람은 짧은 signed URL을 쓴다.
+기존 관계는 그대로 유지됩니다.
 
-삭제는 작업 기록 생성 → 해당 대상 잠금 → Storage 제거 → DB 제거 순서다. 중간 실패는 작업에 남기고 교사 설정에서 재시도한다. 이미지 삭제는 원래 분석을 보존한다.
+- activities → background_questions → background_responses: 배경 질문·개인 응답. 최종 정리는 activities의 temporal_background / spatial_background.
+- activities → worksheets → image_submissions: 학생별 인물·사건 분석과 각 한 장의 사진.
+- lesson_access: 수업 비밀번호 해시·접근 토큰 버전.
+- upload_jobs / deletion_jobs: 이미지 업로드의 중복 방지와 파일 삭제 재시도.
+- revoked_student_codes: 재발급 이전 코드의 재사용 차단.
 
-## 페이지와 컴포넌트
+새로운 논리적 작품 ID는 literary_work_versions.id입니다. 같은 활동 안에서 분석을 수정할 때 버전이 증가하고, 심화 회차는 사용할 버전을 고정 참조합니다. 학급 간 작품 분석 캐시는 재사용할 수 있지만 학생 기록은 합치지 않습니다.
 
-- `/`: 소개, 교사 로그인, 데모 진입
-- `/login`: 교사 인증
-- `/teacher`: 수업 만들기·진행 중인 수업 목록. `/teacher/activities`는 이 화면으로 이동합니다.
-- `/teacher/activities/new`, `/teacher/activity/:id`: 생성·편집·단계·QR
-- `/teacher/activity/:id/background`: 시간적·공간적 배경 질문, 실시간 응답, 교사 최종 정리
-- `/teacher/activity/:id/live`: 실시간 제출 및 미제출 현황
-- `/teacher/activity/:id/gallery`: 검색·필터·비교·승인·삭제
-- `/teacher/activity/:id/analytics`: 실제 학생 단위 빈도·공동 등장·태그 매핑
-- `/teacher/activity/:id/showcase`: 승인 작품 전시
-- `/activity/:token`: BACKGROUND 단계에는 배경 질문 응답, ANALYSIS 이후에는 인물·사건 두 탭의 분석과 두 프롬프트·제출 코드
-- `/submit/:token`: 코드 확인·인물 사진 한 장·사건 장면 사진 한 장 제출
+| 테이블·필드                     | 저장 내용·역할                                                                                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| activities.lesson_kind          | 기존 수업 understanding 또는 독립 심화 수업 deepening. 기존 행 기본값은 understanding                                                                        |
+| activities.active_phase         | 학생에게 안내할 understanding / deepening. 기존 stage와 독립                                                                                                 |
+| activities.deepening_session_id | 현재 안내하는 심화 회차 ID                                                                                                                                   |
+| literary_work_versions          | activity_id, teacher_id, version, title, author, edition, source_text, ai_draft, reviewed_analysis, analysis_source, created_at                              |
+| deepening_sessions              | activity_id, work_version_id, round, status(DRAFT/OPEN/CLOSED), visibility(private/class/public), 공개·생성·수정 시각                                        |
+| deepening_records               | session_id, activity_id, participant_hash, student_label, worksheet_id, initial, questions, question_source, answers, reflection, 단계별 완료 시각, revision |
+| deepening_ai_jobs               | 요청 key, pending/complete, result, lease_until, expires_at, 선택적 record_id. 학생 질문 캐시는 기록 삭제 시 함께 삭제                                       |
+| deepening_exhibit_index         | 공개되었고 완료 성찰이 존재하며 삭제 중이 아닌 수업만 조회하는 서비스 전용 뷰                                                                                |
 
-진행 단계: DRAFT → BACKGROUND → ANALYSIS → SUBMISSION → CLOSED. 배경의 학생 화면은 15초 간격으로 공개 질문·정리·단계를 갱신한다. 교사는 소유권 RLS가 적용된 Realtime으로 학생 응답과 사진을 수신하고, 연결 회복 및 주기적 재조회로 누락을 보완한다.
+연결 수업은 기존 activity_id·teacher_id·참여 토큰을 그대로 사용합니다. 독립 심화 수업은 새 activity를 만들어 기존 비밀번호·QR 체계에 참여합니다. deepening_records의 (session_id, activity_id) 복합 외래 키는 다른 수업과의 잘못된 연결을 차단하고 (session_id, participant_hash) 유일성은 중복 참여 기록을 막습니다.
 
-`src/components/ui.js`는 드롭다운, 모달, 토스트, 입력 도우미를 제공한다. `src/services/api.js`는 명시적인 demo/live 어댑터를 선택한다. 데모는 브라우저 IndexedDB에 이미지와 데이터를 보관하고 BroadcastChannel로 같은 브라우저의 탭을 갱신한다. 실제 학급처럼 다른 기기를 연결하지 않으며 화면에 이 차이를 표시한다. live 설정 오류 시 데모로 조용히 대체하지 않는다.
+개인 코드로 기존 worksheet가 있으면 worksheet_id를 연결합니다. 기존 활동지를 나중에 제출하거나 코드를 재발급해도 DB 트리거가 연결을 갱신합니다. 이미지 한 장 삭제는 분석·심화 기록을 보존합니다. 명시적인 학생 전체 삭제는 해당 worksheet에 연결된 심화 기록을, 수업 전체 삭제는 모든 버전·회차·기록을 삭제합니다.
 
-## 접근성과 성능
+## 인증과 Supabase 보안
 
-최소 44px 터치 영역, 16px 입력 글꼴, safe-area, dynamic viewport, 320px부터 가로 넘침 방지, Escape/방향키/Home/End/문자 탐색, 모달 Tab 순환·원래 초점 복귀를 지원한다. 모달 배경은 inert 처리한다. 교사 첫 화면은 회전하는 WebGL 장식 대신 승인 작품을 크게 보여 준다. 전시는 밝은 전시 벽 위에서 원본 비율을 유지하는 CSS와 GSAP 전환을 사용하고 reduced-motion을 지원한다. 예시 그림은 `artworkSource`가 번들 데모 파일에 한해 매핑하며 실제 업로드 주소는 변경하지 않는다. 새 삽화의 출처와 생성 프롬프트는 `docs/ART-PROMPTS.md`에 기록한다.
+교사는 기존 수업 암호 접근 세션 또는 사전 등록 관리자 로그인을 사용합니다. 암호는 서버 scrypt 해시, 수업 접근 토큰은 수업·버전·만료에 제한된 서명 토큰입니다. 관리 API는 기존 lessonOwner 확인을 사용합니다. DB 직접 쓰기는 서비스 역할에만 허용됩니다.
+
+학생은 기존 QR 토큰과 무작위 개인 코드로 자신을 식별합니다. 서버에는 HMAC 검증값만 저장합니다. 요청마다 토큰 수업과 회차의 수업을 대조하고, 재발급으로 폐기된 코드를 거절합니다. 클라이언트가 전달한 학생 ID를 신뢰하지 않습니다.
+
+마이그레이션 004가 필요한 보안을 함께 적용합니다.
+
+1. 새 네 테이블에 RLS를 활성화합니다. authenticated는 소유 교사의 작품 버전·회차·기록만 읽을 수 있고, anon에는 읽기·쓰기 권한이 없습니다.
+2. configure_deepening / control_deepening / write_deepening_record / claim_deepening_ai RPC는 service_role 전용입니다. 각 데이터 변경에서 수업 소유권·단계·버전·중복 조건을 추가 확인합니다.
+3. 익명 학생의 읽기·쓰기는 Netlify API에서 개인 코드와 공개 범위를 확인한 뒤 실행합니다. DB에 학생용 공개 읽기 정책을 추가하지 않습니다.
+4. 수업 내 관점은 자신의 세 답변 제출 후 교사가 class/public으로 설정했을 때만 읽습니다. 공개 전시는 completed_at이 있는 기록만 제공합니다. 공용 응답에는 학생 표시명·코드·검증값·worksheet ID를 제거하고 ‘관점 01’ 등의 익명 이름을 사용합니다.
+5. public view도 anon/authenticated에 직접 열지 않습니다. 서버가 공개용 필드만 골라 응답합니다. 교사 화면은 번호·별칭과 상세 진행을 확인할 수 있습니다.
+6. 작품 분석/수업 생성/개인 기록 API에 PostgreSQL 기반 요청 제한을 적용합니다. 비밀 키는 서버 환경변수에만 둡니다.
+
+RLS·RPC는 SQL 테스트로 검사했지만 실제 Supabase 프로젝트의 Auth·Realtime 설정은 운영 연결 후 별도로 확인해야 합니다. 비로그인 수업 암호 사용자에게 Realtime 데이터를 공개하지 않으며, 이 경우 교사 화면의 15초 재조회가 현황을 보완합니다.
+
+## 단계와 저장 안정성
+
+작품 파악의 기존 stage는 DRAFT → BACKGROUND → ANALYSIS → SUBMISSION → CLOSED입니다. 심화는 별도 DRAFT → OPEN → CLOSED를 사용합니다. 연결 심화 수업의 시작·종료는 기존 stage를 바꾸지 않습니다. 독립 심화 수업만 첫 시작 시 기존 참여 토큰 체계가 허용하는 ANALYSIS로 전환합니다.
+
+- 교사 분석 확정은 새 버전과 회차 연결을 트랜잭션으로 저장합니다. 시작 전 회차만 분석 교체가 가능하며 시작 후 수정은 새 회차를 만듭니다. 생성 요청 UUID를 재사용해 재시도로 회차가 늘어나지 않게 합니다.
+- 학생 최초 판단은 수정 불가능한 별도 값으로 남깁니다. 질문은 한 번 저장하면 재사용합니다. 세 질문의 답변을 모두 제출해야 다른 관점을 감상할 수 있습니다.
+- final reflection의 same / changed / expanded는 모두 정상 완료입니다. 완료 기록은 읽기 전용이며 새 회차에서도 이전 기록은 보존됩니다.
+- 답변별 저장은 직렬화하고 revision을 비교합니다. 다른 기기·창의 변경과 충돌하면 덮어쓰지 않고 로컬 초안을 유지합니다. 브라우저 저장소에도 입력마다 초안을 보관하고, 새로고침 시 복원합니다. 네트워크 저장 실패를 완료로 표시하지 않습니다.
+- 학생에게 새 단계가 열려도 입력 화면을 강제 교체하지 않습니다. 안내 배너와 명시적 이동 링크를 표시합니다. 교사 화면은 실시간 구독과 15초 재조회, 학생은 단계·공개 상태만 재조회합니다.
+- AI 생성은 DB의 60초 임대 잠금으로 중복을 막습니다. 실패한 작품 분석은 5분 후 다시 생성할 수 있으며 학생의 확정 질문은 계속 재사용합니다. 외부 API와 DB 사이에 원자적 트랜잭션이 없으므로 서버가 결과 저장 전에 강제 종료되는 예외 상황까지 외부 과금을 정확히 1회 보장하지는 않습니다.
+
+## AI 어댑터
+
+`netlify/lib/deepening-ai.js`가 제공자별 전송을 담당하고 `src/utils/deepening.js`가 검증 스키마·갈래별 기본 질문·학생 상태 변경을 공유합니다. AI 키와 네트워크 호출은 HTML 번들에 포함되지 않습니다.
+
+OpenAI는 Responses 구조화 출력을 요청하고 서버에서 다시 Zod 검증합니다. custom은 동일 JSON Schema를 전달하는 HTTPS 어댑터입니다. 학생 AI는 운영자의 정책 검토·활성화 전까지 호출하지 않으며 교사가 확인한 질문에 학생의 선택·이유·근거를 연결합니다. 환경변수·custom 요청 계약·미성년자 운영 조건은 [README](../README.md#심화-ai-연결대체-동작)에 있습니다.
+
+## 경로
+
+| 경로                                                        | 역할                                |
+| ----------------------------------------------------------- | ----------------------------------- |
+| /                                                           | 문학 전시관 입구·공개 작품 수       |
+| /teacher?tab=understanding                                  | 작품 파악 목록                      |
+| /teacher?tab=deepening                                      | 심화 목록, 마지막 탭 복원           |
+| /teacher/activities/new                                     | 기존 작품 파악 수업 생성            |
+| /teacher/deepening/new                                      | 독립 심화 수업 생성                 |
+| /teacher/activity/:id/background, gallery, scenes, settings | 기존 프로젝트·분석·설정             |
+| /teacher/activity/:id/deepening                             | 연결/독립 심화 생성·진행·회차 관리  |
+| /activity/:token                                            | 현재 안내 단계로 학생 진입          |
+| /activity/:token/understanding                              | 기존 작품 파악 화면으로 명시적 이동 |
+| /activity/:token/deepening                                  | 심화 학생 활동                      |
+| /submit/:token                                              | 기존 두 사진 제출                   |
+| /exhibition                                                 | 기존 포스터 전시                    |
+| /exhibition?type=deepening                                  | 심화 전시 목록                      |
+| /exhibition/deep-:sessionId                                 | 익명 관점과 BEFORE/AFTER 상세       |
+| /admin                                                      | 기존 관리자 인증·관리               |
+
+GitHub Pages와 단일 HTML은 기존 hash 라우터를 재사용합니다. 실제 여러 기기의 수업과 서버 AI는 Supabase/Netlify live 모드가 필요합니다.
+
+## 이번 확장의 추가 파일
+
+| 파일                                  | 역할                                             |
+| ------------------------------------- | ------------------------------------------------ |
+| src/utils/deepening.js                | 갈래·분석·질문·성찰 스키마, 상태 검증, 익명 투영 |
+| src/components/deepening.js           | 수업 탭, 교사 분석 편집, 관점 카드·상세          |
+| src/pages/deepening-teacher.js        | 분석 검토·회차·QR·진행·공개 관리                 |
+| src/pages/deepening-student.js        | 학생 4단계·자동 저장·복구                        |
+| src/pages/deepening-exhibit.js        | 기존 전시에 결합하는 심화 액자·상세              |
+| src/services/demo-deepening.js        | 기존 IndexedDB를 확장하는 데모 API               |
+| src/services/student-phase.js         | 입력을 보존하는 학생 단계 안내                   |
+| src/styles/deepening.css              | 기존 디자인과 연결한 반응형 심화 UI              |
+| netlify/lib/deepening.js              | 서버 API·권한·캐시·공개 응답                     |
+| netlify/lib/deepening-ai.js           | 교체 가능한 AI 어댑터                            |
+| supabase/migrations/004_deepening.sql | 추가 테이블·RLS·RPC·트리거·Realtime              |
+| tests/deepening.test.js               | 스키마·AI 실패·SQL·권한·동시성                   |
+| tests/e2e/deepening.spec.js           | 독립/연결 수업·보존·성찰·전시                    |
+| tests/pages/deepening.spec.js         | 루트·하위 경로·단일 HTML 동작                    |
+
+## 이번 확장의 수정 파일
+
+| 파일                                             | 변경                                           |
+| ------------------------------------------------ | ---------------------------------------------- |
+| src/main.js                                      | 심화 CSS 연결                                  |
+| src/pages/teacher.js                             | 하위 탭·심화 라우팅·기존 QR 재사용             |
+| src/pages/dashboard.js                           | 두 수업 분야의 목록·작은 카드                  |
+| src/pages/student.js                             | 기존/심화 학생 진입·단계 안내                  |
+| src/pages/museum.js                              | 전시 유형·심화 검색·작품 수·상세 연결          |
+| src/components/student-ui.js                     | 학생 활동 이름 구분                            |
+| src/services/api.js                              | 심화 테이블 구독                               |
+| src/services/demo.js                             | 데모 연동·기존 필드 보존·코드 재발급·연관 삭제 |
+| src/utils/archive.js                             | 공개 수업 메타데이터의 추가 필드               |
+| netlify/functions/api.js                         | 심화 API 디스패치                              |
+| netlify/lib/server.js                            | 참여 단계·새 오류 메시지 처리                  |
+| netlify/lib/archive.js                           | 기존 수업 목록에 심화 연결 메타데이터          |
+| .env.example                                     | 서버 AI 제공자·학생 AI 정책 설정               |
+| package.json                                     | 심화 서버 검사를 기존 test 명령에 추가         |
+| vite.config.js                                   | 생성된 배포 파일·테스트 파일 감시 제외         |
+| README.md, docs/ARCHITECTURE.md, docs/TESTING.md | 사용·설정·데이터·파일·검증 기록                |
+
+## 이미지와 접근성
+
+기존 업로드는 브라우저 압축 → 서버 제출 단계/코드 검사 → Private Storage signed upload → MIME/시그니처 검증 → 원자적 등록을 유지합니다. 삭제는 작업 기록으로 실패 재시도를 보장하며 사진만 삭제하면 분석은 보존합니다.
+
+키보드 탐색·모달 포커스·Escape 닫기·reduced-motion·기존 아이콘을 재사용하고 입력 글꼴과 모바일 여백을 유지합니다. 메인과 수업 목록은 작은 화면에 맞춰 표시 개수를 조정합니다. 긴 질문·분석 편집·학생 글쓰기 화면과 작품이 있는 전시관은 자연스럽게 스크롤됩니다.

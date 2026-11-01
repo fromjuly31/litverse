@@ -11,6 +11,9 @@ export function publicLesson(a) {
       "updated_at",
       "finalized_at",
       "signature",
+      "lesson_kind",
+      "active_phase",
+      "deepening_session_id",
     ].map((k) => [k, a[k] ?? null]),
   );
 }

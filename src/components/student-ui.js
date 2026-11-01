@@ -3,7 +3,7 @@ import { e } from "../utils/helpers.js";
 import { normalizeTags } from "../utils/domain.js";
 import { isDemo } from "../services/api.js";
 export function studentShell(root, a, content) {
-  root.innerHTML = `<div class="student-shell"><header class="student-topbar">${logo()}<div class="student-context"><span>${e(a.title)} · ${e(a.author)}</span><span class="badge">배경 · 인물 · 사건</span></div></header>${isDemo ? '<div class="student-demo">데모 체험 · 작성 내용은 이 브라우저에만 저장됩니다.</div>' : ""}<main id="main">${content}</main><footer class="student-footer">ONE STORY. INFINITE PERSPECTIVES.</footer></div>`;
+  root.innerHTML = `<div class="student-shell"><header class="student-topbar">${logo()}<div class="student-context"><span>${e(a.title)} · ${e(a.author)}</span><span class="badge">${a.student_phase === "deepening" ? "이해 심화하기" : "배경 · 인물 · 사건"}</span></div></header>${isDemo ? '<div class="student-demo">데모 체험 · 작성 내용은 이 브라우저에만 저장됩니다.</div>' : ""}<main id="main">${content}</main><footer class="student-footer">ONE STORY. INFINITE PERSPECTIVES.</footer></div>`;
   refreshIcons();
   initSelects(root);
 }

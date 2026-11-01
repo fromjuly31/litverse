@@ -1,5 +1,6 @@
 import { seedData } from "./seed.js";
 import { demoArchive } from "./demo-archive.js";
+import { demoDeepening } from "./demo-deepening.js";
 import { passwordHash, issueDemoAccess } from "./demo-access.js";
 import { randomCode } from "../utils/helpers.js";
 import {
@@ -64,7 +65,10 @@ export async function demoRequest(action, payload = {}) {
     state.questions ||= [];
     state.responses ||= [];
     state.revoked_codes ||= [];
-    const archive = await demoArchive(state, action, payload);
+    const deepening = await demoDeepening(state, action, payload);
+    const archive = deepening.handled
+      ? deepening
+      : await demoArchive(state, action, payload);
     if (archive.handled) {
       if (archive.changed) await write(state);
       if (archive.result?.error) {
@@ -102,6 +106,7 @@ export async function demoRequest(action, payload = {}) {
       if (!previous)
         state.lesson_passwords[id] = await passwordHash(payload.password);
       const a = {
+        ...previous,
         ...payload.activity,
         id,
         stage: previous?.stage || "DRAFT",
@@ -202,6 +207,13 @@ export async function demoRequest(action, payload = {}) {
       state.worksheets = state.worksheets.filter(
         (w) => !(w.activity_id === payload.id && w.id === payload.worksheet_id),
       );
+      state.deepening_records = (state.deepening_records || []).filter(
+        (r) =>
+          !(
+            r.activity_id === payload.id &&
+            r.worksheet_id === payload.worksheet_id
+          ),
+      );
       changed = true;
       result = { ok: true };
     } else if (action === "teacher/delete-activity") {
@@ -211,6 +223,14 @@ export async function demoRequest(action, payload = {}) {
         (w) => w.activity_id !== payload.id,
       );
       state.activities = state.activities.filter((a) => a.id !== payload.id);
+      for (const key of [
+        "deepening_records",
+        "deepening_sessions",
+        "literary_work_versions",
+      ])
+        state[key] = (state[key] || []).filter(
+          (r) => r.activity_id !== payload.id,
+        );
       delete state.lesson_passwords[payload.id];
       state.access_sessions = (state.access_sessions || []).filter(
         (s) => s.scope !== payload.id,
@@ -235,6 +255,13 @@ export async function demoRequest(action, payload = {}) {
       state.revoked_codes.push(w.submission_code);
       const previousCode = w.submission_code;
       w.submission_code = randomCode();
+      (state.deepening_records || [])
+        .filter(
+          (r) =>
+            r.activity_id === w.activity_id &&
+            r.participant_hash === previousCode,
+        )
+        .forEach((r) => (r.participant_hash = w.submission_code));
       state.responses
         .filter(
           (r) => r.activity_id === w.activity_id && r.code === previousCode,
@@ -248,7 +275,8 @@ export async function demoRequest(action, payload = {}) {
     else if (action === "teacher/retry-cleanup") result = { ok: true };
     else if (action === "student/activity") {
       const a = byToken();
-      if (a.stage === "DRAFT") fail("아직 활동이 시작되지 않았어요.");
+      if (a.stage === "DRAFT" && a.active_phase !== "deepening")
+        fail("아직 활동이 시작되지 않았어요.");
       result = {
         ...a,
         questions: state.questions.filter((q) => q.activity_id === a.id),
@@ -305,6 +333,9 @@ export async function demoRequest(action, payload = {}) {
         completed_at: new Date().toISOString(),
         created_at: w?.created_at || new Date().toISOString(),
       };
+      (state.deepening_records || [])
+        .filter((r) => r.activity_id === a.id && r.participant_hash === code)
+        .forEach((r) => (r.worksheet_id = w.id));
       w.generated_prompt = createPrompt(a, w);
       w.scene_prompt = createScenePrompt(a, w);
       state.worksheets = state.worksheets.filter((x) => x.id !== id).concat(w);

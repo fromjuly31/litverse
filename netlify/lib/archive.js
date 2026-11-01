@@ -35,7 +35,7 @@ export async function archiveAction(db, req, context, action, p) {
   }
   if (["public/list", "public/exhibits", "public/exhibit"].includes(action)) {
     const fields =
-      "id,title,author,course_name,class_name,stage,created_at,updated_at,finalized_at,signature";
+      "id,title,author,course_name,class_name,stage,created_at,updated_at,finalized_at,signature,lesson_kind,active_phase,deepening_session_id";
     if (action === "public/list") {
       const all = [];
       for (let offset = 0; ; offset += 500) {

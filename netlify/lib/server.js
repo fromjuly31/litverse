@@ -73,7 +73,7 @@ export async function tokenActivity(db, token, kind) {
         `worksheet_token_hash.eq.${hash},submission_token_hash.eq.${hash}`,
       );
   const a = check(await query.maybeSingle());
-  if (!a || a.stage === "DRAFT")
+  if (!a || (a.stage === "DRAFT" && a.active_phase !== "deepening"))
     fail(404, "유효하지 않거나 아직 열리지 않은 활동입니다.");
   return a;
 }
@@ -218,6 +218,14 @@ export function errorResponse(error) {
       { status: 400, headers: { "Cache-Control": "no-store" } },
     );
   const messages = {
+    REVISION_CONFLICT:
+      "다른 창에서 기록이 변경되었습니다. 임시저장 내용을 유지하고 최신 기록을 불러와 주세요.",
+    INITIAL_IMMUTABLE: "최초 판단은 성찰과 비교하기 위해 보존됩니다.",
+    STARTED_CREATE_NEW_ROUND:
+      "진행한 회차는 보존됩니다. 새 회차에서 분석을 수정해 주세요.",
+    CLOSE_CURRENT_ROUND: "진행 중인 심화 회차를 먼저 종료해 주세요.",
+    NO_COMPLETED_REFLECTION:
+      "완료된 성찰이 있어야 전시관에 공개할 수 있습니다.",
     BACKGROUND_CLOSED:
       "배경 질문의 응답이 마감되었어요. 선생님의 정리를 확인해 주세요.",
     SCENE_REQUIRED:

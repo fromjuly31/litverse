@@ -10,7 +10,7 @@
     "preview:pages": "node scripts/serve-pages.mjs",
     "test:pages": "playwright test --config playwright.pages.config.js",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node --test tests/unit.test.js tests/server.test.js tests/archive.test.js",
+    "test": "node --test tests/unit.test.js tests/server.test.js tests/archive.test.js tests/deepening.test.js",
     "test:e2e": "playwright test",
     "dev:netlify": "npx --yes netlify-cli dev"
   },

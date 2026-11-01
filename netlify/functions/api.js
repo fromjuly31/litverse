@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { archiveAction } from "../lib/archive.js";
+import { deepeningAction } from "../lib/deepening.js";
 import { lessonOwner, adminUser } from "../lib/lesson-access.js";
 import {
   activitySchema,
@@ -48,6 +49,8 @@ async function rows(queryFactory) {
   );
 }
 export async function dispatch(db, req, context, action, p) {
+  const deepening = await deepeningAction(db, req, context, action, p);
+  if (deepening.handled) return deepening.value;
   const archive = await archiveAction(db, req, context, action, p);
   if (archive.handled) return archive.value;
   if (action.startsWith("teacher/")) {

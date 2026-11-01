@@ -143,6 +143,26 @@ export function subscribe(activityId, callback, onState = () => {}) {
       },
       refresh,
     )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "deepening_sessions",
+        filter: `activity_id=eq.${activityId}`,
+      },
+      refresh,
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "deepening_records",
+        filter: `activity_id=eq.${activityId}`,
+      },
+      refresh,
+    )
     .subscribe((status) => {
       onState(status === "SUBSCRIBED" ? "connected" : "reconnecting");
       if (status === "SUBSCRIBED") refresh();

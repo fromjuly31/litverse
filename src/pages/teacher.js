@@ -12,8 +12,8 @@ import {
   toast,
 } from "../components/ui.js";
 import { request, isDemo, subscribe } from "../services/api.js";
-import { e, downloadText } from "../utils/helpers.js";
-import { publicRouteUrl } from "../utils/paths.js";
+import { e, downloadText, safeStorage } from "../utils/helpers.js";
+import { publicRouteUrl, currentRoute } from "../utils/paths.js";
 import {
   STAGES,
   DEFAULT_TASKS,
@@ -34,25 +34,31 @@ import { finalizePage, completedLesson } from "./finalize.js";
 import { showcasePage } from "./showcase.js";
 import { museumHeader, museumFooter } from "../components/museum-shell.js";
 import { synopsisPanel, bindSynopsis } from "../components/synopsis.js";
+import { learningTabs } from "../components/deepening.js";
+import { deepeningTeacher, deepeningEditor } from "./deepening-teacher.js";
 export function teacherShell(root, page, activity, content) {
   const base = activity ? `/teacher/activity/${e(activity.id)}` : "";
-  const tabs = activity
-    ? [
-        ["background", "book-open", "배경 탐구", `${base}/background`],
-        ["gallery", "images", "등장인물 갤러리", `${base}/gallery`],
-        ["scenes", "file-text", "사건 분석", `${base}/scenes`],
-      ]
-    : [];
+  const deep = page.startsWith("deepening");
+  safeStorage("litverse-learning-tab", deep ? "deepening" : "understanding");
+  const tabs =
+    activity && !deep
+      ? [
+          ["background", "book-open", "배경 탐구", `${base}/background`],
+          ["gallery", "images", "등장인물 갤러리", `${base}/gallery`],
+          ["scenes", "file-text", "사건 분석", `${base}/scenes`],
+        ]
+      : [];
   const active = (key) =>
     key === page || (key === "gallery" && page === "analytics");
-  const project = activity
-    ? `<section class="lesson-context" aria-label="현재 수업">
+  const project =
+    activity && !deep
+      ? `<section class="lesson-context" aria-label="현재 수업">
     <div class="lesson-context-heading"><div><span class="eyebrow">${e(activity.course_name || "문학 수업")}</span><h2>${e(activity.title)}</h2><p>${e(activity.author)} · ${e(activity.class_name || "학급 미지정")} <span class="badge">${e(STAGES[activity.stage])}</span></p></div><div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div></div>
     <nav class="lesson-tabs" aria-label="수업 활동">${tabs.map(([key, ico, label, path], index) => `<a href="${path}" ${active(key) ? 'class="active" aria-current="page"' : ""}><span class="lesson-tab-number">0${index + 1}</span>${icon(ico)}<span>${label}</span></a>`).join("")}</nav>
   </section>`
-    : "";
+      : "";
   root.classList.add("museum-classroom");
-  root.innerHTML = `${museumHeader()}<div class="teacher-layout"><main id="main" class="teacher-main" data-page="${page}">${project}${content}</main></div>${museumFooter()}`;
+  root.innerHTML = `${museumHeader()}<div class="teacher-layout"><main id="main" class="teacher-main" data-page="${page}">${learningTabs(deep ? "deepening" : "understanding", activity)}${project}${content}</main></div>${museumFooter()}`;
 }
 export function pageHeading(
   eyebrow,
@@ -115,6 +121,7 @@ function statistics(data) {
   );
 }
 export async function teacherPage(root, path) {
+  if (path === "/teacher/deepening/new") return deepeningEditor(root);
   if (path === "/teacher/activities/new") return activityEditor(root, null);
   if (path === "/teacher/settings") {
     if (!(await request("admin/session")).authenticated) return adminPage(root);
@@ -131,6 +138,9 @@ export async function teacherPage(root, path) {
       if (error.status === 401) return unlockPage(root, id, path);
       throw error;
     }
+    if (parts[4] === "deepening") return deepeningTeacher(root, data);
+    if (data.activity.lesson_kind === "deepening")
+      return navigate(`/teacher/activity/${id}/deepening`, true);
     if (data.activity.finalized_at) return completedLesson(root, data);
     if (parts[4] === "finalize") return finalizePage(root, data);
     if (parts[4] === "showcase") return showcasePage(root, id);
@@ -147,7 +157,15 @@ export async function teacherPage(root, path) {
   }
   if (path !== "/teacher") throw new Error("교사 메뉴의 주소를 확인해 주세요.");
   forgetLessons();
-  return dashboard(root, await request("public/list"));
+  const tab =
+    new URLSearchParams(currentRoute().split("?")[1] || "").get("tab") ||
+    safeStorage("litverse-learning-tab") ||
+    "understanding";
+  return dashboard(
+    root,
+    await request("public/list"),
+    tab === "deepening" ? "deepening" : "understanding",
+  );
 }
 async function activityDetail(root, data) {
   const a = data.activity;
@@ -221,8 +239,9 @@ async function activityDetail(root, data) {
 export async function showQR(
   activity,
   kind = activity.stage === "SUBMISSION" ? "submission" : "analysis",
+  suffix = "",
 ) {
-  if (activity.stage === "DRAFT") {
+  if (activity.stage === "DRAFT" && activity.active_phase !== "deepening") {
     toast(
       "먼저 수업 설정에서 배경 탐구 또는 인물·사건 분석을 시작해 주세요.",
       "error",
@@ -234,7 +253,7 @@ export async function showQR(
   let large = false;
   const display = async () => {
     const url = publicRouteUrl(
-      `/${currentKind === "analysis" ? "activity" : "submit"}/${currentKind === "analysis" ? links.worksheet_token : links.submission_token}`,
+      `/${currentKind === "analysis" ? "activity" : "submit"}/${currentKind === "analysis" ? links.worksheet_token : links.submission_token}${currentKind === "analysis" ? suffix : ""}`,
     );
     const qr = await QRCode.toDataURL(url, {
       width: 600,
@@ -245,9 +264,11 @@ export async function showQR(
     const modal = openModal({
       title:
         currentKind === "analysis"
-          ? activity.stage === "BACKGROUND"
-            ? "배경 질문에 응답하기"
-            : "나의 두 해석 시작하기"
+          ? suffix === "/deepening"
+            ? "이해 심화하기 참여"
+            : activity.stage === "BACKGROUND"
+              ? "배경 질문에 응답하기"
+              : "나의 두 해석 시작하기"
           : "두 사진 제출하기",
       eyebrow: `${activity.title} · ${currentKind === "analysis" ? "ANALYSIS" : "SUBMISSION"}`,
       wide: !large,
