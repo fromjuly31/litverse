@@ -32,8 +32,23 @@
   margin-left: auto;
   font-size: 12px;
 }
-.archive-header nav a:hover {
+.archive-header nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  position: relative;
+  white-space: nowrap;
+}
+.archive-header nav a:hover,
+.archive-header nav a[aria-current="page"] {
   color: #876a35;
+}
+.archive-header nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 3px;
+  height: 2px;
+  background: currentColor;
 }
 .archive-admin {
   display: flex;

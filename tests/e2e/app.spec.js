@@ -47,10 +47,21 @@ test("desktop dashboard, custom QR dialog, focus return and gallery filters", as
   await expect(
     page.getByRole("button", { name: "학생 참여 QR" }),
   ).toBeFocused();
+  await expect(page.getByRole("link", { name: "인물 해석 비교" })).toBeHidden();
+  await page.locator(".gallery-options summary").focus();
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "크게 보기", exact: true }).click();
+  await expect(page.locator("#gallery-grid")).toHaveClass(/focus/);
+  await page.getByRole("button", { name: "그리드 보기", exact: true }).click();
+  await page.locator(".gallery-options summary").click();
   await page.goto(`${route}/gallery`);
+  await page.locator(".gallery-options summary").click();
   await choose(page, "등장인물", "점순이");
   await expect(page.locator(".art-card")).toHaveCount(6);
   await choose(page, "승인 상태", "승인 대기");
+  await expect(page.locator(".gallery-options summary")).toContainText(
+    "2개 적용",
+  );
   await expect(page.locator(".art-card")).toHaveCount(1);
   await page.getByRole("combobox", { name: "작품 정렬" }).focus();
   await page.keyboard.press("Enter");
@@ -233,7 +244,7 @@ test("activity creation, stage change, comparison, deletion and tag mapping use 
   await page.getByRole("button", { name: "수업 만들기", exact: true }).click();
   await expect(
     page.getByRole("heading", {
-      name: "테스트 소설의 배경을 읽어요.",
+      name: "배경 탐구",
       exact: true,
     }),
   ).toBeVisible();
@@ -300,6 +311,7 @@ test("responsive layout at phone, tablet, laptop and projector sizes", async ({
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${route}/gallery`);
+  await page.locator(".gallery-options summary").click();
   await page.getByRole("combobox", { name: "승인 상태" }).click();
   const box = await page
     .getByRole("listbox", { name: "승인 상태" })

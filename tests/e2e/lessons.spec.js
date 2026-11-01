@@ -27,7 +27,7 @@ async function createLesson(page, title) {
   return page.url().replace(/\/background$/, "");
 }
 
-test("dashboard creates isolated lesson projects and restores saved settings", async ({
+test("classroom creates isolated lesson projects and restores saved settings", async ({
   page,
 }) => {
   const errors = [];
@@ -48,9 +48,16 @@ test("dashboard creates isolated lesson projects and restores saved settings", a
   await expect(tabs(page)).toHaveCount(0);
   await expect(
     page
-      .getByRole("navigation", { name: "교사 메뉴", exact: true })
+      .getByRole("navigation", { name: "전시관 메뉴", exact: true })
       .getByRole("link"),
-  ).toHaveCount(4);
+  ).toHaveCount(3);
+  await expect(
+    page.getByRole("link", { name: "대시보드", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator(".mobile-nav, .lesson-resume")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "수업 만들기", exact: true }),
+  ).toHaveCount(1);
 
   const first = await createLesson(page, "첫 번째 작품");
   await page
@@ -82,14 +89,14 @@ test("dashboard creates isolated lesson projects and restores saved settings", a
       exact: true,
     }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "내 수업으로" }).click();
+  await page.getByRole("link", { name: "수업하기", exact: true }).click();
   await expect(tabs(page)).toHaveCount(0);
   await expect(page.locator(".lesson-card")).toHaveCount(1);
 
   const second = await createLesson(page, "두 번째 작품");
   expect(second).not.toBe(first);
   await expect(page.locator(".question-card")).toHaveCount(0);
-  await page.getByRole("link", { name: "내 수업으로" }).click();
+  await page.getByRole("link", { name: "수업하기", exact: true }).click();
   await expect(page.locator(".lesson-card")).toHaveCount(2);
   await page
     .getByRole("link", { name: "첫 번째 작품 수업 열기", exact: true })
@@ -97,14 +104,32 @@ test("dashboard creates isolated lesson projects and restores saved settings", a
   await expect(page.locator(".question-card")).toContainText(
     "첫 번째 작품의 시대적 배경은 무엇인가요?",
   );
-  await page.getByRole("link", { name: "내 수업으로" }).click();
+  await page.getByRole("link", { name: "수업하기", exact: true }).click();
   await page.reload();
   await expect(
-    page.getByRole("link", { name: "첫 번째 작품 수업 이어가기", exact: true }),
+    page.getByRole("link", { name: "첫 번째 작품 수업 열기", exact: true }),
   ).toHaveAttribute("href", `${new URL(first).pathname}/background`);
   await page.getByRole("link", { name: "수업 만들기", exact: true }).click();
   await expect(tabs(page)).toHaveCount(0);
   await page.getByRole("link", { name: "취소", exact: true }).click();
+  await expect(page.locator(".lesson-card")).toHaveCount(2);
+  const menu = page.getByRole("navigation", {
+    name: "전시관 메뉴",
+    exact: true,
+  });
+  await expect(
+    menu.getByRole("link", { name: "수업하기", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await menu.getByRole("link", { name: "관람하기", exact: true }).click();
+  await expect(page).toHaveURL(/\/exhibition$/);
+  await expect(
+    menu.getByRole("link", { name: "관람하기", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await page
+    .getByRole("link", { name: "LITVERSE 처음으로", exact: true })
+    .click();
+  await expect(page.locator(".museum-choices > a")).toHaveCount(2);
+  await menu.getByRole("link", { name: "수업하기", exact: true }).click();
   await expect(page.locator(".lesson-card")).toHaveCount(2);
   expect(errors).toEqual([]);
 });

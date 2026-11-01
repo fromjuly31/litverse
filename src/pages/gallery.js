@@ -35,7 +35,7 @@ export function galleryPage(root, initialData, imageType = "character") {
     root,
     isScene ? "scenes" : "gallery",
     data.activity,
-    `${pageHeading(isScene ? "READ THE MOMENTS" : "MEET THE CHARACTERS", isScene ? "사건 분석" : "등장인물 갤러리", isScene ? "인상 깊은 사건과 선택한 이유, 본문 속 전개를 함께 읽고 장면 작품을 살펴보세요." : "인물의 성격과 본문 근거를 담은 우리 반의 해석을 모았습니다.", `${isScene ? "" : `<a class="btn secondary" href="/teacher/activity/${id}/analytics">${icon("chart-no-axes-combined")} 인물 해석 비교</a>`}${button("학생 참여 QR", "qr-code", "secondary", 'id="gallery-qr"')}${button("크게 보기", "maximize-2", "secondary", 'id="focus-view"')}<a class="btn primary" href="/teacher/activity/${id}/showcase">${icon("play")} 전시 시작</a>`)}<div class="gallery-toolbar"><label class="search-field">${icon("search")}<input id="gallery-search" type="search" placeholder="${isScene ? "사건, 인물, 학생 번호로 검색" : "인물, 학생 번호, 해시태그로 검색"}" aria-label="작품 검색"/></label><div id="character-select"></div>${customSelect(
+    `${pageHeading(isScene ? "READ THE MOMENTS" : "MEET THE CHARACTERS", isScene ? "사건 분석" : "등장인물 갤러리", isScene ? "인상 깊은 사건과 선택한 이유, 본문 속 전개를 함께 읽고 장면 작품을 살펴보세요." : "인물의 성격과 본문 근거를 담은 우리 반의 해석을 모았습니다.", `${button("학생 참여 QR", "qr-code", "secondary", 'id="gallery-qr"')}`, true)}<label class="search-field gallery-search">${icon("search")}<input id="gallery-search" type="search" placeholder="${isScene ? "사건, 인물, 학생 번호로 검색" : "인물, 학생 번호, 해시태그로 검색"}" aria-label="작품 검색"/></label><details class="gallery-options"><summary>필터 · 보기 옵션 ${icon("chevron-down")}</summary><div class="gallery-toolbar"><div id="character-select"></div>${customSelect(
       {
         name: "approval",
         label: "승인 상태",
@@ -58,7 +58,7 @@ export function galleryPage(root, initialData, imageType = "character") {
         { value: "character", label: "인물 이름순" },
         { value: "frequency", label: "태그 빈도순" },
       ],
-    })}</div><div class="gallery-tags" id="gallery-tags" ${isScene ? "hidden" : ""}></div>${isScene ? '<section class="scene-analysis-section" aria-labelledby="scene-analysis-heading"><div class="section-heading"><div><h2 id="scene-analysis-heading">학생들이 읽은 사건</h2><p>사진 제출 전에도 완성한 사건 분석을 확인할 수 있어요.</p></div><span id="scene-record-count" class="badge"></span></div><div id="scene-records" class="scene-records"></div></section><div class="section-heading"><h2>사건 장면 갤러리</h2></div>' : ""}<div class="between wrap" style="margin-bottom:22px"><span class="muted" style="font-size:12px" id="gallery-count"></span><label class="check-field" style="font-size:12px"><input type="checkbox" id="select-visible"/>현재 작품 전체 선택</label></div><div class="gallery-grid" id="gallery-grid"></div><div id="selection-slot"></div>`,
+    })}</div><div class="gallery-tags" id="gallery-tags" ${isScene ? "hidden" : ""}></div><div class="flex wrap">${isScene ? "" : `<a class="btn secondary" href="/teacher/activity/${id}/analytics">${icon("chart-no-axes-combined")} 인물 해석 비교</a>`}${button("크게 보기", "maximize-2", "secondary", 'id="focus-view"')}<a class="btn secondary" href="/teacher/activity/${id}/showcase">${icon("play")} 전체 화면 전시</a></div></details>${isScene ? '<section class="scene-analysis-section" aria-labelledby="scene-analysis-heading"><div class="section-heading"><div><h2 id="scene-analysis-heading">학생들이 읽은 사건</h2><p>사진 제출 전에도 완성한 사건 분석을 확인할 수 있어요.</p></div><span id="scene-record-count" class="badge"></span></div><div id="scene-records" class="scene-records"></div></section><div class="section-heading"><h2>사건 장면 갤러리</h2></div>' : ""}<div class="between wrap" style="margin-bottom:22px"><span class="muted" style="font-size:12px" id="gallery-count"></span><label class="check-field" style="font-size:12px"><input type="checkbox" id="select-visible"/>현재 작품 전체 선택</label></div><div class="gallery-grid" id="gallery-grid"></div><div id="selection-slot"></div>`,
   );
   const grid = root.querySelector("#gallery-grid");
   root.querySelector("#gallery-qr").onclick = () => showQR(data.activity);
@@ -178,6 +178,13 @@ export function galleryPage(root, initialData, imageType = "character") {
         ? Flip.getState(grid.querySelectorAll(".art-card"))
         : null;
     const images = visible();
+    const filterCount =
+      Number(Boolean(filters.character)) +
+      Number(Boolean(filters.approval)) +
+      filters.tags.length +
+      Number(filters.sort !== "newest");
+    root.querySelector(".gallery-options summary").innerHTML =
+      `필터 · 보기 옵션${filterCount ? `<span class="badge">${filterCount}개 적용</span>` : ""} ${icon("chevron-down")}`;
     grid.classList.toggle("focus", focus);
     grid.innerHTML = images.length
       ? images
@@ -185,9 +192,6 @@ export function galleryPage(root, initialData, imageType = "character") {
             artCard(i, data.worksheets, {
               selectable: true,
               selected: selected.has(i.id),
-              chooseFinal: true,
-              finalSelected:
-                data.activity.final_selection?.[imageType] === i.id,
             }),
           )
           .join("")
@@ -275,23 +279,6 @@ export function galleryPage(root, initialData, imageType = "character") {
     drawSelection();
   });
   grid.onclick = async (ev) => {
-    const pick = ev.target.closest("[data-final-pick]");
-    if (pick) {
-      pick.disabled = true;
-      try {
-        data.activity.final_selection = await request("teacher/select-final", {
-          id,
-          image_id: pick.dataset.finalPick,
-          image_type: imageType,
-        });
-        draw();
-        toast("최종본 후보로 선택했어요. 수업 마무리에서 확정해 주세요.");
-      } catch (error) {
-        toast(error.message, "error");
-        pick.disabled = false;
-      }
-      return;
-    }
     const key = ev.target.closest("[data-open-art]")?.dataset.openArt;
     if (key)
       showArt(

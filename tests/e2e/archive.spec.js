@@ -42,7 +42,7 @@ test("museum entrance, password gate, final pair, public poster, reopen and admi
     "",
   );
   await expect(page.locator(".synopsis-note")).toContainText("내장 예시");
-  await page.getByRole("link", { name: "내 수업으로" }).click();
+  await page.getByRole("link", { name: "수업하기", exact: true }).click();
   await page
     .getByRole("link", { name: "동백꽃 수업 열기", exact: true })
     .click();
@@ -70,14 +70,14 @@ test("museum entrance, password gate, final pair, public poster, reopen and admi
     .getByRole("navigation", { name: "수업 활동", exact: true })
     .getByRole("link", { name: "등장인물 갤러리" })
     .click();
-  await page
-    .getByRole("button", { name: "최종본 선택", exact: true })
-    .first()
-    .click();
   await expect(
-    page.getByRole("button", { name: "최종본으로 선택됨" }),
-  ).toHaveCount(1);
+    page.getByRole("button", { name: "최종본 선택", exact: true }),
+  ).toHaveCount(0);
   await page.getByRole("link", { name: "수업 마무리", exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: "수업 마무리", exact: true }),
+  ).toHaveCount(0);
+  await page.locator("[name=character_image_id]").first().check();
   await expect(page.locator("[name=character_image_id]:checked")).toHaveCount(
     1,
   );
@@ -186,10 +186,16 @@ test("museum entrance, password gate, final pair, public poster, reopen and admi
     fullPage: true,
   });
   await page.goto("/teacher");
-  await expect(page.locator(".completed-lesson-grid .lesson-card")).toHaveCount(
-    1,
+  await expect(page.locator('[data-lesson-id="demo-dongbaek"]')).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /완료된 수업/ })).toHaveCount(
+    0,
   );
-  await page.getByRole("link", { name: "다시 열기", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "전시관 메뉴" })
+    .getByRole("link", { name: "관람하기", exact: true })
+    .click();
+  await page.getByRole("link", { name: "동백꽃 전시작 자세히 보기" }).click();
+  await page.getByRole("link", { name: "수업 다시 열기", exact: true }).click();
   await page
     .getByLabel("수업 비밀번호", { exact: true })
     .fill("class-password");

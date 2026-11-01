@@ -20,7 +20,7 @@ activities → worksheets → image_submissions 관계로 인물·사건 분석�
 
 - `/`: 소개, 교사 로그인, 데모 진입
 - `/login`: 교사 인증
-- `/teacher`, `/teacher/activities`: 대시보드, 활동 목록
+- `/teacher`: 수업 만들기·진행 중인 수업 목록. `/teacher/activities`는 이 화면으로 이동합니다.
 - `/teacher/activities/new`, `/teacher/activity/:id`: 생성·편집·단계·QR
 - `/teacher/activity/:id/background`: 시간적·공간적 배경 질문, 실시간 응답, 교사 최종 정리
 - `/teacher/activity/:id/live`: 실시간 제출 및 미제출 현황

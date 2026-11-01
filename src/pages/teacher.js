@@ -1,5 +1,4 @@
 import {
-  logo,
   icon,
   button,
   customSelect,
@@ -12,14 +11,8 @@ import {
   copyText,
   toast,
 } from "../components/ui.js";
-import {
-  request,
-  isDemo,
-  teacherSession,
-  subscribe,
-  signOut,
-} from "../services/api.js";
-import { e, dateLabel, downloadText } from "../utils/helpers.js";
+import { request, isDemo, subscribe } from "../services/api.js";
+import { e, downloadText } from "../utils/helpers.js";
 import { publicRouteUrl } from "../utils/paths.js";
 import {
   STAGES,
@@ -39,6 +32,7 @@ import { unlockPage, adminPage } from "./lesson-access.js";
 import { rememberAccess, forgetLessons } from "../services/access.js";
 import { finalizePage, completedLesson } from "./finalize.js";
 import { showcasePage } from "./showcase.js";
+import { museumHeader, museumFooter } from "../components/museum-shell.js";
 import { synopsisPanel, bindSynopsis } from "../components/synopsis.js";
 export function teacherShell(root, page, activity, content) {
   const base = activity ? `/teacher/activity/${e(activity.id)}` : "";
@@ -51,28 +45,23 @@ export function teacherShell(root, page, activity, content) {
     : [];
   const active = (key) =>
     key === page || (key === "gallery" && page === "analytics");
-  const dashboardLink = `<a href="/teacher" ${page === "dashboard" ? 'class="active" aria-current="page"' : ""}>${icon("layout-dashboard")}<span>대시보드</span></a>`;
   const project = activity
     ? `<section class="lesson-context" aria-label="현재 수업">
-    <a class="text-link lesson-back" href="/teacher">${icon("arrow-left")} 내 수업으로</a>
-    <div class="lesson-context-heading"><div><span class="eyebrow">${e(activity.course_name || "문학 수업")}</span><h2>${e(activity.title)}</h2><p>${e(activity.author)} · ${e(activity.class_name || "학급 미지정")} <span class="badge">${e(STAGES[activity.stage])}</span></p></div><div class="lesson-tools"><a class="btn secondary small" href="${base}/settings" ${page === "detail" || page === "edit" ? 'aria-current="page"' : ""}>${icon("sliders-horizontal")} 수업 설정</a><a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a><a class="btn ghost small" href="${base}/live">${icon("users")} 제출 현황</a></div></div>
+    <div class="lesson-context-heading"><div><span class="eyebrow">${e(activity.course_name || "문학 수업")}</span><h2>${e(activity.title)}</h2><p>${e(activity.author)} · ${e(activity.class_name || "학급 미지정")} <span class="badge">${e(STAGES[activity.stage])}</span></p></div><div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div></div>
     <nav class="lesson-tabs" aria-label="수업 활동">${tabs.map(([key, ico, label, path], index) => `<a href="${path}" ${active(key) ? 'class="active" aria-current="page"' : ""}><span class="lesson-tab-number">0${index + 1}</span>${icon(ico)}<span>${label}</span></a>`).join("")}</nav>
   </section>`
     : "";
-  root.innerHTML = `<header class="museum-masthead"><div class="museum-identity">${logo()}<span>문학 수업 공간</span></div><div class="museum-header-note">한 작품을 함께 읽는 세 가지 시선</div><div class="museum-utilities">${isDemo ? '<span class="demo-pill">데모 수업</span>' : '<span class="demo-pill">교사 공간</span>'}<button class="btn ghost small" id="help">${icon("circle-help")} 이용 안내</button><a class="icon-btn" href="/teacher/settings" aria-label="수업 공간 설정">${icon("settings")}</a><button class="icon-btn" id="logout" aria-label="로그아웃">${icon("log-out")}</button></div></header><nav class="museum-nav" aria-label="교사 메뉴">${dashboardLink}<a href="/">${icon("library")}<span>문학 전시관</span></a><a href="/exhibition">관람하기</a><a href="/admin">관리자</a><span class="museum-date">${dateLabel(new Date())}</span></nav><div class="teacher-layout"><main id="main" class="teacher-main" data-page="${page}">${project}${content}</main></div><nav class="mobile-nav lesson-mobile-nav" aria-label="교사 모바일 메뉴">${dashboardLink}${tabs.map(([key, ico, label, path]) => `<a href="${path}" ${active(key) ? 'class="active" aria-current="page"' : ""}>${icon(ico)}<span>${label}</span></a>`).join("")}</nav>`;
-  root.querySelector("#logout").onclick = async () => {
-    await signOut();
-    navigate("/");
-  };
-  root.querySelector("#help").onclick = () =>
-    openModal({
-      title: "한 편의 수업을 여는 방법",
-      eyebrow: "WELCOME TO LITVERSE",
-      body: `<ol class="student-task-list"><li>대시보드에서 ‘수업 만들기’를 눌러 작품 정보와 수업 설정을 저장해요.</li><li>생성한 수업 안에서 배경 탐구·등장인물 갤러리·사건 분석 세 탭을 이용해요.</li><li>배경 탐구에서 시간적·공간적 배경 질문을 공개하고, QR로 학생 응답을 모아 최종 정리를 공유해요.</li><li>인물·사건 분석을 열어 학생이 성격과 본문 근거, 인상 깊은 사건과 이유를 작성하게 해요.</li><li>수업 설정에서 이미지 제출을 열고 인물 사진 한 장과 사건 장면 사진 한 장을 받아요.</li><li>등장인물 갤러리와 사건 분석에서 해석과 작품을 살펴보고 전시해요. 대시보드에서 수업을 다시 열어 이어갈 수 있어요.</li></ol>${isDemo ? '<div class="notice">데모 자료는 예시입니다. 변경 사항은 이 브라우저에만 저장되며 다른 기기의 학생과 공유되지 않습니다.</div>' : ""}`,
-    });
+  root.classList.add("museum-classroom");
+  root.innerHTML = `${museumHeader()}<div class="teacher-layout"><main id="main" class="teacher-main" data-page="${page}">${project}${content}</main></div>${museumFooter()}`;
 }
-export function pageHeading(eyebrow, title, description, actions = "") {
-  return `<div class="page-heading"><div><span class="eyebrow">${eyebrow}</span><h1>${title}</h1>${description ? `<p>${description}</p>` : ""}</div>${actions ? `<div class="flex">${actions}</div>` : ""}</div>`;
+export function pageHeading(
+  eyebrow,
+  title,
+  description,
+  actions = "",
+  compact = false,
+) {
+  return `<div class="page-heading${compact ? " compact-heading" : ""}"><div>${eyebrow && !compact ? `<span class="eyebrow">${eyebrow}</span>` : ""}<h1${compact ? ' class="sr-only"' : ""}>${title}</h1>${description ? `<p>${description}</p>` : ""}</div>${actions ? `<div class="flex">${actions}</div>` : ""}</div>`;
 }
 function statistics(data) {
   const a = data.activity,
@@ -145,9 +134,7 @@ export async function teacherPage(root, path) {
     if (data.activity.finalized_at) return completedLesson(root, data);
     if (parts[4] === "finalize") return finalizePage(root, data);
     if (parts[4] === "showcase") return showcasePage(root, id);
-    try {
-      localStorage.setItem("litverse-last-lesson", id);
-    } catch {}
+
     if (!parts[4]) return navigate(`/teacher/activity/${id}/background`, true);
     if (parts[4] === "background") return backgroundTeacher(root, data);
     if (parts[4] === "gallery") return galleryPage(root, data);
@@ -168,7 +155,7 @@ async function activityDetail(root, data) {
     root,
     "detail",
     a,
-    `${pageHeading("CLASS SETTINGS", e(a.title), `${e(a.author)} · ${e(a.class_name || "나의 문학 수업")}`, `<a class="btn secondary" href="/teacher/activity/${a.id}/background">배경 질문·응답</a>${button("수업 정보 수정", "sliders-horizontal", "secondary", 'id="edit-activity"')}<a class="btn primary" href="/teacher/activity/${a.id}/gallery">${icon("images")} 작품 보기</a>`)}<section class="panel"><div class="between wrap"><div><span class="eyebrow" style="margin-bottom:10px">ACTIVITY STATUS</span><h2>${STAGES[a.stage]}</h2></div><div class="flex wrap">${customSelect({ name: "stage", label: "활동 진행 단계", value: a.stage, options: Object.entries(STAGES).map(([value, label]) => ({ value, label })) })}${button("단계 변경", "check", "primary", 'id="change-stage"')}</div></div><hr class="divider"/><p class="muted" style="font-size:13px">배경 탐구에서 시간적·공간적 배경을 질문하고 정리한 뒤, 인물·사건 분석과 두 사진 제출을 차례로 열어 주세요. 종료 후에는 학생의 작성과 제출이 잠깁니다.</p><div class="flex wrap" style="margin-top:23px">${button("활동지 QR", "qr-code", "secondary", 'id="analysis-qr"')}${button("이미지 제출 QR", "upload", "secondary", 'id="submission-qr"')}<a class="btn ghost" href="/teacher/activity/${a.id}/live">실시간 현황 ${icon("arrow-up-right")}</a></div></section>${statistics(data)}<div class="form-grid"><section class="panel"><h3>활동 소개</h3><p class="muted" style="font-size:14px;margin-top:18px;white-space:pre-wrap">${e(a.introduction)}</p><hr class="divider"/><h3>수업 목표</h3><p class="muted" style="font-size:13px;margin-top:15px">${e(a.objectives || "등록된 수업 목표가 없습니다.")}</p>${a.standards ? `<p class="muted" style="font-size:12px;margin-top:15px">${e(a.standards)}</p>` : ""}</section><section class="panel"><h3>학생 활동 안내</h3><ol class="student-task-list" style="margin-bottom:0">${a.tasks.map((t) => `<li>${e(t)}</li>`).join("")}</ol></section></div><div class="between wrap" style="margin-top:28px"><p class="muted" style="font-size:12px">분석 기록과 이미지 정보는 JSON 파일로 보관할 수 있습니다.</p><div class="flex wrap">${button("데이터 내보내기", "download", "secondary", 'id="export-data"')}${button("활동 삭제", "trash-2", "danger", 'id="delete-activity"')}</div></div>`,
+    `${pageHeading("CLASS SETTINGS", "수업 설정", "진행 단계를 바꾸고 참여 현황을 확인하세요.", button("수업 정보 수정", "sliders-horizontal", "secondary", 'id="edit-activity"'))}<section class="panel"><div class="between wrap"><div><span class="eyebrow" style="margin-bottom:10px">ACTIVITY STATUS</span><h2>${STAGES[a.stage]}</h2></div><div class="flex wrap">${customSelect({ name: "stage", label: "활동 진행 단계", value: a.stage, options: Object.entries(STAGES).map(([value, label]) => ({ value, label })) })}${button("단계 변경", "check", "primary", 'id="change-stage"')}</div></div><hr class="divider"/><p class="muted" style="font-size:13px">배경 탐구에서 시간적·공간적 배경을 질문하고 정리한 뒤, 인물·사건 분석과 두 사진 제출을 차례로 열어 주세요. 종료 후에는 학생의 작성과 제출이 잠깁니다.</p><div class="flex wrap" style="margin-top:23px">${button("학생 참여 QR", "qr-code", "secondary", 'id="class-qr"')}<a class="btn ghost" href="/teacher/activity/${a.id}/live">제출 현황 ${icon("arrow-up-right")}</a></div></section>${statistics(data)}<div class="form-grid"><section class="panel"><h3>활동 소개</h3><p class="muted" style="font-size:14px;margin-top:18px;white-space:pre-wrap">${e(a.introduction)}</p><hr class="divider"/><h3>수업 목표</h3><p class="muted" style="font-size:13px;margin-top:15px">${e(a.objectives || "등록된 수업 목표가 없습니다.")}</p>${a.standards ? `<p class="muted" style="font-size:12px;margin-top:15px">${e(a.standards)}</p>` : ""}</section><section class="panel"><h3>학생 활동 안내</h3><ol class="student-task-list" style="margin-bottom:0">${a.tasks.map((t) => `<li>${e(t)}</li>`).join("")}</ol></section></div><div class="between wrap" style="margin-top:28px"><p class="muted" style="font-size:12px">분석 기록과 이미지 정보는 JSON 파일로 보관할 수 있습니다.</p><div class="flex wrap">${button("데이터 내보내기", "download", "secondary", 'id="export-data"')}${button("활동 삭제", "trash-2", "danger", 'id="delete-activity"')}</div></div>`,
   );
   initSelects(root);
   root.querySelector("#edit-activity").onclick = () =>
@@ -192,8 +179,7 @@ async function activityDetail(root, data) {
       },
     });
   };
-  root.querySelector("#analysis-qr").onclick = () => showQR(a, "analysis");
-  root.querySelector("#submission-qr").onclick = () => showQR(a, "submission");
+  root.querySelector("#class-qr").onclick = () => showQR(a);
   root.querySelector("#export-data").onclick = async (event) => {
     const trigger = event.currentTarget;
     trigger.disabled = true;

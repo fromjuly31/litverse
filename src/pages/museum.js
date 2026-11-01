@@ -34,7 +34,7 @@ export async function museumHome(root) {
 export async function exhibitionPage(root, id) {
   if (id) {
     const exhibit = await request("public/exhibit", { id });
-    root.innerHTML = `${museumHeader()}<main id="main" class="exhibit-detail"><div class="exhibit-toolbar"><a class="text-link" href="/exhibition">${icon("arrow-left")} 전시관으로</a><div><button class="btn secondary" id="download-poster">${icon("download")} 포스터 HTML 저장</button><button class="btn primary" id="print-poster">${icon("file-text")} 인쇄 · PDF 저장</button></div></div><h1 class="sr-only">${e(exhibit.title)} 완성 전시작</h1><div class="poster-print-area">${posterMarkup(exhibit.result, exhibit.images)}</div></main>${museumFooter()}`;
+    root.innerHTML = `${museumHeader()}<main id="main" class="exhibit-detail"><div class="exhibit-toolbar"><a class="text-link" href="/exhibition">${icon("arrow-left")} 전시관으로</a><div><a class="btn secondary" href="/teacher/activity/${e(id)}/background">${icon("lock-keyhole")} 수업 다시 열기</a><button class="btn secondary" id="download-poster">${icon("download")} 포스터 HTML 저장</button><button class="btn primary" id="print-poster">${icon("file-text")} 인쇄 · PDF 저장</button></div></div><h1 class="sr-only">${e(exhibit.title)} 완성 전시작</h1><div class="poster-print-area">${posterMarkup(exhibit.result, exhibit.images)}</div></main>${museumFooter()}`;
     root.querySelector("#print-poster").onclick = () => window.print();
     root.querySelector("#download-poster").onclick = async (event) => {
       const btn = event.currentTarget;
@@ -73,7 +73,7 @@ export async function exhibitionPage(root, id) {
       ? visible
           .map(
             (a) =>
-              `<article class="exhibit-card"><a class="exhibit-frame" href="/exhibition/${e(a.id)}" aria-label="${e(a.title)} 전시작 자세히 보기"><div class="exhibit-mat">${posterMarkup(a.result, a.images, true)}</div></a><div class="exhibit-label"><div><h2><a href="/exhibition/${e(a.id)}">${e(a.title)}</a></h2><p>${e(a.author)} 원작</p></div><span class="exhibit-signature">${e(a.signature)}</span></div></article>`,
+              `<article class="exhibit-card"><a class="exhibit-frame" href="/exhibition/${e(a.id)}" aria-label="${e(a.title)} 전시작 자세히 보기"><div class="exhibit-mat">${posterMarkup(a.result, a.images, true)}</div></a><div class="exhibit-label"><div><h2>${e(a.title)}</h2><p>${e(a.author)} 원작</p></div><span class="exhibit-signature">${e(a.signature)}</span></div></article>`,
           )
           .join("")
       : `<section class="empty collection-empty">${q ? icon("search") : `<img class="empty-gallery-art" src="${e(assetUrl("/art/literary-museum-interior.webp"))}" alt="첫 작품을 기다리는 따뜻한 문학 전시실" width="340" height="170"/>`}<h2>${q ? "검색한 전시작이 없어요." : "아직 걸리지 않은, 우리의 첫 작품."}</h2><p>${q ? "다른 작품명이나 제작자 이름으로 찾아보세요." : "수업을 마무리하고 두 장의 최종본을 선정하면 이곳에 전시됩니다."}</p>${q ? "" : '<a class="btn primary" href="/teacher">첫 수업 시작하기</a>'}</section>`;
