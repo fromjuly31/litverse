@@ -15,6 +15,8 @@ npm ci
 npm run build:pages
 ```
 
+VS Code에서는 `release/index.html`을 우클릭하고 **Open with Live Server**를 선택해도 됩니다. 예전 파일에서 코드가 그대로 보였다면 새로 빌드된 파일을 사용하고 브라우저에서 **Ctrl+F5**로 다시 불러옵니다. 단일 HTML의 JavaScript는 data URL 모듈로 내장되어, Live Server가 포스터 생성 문자열을 실제 HTML 태그로 잘못 인식하지 않도록 처리했습니다.
+
 HTTP로 배포판을 미리 보려면 `npm run preview:pages`를 실행하고 `http://127.0.0.1:4174/`을 엽니다.
 
 ## GitHub에서 수동 배포

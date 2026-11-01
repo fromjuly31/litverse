@@ -1,16 +1,26 @@
 import { test, expect } from "@playwright/test";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { readFile } from "node:fs/promises";
 
 const tabs = (page) =>
   page.getByRole("navigation", { name: "수업 활동", exact: true });
 const entries = [
   ["root site", "http://127.0.0.1:4174/"],
   ["repository subdirectory", "http://127.0.0.1:4174/preview-repository/"],
-  ["standalone HTML file", pathToFileURL(resolve("release/index.html")).href],
+  [
+    "standalone HTML file",
+    pathToFileURL(resolve("release/index.html")).href,
+    true,
+  ],
+  [
+    "Live Server injected HTML",
+    "http://127.0.0.1:4174/live-server/index.html",
+    true,
+  ],
 ];
 
-for (const [name, entry] of entries) {
+for (const [name, entry, embedded] of entries) {
   test(`${name}: create a class, reload, reopen links and view embedded artwork`, async ({
     page,
     context,
@@ -21,6 +31,22 @@ for (const [name, entry] of entries) {
     await context.route(/^https:\/\/(?:fonts\.|cdn\.jsdelivr\.net)/, (route) =>
       route.abort(),
     );
+    if (name === "Live Server injected HTML") {
+      const html = await readFile(resolve("release/index.html"), "utf8");
+      // Match Live Server's first-tag insertion, including its effect on JS
+      // templates if they accidentally contain raw closing body tags.
+      const injected = html.replace(
+        /<\/body>/i,
+        (tag) =>
+          `<script>globalThis.__LIVE_RELOAD_TEST__ = true;</script>${tag}`,
+      );
+      await context.route(entry, (route) =>
+        route.fulfill({
+          contentType: "text/html; charset=utf-8",
+          body: injected,
+        }),
+      );
+    }
     await page.goto(entry);
     await expect(page.locator(".museum-choices>a")).toHaveCount(2);
     await page
@@ -40,7 +66,7 @@ for (const [name, entry] of entries) {
         ),
       ).toBe(true);
     }
-    if (entry.startsWith("file:"))
+    if (embedded)
       await expect(page.locator(".choice-visit img")).toHaveAttribute(
         "src",
         /^data:image\/webp;base64,/,
@@ -125,7 +151,7 @@ for (const [name, entry] of entries) {
         });
       expect(loaded).toBe(true);
     }).toPass();
-    if (entry.startsWith("file:")) {
+    if (embedded) {
       await expect(page.locator(".art-card img").first()).toHaveAttribute(
         "src",
         /^data:image\/webp;base64,/,
@@ -185,6 +211,10 @@ for (const [name, entry] of entries) {
     ).toBe(1);
     await page.goto(`${entry}#/exhibition`);
     await expect(page.locator(".exhibit-card")).toHaveCount(1);
+    if (name === "Live Server injected HTML")
+      expect(await page.evaluate(() => globalThis.__LIVE_RELOAD_TEST__)).toBe(
+        true,
+      );
     expect(errors).toEqual([]);
   });
 }

@@ -2,6 +2,13 @@
 
 검증일: 2026-11-01. Windows, Node.js 24.18.0, npm 11, Microsoft Edge 기반 Playwright에서 실행했습니다.
 
+## Live Server 단일 HTML 호환성 수정
+
+- 설치된 VS Code 확장 `ritwickdey.liveserver-5.7.10`의 실제 서버에서 문제를 재현했습니다. 포스터 HTML을 만드는 JavaScript 문자열의 첫 `</body>` 앞에 새로고침 코드가 삽입되면서 `Unexpected end of input`이 발생했고, 뒤쪽 코드가 화면의 HTML로 표시되었습니다. 파일 직접 열기와 일반 정적 서버는 이 주입을 하지 않아 기존 검사로 발견되지 않았습니다.
+- 단일 파일 빌드의 JavaScript를 base64 data URL 모듈로 내장해 HTML 태그 검색과 분리했습니다. 번들 내용·기존 앱 기능·로컬 저장 데이터는 바꾸지 않습니다.
+- 같은 설치된 Live Server에서 메인·수업·심화 탭 이동과 새로고침, JavaScript 오류 없음, 정상 화면을 확인했습니다.
+- 첫 `</body>`에 코드를 삽입하는 회귀 시나리오를 추가했습니다. 파일 직접 열기·일반 정적 경로·Live Server 방식에서 수업 생성·사진·포스터 흐름을 함께 확인합니다. 이번 수정의 재검사 범위는 정적 브라우저 7개이며 서버/DB 코드는 변경하지 않았습니다.
+
 ## 이해 심화하기 확장 검증
 
 운영 Supabase/Firebase 프로젝트를 변경하지 않고, 로컬 데모 브라우저·PGlite SQL·모의 AI 응답으로 검사했습니다. 기존 전시관·사진·수업 테스트와 새로운 심화 테스트를 함께 실행했습니다.
@@ -65,8 +72,8 @@
 | `npm test`                 | 29개 통과, 실패 0                            |
 | `npm run test:e2e`         | 전체 18개 통과, 실패 0                       |
 | `npm run build`            | 성공, `dist` 생성                            |
-| `npm run build:pages`      | 성공, 정적 배포 폴더와 4.17MB 단일 HTML 생성 |
-| `npm run test:pages`       | 6개 통과, 실패 0                             |
+| `npm run build:pages`      | 성공, 정적 배포 폴더와 4.31MB 단일 HTML 생성 |
+| `npm run test:pages`       | 7개 통과, 실패 0                             |
 | API·정리 함수 esbuild 번들 | API와 정리 함수 esbuild 번들 성공            |
 
 ## 문학 전시관·완성 포스터

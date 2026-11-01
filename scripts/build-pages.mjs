@@ -38,6 +38,11 @@ const stylesheet = html.match(
 if (!script || !stylesheet)
   throw new Error("The built HTML is missing its JS or CSS bundle.");
 const js = await readFile(resolve(output, script[1]), "utf8");
+// Live Server inserts its reload script before the first literal </body>,
+// including one inside a JavaScript template used to export a poster.
+// A data module preserves the bundle bytes without exposing template markup
+// to HTML scanners, while keeping this edition a single offline-capable file.
+const moduleSource = `data:text/javascript;base64,${Buffer.from(js).toString("base64")}`;
 const css = await readFile(resolve(output, stylesheet[1]), "utf8");
 const assets = {};
 for (const filename of await readdir(resolve(output, "art"))) {
@@ -53,7 +58,7 @@ html = html
   .replace(
     script[0],
     () =>
-      `<script>globalThis.__LITVERSE_ASSETS__=${JSON.stringify(assets)};</script>\n<script type="module">${js.replace(/<\/script/gi, "<\\/script")}</script>`,
+      `<script>globalThis.__LITVERSE_ASSETS__=${JSON.stringify(assets)};</script>\n<script type="module" src="${moduleSource}"></script>`,
   )
   .replace(
     stylesheet[0],
