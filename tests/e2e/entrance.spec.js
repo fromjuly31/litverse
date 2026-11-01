@@ -79,6 +79,9 @@ test("entrance fits phone, tablet, laptop and landscape screens without scrollin
   await mkdir("test-results/entrance", { recursive: true });
   await page.goto("/");
   await expect(page.locator(".museum-choices>a")).toHaveCount(2);
+  await expect(page.locator(".inventory-summary")).toHaveText(
+    "전시 중인 작품0점",
+  );
   await page
     .locator(".museum-choice img")
     .evaluateAll((imgs) => Promise.all(imgs.map((img) => img.decode())));
@@ -198,9 +201,9 @@ test("a large collection stays compact on the entrance and remains reachable wit
   await expect(
     page.getByRole("link", { name: "전체 전시작 13점 보기" }),
   ).toBeVisible();
-  await page.locator(".inventory-list a").first().click();
-  await expect(page.locator(".literary-poster")).toBeVisible();
-  await page.goto("/");
+  await expect(page.locator(".inventory-summary")).toHaveText(
+    "전시 중인 작품13점",
+  );
   await page.getByRole("link", { name: "전체 전시작 13점 보기" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator(".exhibit-card")).toHaveCount(13);

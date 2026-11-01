@@ -14,21 +14,9 @@ import { forgetLessons } from "../services/access.js";
 export async function museumHome(root) {
   forgetLessons();
   const lessons = await request("public/list");
-  const complete = lessons
-    .filter((a) => a.finalized_at)
-    .sort((a, b) => new Date(b.finalized_at) - new Date(a.finalized_at));
+  const complete = lessons.filter((a) => a.finalized_at);
   root.classList.add("museum-entry");
-  root.innerHTML = `${museumHeader()}<main id="main" class="museum-home"><div class="museum-welcome"><span class="eyebrow">THE LITERARY MUSEUM</span><h1>읽었던 문장이,<br/> 우리의 작품으로 남는 곳.</h1><p>읽고, 해석하고, 한 장의 작품으로 간직하세요.</p></div><section class="museum-choices" aria-label="문학 전시관 입장"><a class="museum-choice choice-class" href="/teacher"><img src="${e(assetUrl("/art/literary-landscape.webp"))}" alt="봄꽃이 핀 길에서 만난 두 인물의 문학 일러스트" width="1536" height="1024" fetchpriority="high" decoding="async"/><div class="choice-shade"></div><span class="choice-index">01 — THE CLASSROOM</span><div class="choice-copy"><span>새로운 해석을 시작하는 곳</span><h2>수업하기</h2><p>작품을 고르고, 우리만의 시선으로 함께 읽어요.</p><span class="choice-enter"><span>수업 만들기 · 이어가기</span>${icon("arrow-up-right")}</span></div></a><a class="museum-choice choice-visit" href="/exhibition"><img src="${e(assetUrl("/art/literary-museum-interior.webp"))}" alt="문학 속 인물과 풍경이 액자에 걸린 수채화 전시실" width="1536" height="1024" decoding="async"/><div class="choice-shade"></div><span class="choice-index">02 — THE COLLECTION</span><div class="choice-copy"><span>완성된 이야기를 만나는 곳</span><h2>관람하기</h2><p>함께 완성한 문학 작품과 새로운 해석을 만나요.</p><span class="choice-enter"><span>${complete.length}점의 완성작 만나기</span>${icon("arrow-up-right")}</span></div></a></section><section class="museum-inventory" aria-label="최근 완성된 전시작"><div class="inventory-heading"><span class="eyebrow">PERMANENT COLLECTION</span><h2>전시관에 남겨진 이야기</h2></div><div class="inventory-list">${
-    complete.length
-      ? complete
-          .slice(0, 3)
-          .map(
-            (a, i) =>
-              `<a href="/exhibition/${e(a.id)}" title="${e(a.title)} · ${e(a.author)}"><span>${String(i + 1).padStart(2, "0")}</span><strong>${e(a.title)}</strong><small>${e(a.author)}</small>${icon("arrow-up-right")}</a>`,
-          )
-          .join("")
-      : `<p class="inventory-empty">${icon("book-open")}<span>첫 번째 전시작을 기다리고 있어요.</span></p>`
-  }</div><a class="inventory-all" href="/exhibition" aria-label="전체 전시작 ${complete.length}점 보기"><span>전체 보기</span>${icon("arrow-right")}</a></section></main>${museumFooter()}`;
+  root.innerHTML = `${museumHeader()}<main id="main" class="museum-home"><div class="museum-welcome"><span class="eyebrow">THE LITERARY MUSEUM</span><h1>읽었던 문장이,<br/> 우리의 작품으로 남는 곳.</h1><p>읽고, 해석하고, 한 장의 작품으로 간직하세요.</p></div><section class="museum-choices" aria-label="문학 전시관 입장"><a class="museum-choice choice-class" href="/teacher"><img src="${e(assetUrl("/art/literary-landscape.webp"))}" alt="봄꽃이 핀 길에서 만난 두 인물의 문학 일러스트" width="1536" height="1024" fetchpriority="high" decoding="async"/><div class="choice-shade"></div><span class="choice-index">01 — THE CLASSROOM</span><div class="choice-copy"><span>새로운 해석을 시작하는 곳</span><h2>수업하기</h2><p>작품을 고르고, 우리만의 시선으로 함께 읽어요.</p><span class="choice-enter"><span>수업 만들기 · 이어가기</span>${icon("arrow-up-right")}</span></div></a><a class="museum-choice choice-visit" href="/exhibition"><img src="${e(assetUrl("/art/literary-museum-interior.webp"))}" alt="문학 속 인물과 풍경이 액자에 걸린 수채화 전시실" width="1536" height="1024" decoding="async"/><div class="choice-shade"></div><span class="choice-index">02 — THE COLLECTION</span><div class="choice-copy"><span>완성된 이야기를 만나는 곳</span><h2>관람하기</h2><p>함께 완성한 문학 작품과 새로운 해석을 만나요.</p><span class="choice-enter"><span>문학 전시관 입장</span>${icon("arrow-up-right")}</span></div></a></section><section class="museum-inventory" aria-label="전시 작품 현황"><div class="inventory-heading"><span class="eyebrow">THE COLLECTION</span><h2>전시 현황</h2></div><p class="inventory-summary"><span>전시 중인 작품</span><strong>${complete.length.toLocaleString("ko-KR")}<small>점</small></strong></p><a class="inventory-all" href="/exhibition" aria-label="전체 전시작 ${complete.length}점 보기"><span>전체 보기</span>${icon("arrow-right")}</a></section></main>${museumFooter()}`;
 }
 
 export async function exhibitionPage(root, id) {

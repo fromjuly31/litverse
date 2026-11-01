@@ -115,50 +115,26 @@
   line-height: 1.5;
   white-space: nowrap;
 }
-.museum-entry .inventory-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
-  min-width: 0;
-}
-.museum-entry .inventory-list > a {
-  min-width: 0;
-  min-height: 44px;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px solid #dcd3c1;
-}
-.museum-entry .inventory-list strong {
-  font-size: 15px;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-.museum-entry .inventory-list small {
-  font-size: 10px;
-  white-space: nowrap;
-}
-.museum-entry .inventory-list svg {
-  flex-shrink: 0;
-  width: 14px;
-}
-.museum-entry .inventory-empty {
+.museum-entry .inventory-summary {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  grid-column: 1/-1;
+  align-items: baseline;
+  gap: 16px;
+  min-width: 0;
   margin: 0;
-  padding: 0;
+  color: #7b7467;
   font-size: 12px;
   line-height: 1.5;
 }
-.museum-entry .inventory-empty svg {
-  width: 24px;
-  height: 24px;
-  margin: 0;
-  color: #a18d63;
+.museum-entry .inventory-summary strong {
+  font-size: 27px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #574c35;
+}
+.museum-entry .inventory-summary small {
+  margin-left: 5px;
+  font-size: 12px;
+  font-weight: 400;
 }
 .museum-entry .inventory-all {
   min-height: 44px;
@@ -193,18 +169,6 @@
   margin: 0 auto 22px;
   border: 6px solid #e8e1d1;
   outline: 1px solid #baaa8c;
-}
-@media (max-width: 1100px) {
-  .museum-entry .inventory-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-  .museum-entry .inventory-list > a:nth-child(n + 3) {
-    display: none;
-  }
-  .museum-entry .inventory-list small {
-    display: none;
-  }
 }
 @media (max-width: 760px) and (min-height: 601px) {
   .museum-entry .museum-choices {
@@ -324,38 +288,17 @@
     margin: 0;
     line-height: 1.5;
   }
-  .museum-entry .inventory-list {
+  .museum-entry .inventory-summary {
     grid-column: 1;
     grid-row: 2;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .museum-entry .inventory-list > a:nth-child(n + 2) {
-    display: none;
-  }
-  .museum-entry .inventory-list > a {
-    min-height: 30px;
-    border: 0;
-    padding: 3px 0;
-    gap: 8px;
-  }
-  .museum-entry .inventory-list strong {
-    font-size: 13px;
-  }
-  .museum-entry .inventory-list > a > span {
-    font-size: 9px;
-  }
-  .museum-entry .inventory-list svg {
-    margin: 0;
-    width: 12px;
-  }
-  .museum-entry .inventory-empty {
+    gap: 10px;
     font-size: 10px;
-    gap: 6px;
-    min-height: 27px;
   }
-  .museum-entry .inventory-empty svg {
-    width: 15px;
-    height: 15px;
+  .museum-entry .inventory-summary strong {
+    font-size: 20px;
+  }
+  .museum-entry .inventory-summary small {
+    font-size: 10px;
   }
   .museum-entry .inventory-all {
     grid-column: 2;
@@ -476,27 +419,14 @@
     font-size: 12px;
     margin: 0;
   }
-  .museum-entry .inventory-list {
+  .museum-entry .inventory-summary {
     grid-column: 2;
     grid-row: 1;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .museum-entry .inventory-list > a:nth-child(n + 2) {
-    display: none;
-  }
-  .museum-entry .inventory-list > a {
-    min-height: 30px;
-    padding: 3px 0;
-  }
-  .museum-entry .inventory-list strong {
-    font-size: 12px;
-  }
-  .museum-entry .inventory-empty {
+    gap: 10px;
     font-size: 10px;
   }
-  .museum-entry .inventory-empty svg {
-    width: 17px;
-    height: 17px;
+  .museum-entry .inventory-summary strong {
+    font-size: 20px;
   }
   .museum-entry .inventory-all {
     grid-column: 3;
