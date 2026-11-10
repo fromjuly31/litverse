@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_PDF_BYTES } from "../../src/utils/text-study.js";
 import { validateQuestionResponses } from "../../src/utils/submission-questions.js";
 import { archiveAction } from "../lib/archive.js";
 import { deepeningAction } from "../lib/deepening.js";
@@ -76,6 +77,24 @@ export async function dispatch(db, req, context, action, p) {
           .limit(100),
       );
     if (action === "teacher/retry-cleanup") return cleanup(db);
+    if (["teacher/pdf-init", "teacher/pdf-url"].includes(action)) {
+      const source = uuid.parse(p.source_id);
+      const activity = await ownedActivity(db, uuid.parse(p.id), teacher);
+      if (activity.settings?.text_study?.source_id !== source)
+        fail(403, "이 수업에 연결된 PDF만 열 수 있어요.");
+      const path = `${activity.id}/text-${source}.pdf`;
+      if (action === "teacher/pdf-init") {
+        z.number().int().min(1).max(MAX_PDF_BYTES).parse(p.size);
+        const signed = check(
+          await db.storage.from("literature-texts").createSignedUploadUrl(path),
+        );
+        return { path, token: signed.token };
+      }
+      const signed = check(
+        await db.storage.from("literature-texts").createSignedUrl(path, 600),
+      );
+      return { url: signed.signedUrl };
+    }
     if (action === "teacher/save") {
       const input = activitySchema.parse(p.activity);
       const id = p.id ? uuid.parse(p.id) : crypto.randomUUID();

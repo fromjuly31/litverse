@@ -34,6 +34,31 @@ test("PostgreSQL migration, access policies, atomic uploads and cleanup", async 
       "utf8",
     ),
   );
+  await t.test(
+    "PDF originals use a private bucket without broadening student image uploads",
+    async () => {
+      await db.exec(
+        await readFile(
+          new URL("../supabase/migrations/006_text_study.sql", import.meta.url),
+          "utf8",
+        ),
+      );
+      const buckets = (
+        await db.query(
+          "select id,public,file_size_limit,allowed_mime_types from storage.buckets order by id",
+        )
+      ).rows;
+      const pdf = buckets.find((bucket) => bucket.id === "literature-texts");
+      const images = buckets.find(
+        (bucket) => bucket.id === "literature-images",
+      );
+      assert.equal(pdf.public, false);
+      assert.equal(Number(pdf.file_size_limit), 40 * 1024 * 1024);
+      assert.deepEqual(pdf.allowed_mime_types, ["application/pdf"]);
+      assert.equal(Number(images.file_size_limit), 5 * 1024 * 1024);
+      assert.ok(!images.allowed_mime_types.includes("application/pdf"));
+    },
+  );
   const teacher = randomUUID(),
     otherTeacher = randomUUID(),
     activityId = randomUUID();

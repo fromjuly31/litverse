@@ -156,6 +156,28 @@ export async function runDeletion(db, id) {
   if (!job?.id) return;
   try {
     let paths = [...new Set(job.image_paths)];
+    if (job.target_type === "activity" && job.activity_id) {
+      const documents = [];
+      for (let offset = 0; ; offset += 1000) {
+        const files = check(
+          await db.storage
+            .from("literature-texts")
+            .list(job.activity_id, { limit: 1000, offset }),
+        );
+        documents.push(
+          ...files
+            .filter((file) => /^text-[a-f0-9-]+\.pdf$/.test(file.name))
+            .map((file) => `${job.activity_id}/${file.name}`),
+        );
+        if (files.length < 1000) break;
+      }
+      for (let i = 0; i < documents.length; i += 100)
+        check(
+          await db.storage
+            .from("literature-texts")
+            .remove(documents.slice(i, i + 100)),
+        );
+    }
     // An orphan cleanup must never delete an object still referenced by a completed submission.
     if (job.target_type === "orphan" && paths.length) {
       const used = check(

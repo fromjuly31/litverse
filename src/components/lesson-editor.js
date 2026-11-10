@@ -7,6 +7,7 @@ import {
   refreshIcons,
 } from "./ui.js";
 import { STYLES } from "../utils/domain.js";
+import { textStudyEditorView } from "./text-study-editor.js";
 import {
   MAX_SUBMISSION_QUESTIONS,
   QUESTION_MAX_LENGTH,
@@ -62,7 +63,7 @@ export function lessonEditorView(a) {
       ${field("예상 참여 인원", "expected_student_count", a?.expected_student_count ?? 30, { type: "number", hint: "실제 참여 인원과 구분해 표시해요." })}
       <div class="field"><span id="image-style-label">기본 이미지 스타일</span>${customSelect({ name: "default_image_style", label: "기본 이미지 스타일", value: a?.default_image_style || STYLES[0], options: STYLES })}<small>학생은 활동 중 다른 스타일을 선택할 수 있어요.</small></div>
     </div></section>`,
-    `<section class="panel editor-section synopsis-only">${field("작품 줄거리", "synopsis", a?.synopsis, { area: true, max: 1800, placeholder: "작품의 주요 인물과 사건, 이야기의 흐름을 적어 주세요.", hint: "줄거리는 수업을 만든 뒤에도 수정할 수 있어요." })}</section>`,
+    `<section class="panel editor-section synopsis-only">${field("작품 줄거리", "synopsis", a?.synopsis, { area: true, max: 1800, placeholder: "작품의 주요 인물과 사건, 이야기의 흐름을 적어 주세요.", hint: "줄거리는 수업을 만든 뒤에도 수정할 수 있어요." })}</section>${textStudyEditorView(a)}`,
     `<section class="panel editor-section question-editor">${cardHeading("사진 제출 질문", "작성한 질문은 학생의 사진 제출 화면에 표시돼요. 회색 예시는 저장되지 않습니다.")}
       <div id="submission-question-list" class="submission-question-list"></div>
       <div class="question-editor-actions">${button("질문 추가", "plus", "secondary", 'id="add-submission-question"')}<span id="submission-question-count" role="status"></span></div>
@@ -93,7 +94,10 @@ export function lessonEditorView(a) {
   </form>`;
 }
 
-export function bindLessonWizard(form, { editing, initialQuestions = [] }) {
+export function bindLessonWizard(
+  form,
+  { editing, initialQuestions = [], textStudy },
+) {
   let current = 0;
   const completed = new Set();
   const panels = [...form.querySelectorAll(".wizard-step")];
@@ -160,6 +164,7 @@ export function bindLessonWizard(form, { editing, initialQuestions = [] }) {
   };
 
   const stepValid = (step) => {
+    if (step === 1) return !textStudy?.problem();
     if (step === 0) {
       const count = Number(value("expected_student_count"));
       return (
@@ -191,6 +196,7 @@ export function bindLessonWizard(form, { editing, initialQuestions = [] }) {
     form.querySelector("#lesson-review").innerHTML =
       `<div>${heading("작품과 수업", 0)}<dl class="review-facts">${line("작품", `${value("title")} · ${value("author")}`)}${line("수업명", value("course_name"))}${line("참여 인원", `${value("expected_student_count")}명`)}${line("이미지 스타일", value("default_image_style"))}</dl></div>
       <div>${heading("작품 줄거리", 1)}<p class="review-excerpt">${e(value("synopsis") || "별도로 입력한 줄거리가 없어요. 수업 중에도 추가할 수 있어요.")}</p></div>
+      <div>${heading("본문 학습", 1)}<p class="review-excerpt">${textStudy?.value().enabled ? `${e(textStudy.value().source_name || "직접 정리한 본문")} · ${textStudy.value().paragraphs.length}문단` : "사용하지 않음"}</p></div>
       <div>${heading("질문 목록", 2)}<ol class="review-questions">${questions()
         .map((question) => `<li>${e(question)}</li>`)
         .join("")}</ol></div>`;
@@ -243,6 +249,13 @@ export function bindLessonWizard(form, { editing, initialQuestions = [] }) {
 
   const validateStep = (step) => {
     error.textContent = "";
+    if (step === 1 && textStudy?.problem()) {
+      error.textContent = textStudy.problem();
+      const target = form.querySelector("#text-study-error");
+      target.textContent = textStudy.problem();
+      target.scrollIntoView({ block: "center" });
+      return false;
+    }
     if (formErrors(panels[step])) {
       error.textContent = "별표가 있는 필수 항목을 입력해 주세요.";
       return false;
@@ -306,6 +319,11 @@ export function bindLessonWizard(form, { editing, initialQuestions = [] }) {
     updateNavigation();
   });
   const count = form.elements.expected_student_count;
+  form.addEventListener("text-study-change", () => {
+    error.textContent = "";
+    updateNavigation();
+    if (current === 3) review();
+  });
   count.min = "1";
   count.max = "1000";
   count.step = "1";

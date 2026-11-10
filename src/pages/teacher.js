@@ -30,6 +30,9 @@ import {
 } from "../components/lesson-editor.js";
 import { learningTabs } from "../components/deepening.js";
 import { deepeningTeacher, deepeningEditor } from "./deepening-teacher.js";
+import { textStudyPage } from "./text-study.js";
+import { bindTextStudyEditor } from "../components/text-study-editor.js";
+import { saveLessonPdf } from "../services/lesson-pdf.js";
 export function teacherShell(root, page, activity, content) {
   const base = activity ? `/teacher/activity/${e(activity.id)}` : "";
   const deep = page.startsWith("deepening");
@@ -38,6 +41,7 @@ export function teacherShell(root, page, activity, content) {
     activity && !deep
       ? [
           ["background", "book-open", "배경 탐구", `${base}/background`],
+          ["text-study", "file-text", "본문 학습", `${base}/text-study`],
           ["gallery", "images", "등장인물 갤러리", `${base}/gallery`],
           ["scenes", "file-text", "사건 분석", `${base}/scenes`],
         ]
@@ -141,6 +145,7 @@ export async function teacherPage(root, path) {
 
     if (!parts[4]) return navigate(`/teacher/activity/${id}/background`, true);
     if (parts[4] === "background") return backgroundTeacher(root, data);
+    if (parts[4] === "text-study") return textStudyPage(root, data);
     if (parts[4] === "gallery") return galleryPage(root, data);
     if (parts[4] === "scenes") return galleryPage(root, data, "scene");
     if (parts[4] === "analytics") return analyticsPage(root, data);
@@ -290,9 +295,12 @@ async function activityEditor(root, a) {
     `${pageHeading("CREATE YOUR CLASS", a ? "수업 정보 수정" : "수업 만들기", "네 단계로 준비하는, 우리만의 문학 수업.")}${lessonEditorView(a)}`,
   );
   const form = root.querySelector("#activity-form");
+  const textStudy = bindTextStudyEditor(root, a);
+  let savedId = a?.id;
   const wizard = bindLessonWizard(form, {
     editing: !!a,
     initialQuestions: a?.settings?.submission_questions || [],
+    textStudy,
   });
   initSelects(root);
   refreshIcons();
@@ -323,9 +331,11 @@ async function activityEditor(root, a) {
         enable_scene: true,
         max_images: 1,
         submission_questions: wizard.questions(),
+        text_study: textStudy.value(),
       },
     };
     delete activity.submission_question;
+    delete activity.pdf_password;
     delete activity.password;
     delete activity.confirm_password;
     delete activity.max_images;
@@ -341,11 +351,17 @@ async function activityEditor(root, a) {
     refreshIcons();
     try {
       const saved = await request("teacher/save", {
-        id: a?.id,
+        id: savedId,
         activity,
-        ...(!a ? { password: values.password } : {}),
+        ...(!savedId ? { password: values.password } : {}),
       });
       if (saved.access) rememberAccess(saved.id, saved.access);
+      savedId = saved.id;
+      await saveLessonPdf(
+        saved.id,
+        activity.settings.text_study,
+        textStudy.file(),
+      );
       toast(
         a
           ? "수업 정보를 저장했어요."
@@ -363,6 +379,7 @@ async function activityEditor(root, a) {
       refreshIcons();
     }
   };
+  return () => textStudy.dispose();
 }
 async function livePage(root, data) {
   const id = data.activity.id;

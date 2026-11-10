@@ -45,6 +45,23 @@ const js = await readFile(resolve(output, script[1]), "utf8");
 const moduleSource = `data:text/javascript;base64,${Buffer.from(js).toString("base64")}`;
 const css = await readFile(resolve(output, stylesheet[1]), "utf8");
 const assets = {};
+async function embedDocuments(folder, prefix = "/document-assets") {
+  for (const entry of await readdir(folder, { withFileTypes: true })) {
+    const path = resolve(folder, entry.name);
+    if (entry.isDirectory())
+      await embedDocuments(path, `${prefix}/${entry.name}`);
+    else {
+      const type = entry.name.endsWith(".js")
+        ? "text/javascript"
+        : entry.name.endsWith(".wasm")
+          ? "application/wasm"
+          : "application/octet-stream";
+      assets[`${prefix}/${entry.name}`] =
+        `data:${type};base64,${(await readFile(path)).toString("base64")}`;
+    }
+  }
+}
+await embedDocuments(resolve(output, "document-assets"));
 for (const filename of await readdir(resolve(output, "art"))) {
   const type = { ".webp": "image/webp", ".svg": "image/svg+xml" }[
     extname(filename)

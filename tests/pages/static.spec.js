@@ -97,7 +97,7 @@ for (const [name, entry, embedded] of entries) {
     await page
       .getByRole("button", { name: "수업 만들기", exact: true })
       .click();
-    await expect(tabs(page).getByRole("link")).toHaveCount(3);
+    await expect(tabs(page).getByRole("link")).toHaveCount(4);
     await expect(page).toHaveURL(/#\/teacher\/activity\/[^/]+\/background$/);
     await page
       .getByLabel("학생들에게 보낼 질문")

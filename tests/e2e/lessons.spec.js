@@ -24,7 +24,7 @@ async function createLesson(page, title) {
     .getByLabel("비밀번호 확인", { exact: true })
     .fill("lesson-test-password");
   await page.getByRole("button", { name: "수업 만들기", exact: true }).click();
-  await expect(tabs(page).getByRole("link")).toHaveCount(3);
+  await expect(tabs(page).getByRole("link")).toHaveCount(4);
   await expect(
     tabs(page).getByRole("link", { name: "배경 탐구" }),
   ).toHaveAttribute("aria-current", "page");

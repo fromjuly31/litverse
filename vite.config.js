@@ -1,5 +1,7 @@
 import { defineConfig } from "vite";
+import { documentAssets } from "./scripts/document-assets.mjs";
 export default defineConfig({
+  plugins: [documentAssets()],
   server: {
     port: 5173,
     strictPort: true,

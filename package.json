@@ -10,15 +10,19 @@
     "preview:pages": "node scripts/serve-pages.mjs",
     "test:pages": "playwright test --config playwright.pages.config.js",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node --test tests/unit.test.js tests/server.test.js tests/archive.test.js tests/deepening.test.js",
+    "test": "node --test tests/unit.test.js tests/server.test.js tests/archive.test.js tests/deepening.test.js tests/text-study.test.js",
     "test:e2e": "playwright test",
     "dev:netlify": "npx --yes netlify-cli dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
+    "@tesseract.js-data/eng": "1.0.0",
+    "@tesseract.js-data/kor": "1.0.0",
     "gsap": "^3.0.0",
     "lucide": "^0.468.0",
+    "pdfjs-dist": "6.5.438",
     "qrcode": "^1.5.4",
+    "tesseract.js": "7.0.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {

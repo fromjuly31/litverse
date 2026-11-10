@@ -9,6 +9,7 @@ import "./styles/entrance.css";
 import "./styles/screens.css";
 import "./styles/deepening.css";
 import "./styles/editor.css";
+import "./styles/text-study.css";
 import { museumHeader } from "./components/museum-shell.js";
 import { museumHome, exhibitionPage } from "./pages/museum.js";
 import { adminPage } from "./pages/lesson-access.js";

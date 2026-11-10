@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { textStudySchema } from "../../src/utils/text-study.js";
 import { normalizeTags } from "../../src/utils/domain.js";
 import {
   MAX_SUBMISSION_QUESTIONS,
@@ -40,6 +41,7 @@ export const activitySchema = z.object({
     require_approval: z.boolean(),
     enable_scene: z.literal(true),
     max_images: z.literal(1),
+    text_study: textStudySchema.optional(),
     submission_questions: z
       .array(text(1, QUESTION_MAX_LENGTH))
       .min(1)

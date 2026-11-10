@@ -1,4 +1,6 @@
 import { seedData } from "./seed.js";
+import { textStudySchema } from "../utils/text-study.js";
+import { removeDocuments } from "./document-store.js";
 import { demoArchive } from "./demo-archive.js";
 import { demoDeepening } from "./demo-deepening.js";
 import { passwordHash, issueDemoAccess } from "./demo-access.js";
@@ -105,6 +107,10 @@ export async function demoRequest(action, payload = {}) {
         images: state.images.filter((i) => i.activity_id === a.id),
       };
     } else if (action === "teacher/save") {
+      if (payload.activity.settings?.text_study !== undefined)
+        payload.activity.settings.text_study = textStudySchema.parse(
+          payload.activity.settings.text_study,
+        );
       if (payload.activity.settings?.submission_questions !== undefined)
         payload.activity.settings.submission_questions =
           validateSubmissionQuestions(
@@ -227,6 +233,7 @@ export async function demoRequest(action, payload = {}) {
       result = { ok: true };
     } else if (action === "teacher/delete-activity") {
       activity();
+      await removeDocuments(payload.id);
       state.images = state.images.filter((i) => i.activity_id !== payload.id);
       state.worksheets = state.worksheets.filter(
         (w) => w.activity_id !== payload.id,
