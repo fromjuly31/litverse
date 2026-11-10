@@ -5,7 +5,6 @@ import {
   initSelects,
   refreshIcons,
   field,
-  formErrors,
   openModal,
   confirmDialog,
   copyText,
@@ -17,8 +16,6 @@ import { publicRouteUrl, currentRoute } from "../utils/paths.js";
 import {
   STAGES,
   DEFAULT_TASKS,
-  DEFAULT_TAGS,
-  STYLES,
   normalizeTags,
   submissionProgress,
 } from "../utils/domain.js";
@@ -33,7 +30,11 @@ import { rememberAccess, forgetLessons } from "../services/access.js";
 import { finalizePage, completedLesson } from "./finalize.js";
 import { showcasePage } from "./showcase.js";
 import { museumHeader, museumFooter } from "../components/museum-shell.js";
-import { synopsisPanel, bindSynopsis } from "../components/synopsis.js";
+import { bindSynopsis } from "../components/synopsis.js";
+import {
+  lessonEditorView,
+  bindLessonWizard,
+} from "../components/lesson-editor.js";
 import { learningTabs } from "../components/deepening.js";
 import { deepeningTeacher, deepeningEditor } from "./deepening-teacher.js";
 export function teacherShell(root, page, activity, content) {
@@ -53,7 +54,7 @@ export function teacherShell(root, page, activity, content) {
   const project =
     activity && !deep
       ? `<section class="lesson-context" aria-label="현재 수업">
-    <div class="lesson-context-heading"><div><span class="eyebrow">${e(activity.course_name || "문학 수업")}</span><h2>${e(activity.title)}</h2><p>${e(activity.author)} · ${e(activity.class_name || "학급 미지정")} <span class="badge">${e(STAGES[activity.stage])}</span></p></div><div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div></div>
+    <div class="lesson-context-heading"><div><span class="eyebrow">${e(activity.course_name || "문학 수업")}</span><h2>${e(activity.title)}</h2><p>${e(activity.author)} · ${e(activity.course_name || "문학 수업")} <span class="badge">${e(STAGES[activity.stage])}</span></p></div><div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div></div>
     <nav class="lesson-tabs" aria-label="수업 활동">${tabs.map(([key, ico, label, path], index) => `<a href="${path}" ${active(key) ? 'class="active" aria-current="page"' : ""}><span class="lesson-tab-number">0${index + 1}</span>${icon(ico)}<span>${label}</span></a>`).join("")}</nav>
   </section>`
       : "";
@@ -294,19 +295,13 @@ async function activityEditor(root, a) {
     root,
     a ? "edit" : "new",
     a,
-    `${pageHeading("CREATE YOUR CLASS", a ? "수업 정보 수정" : "수업 만들기", "작품 정보와 수업 설정을 저장하면 배경 탐구·등장인물 갤러리·사건 분석을 시작할 수 있어요.")}<form id="activity-form" class="editor" novalidate><section class="panel editor-section"><h2>01. 작품과 학급 정보</h2><div class="form-grid">${field("작품 제목", "title", a?.title, { required: true, max: 120, placeholder: "예: 동백꽃" })}${field("작가", "author", a?.author, { required: true, max: 80, placeholder: "예: 김유정" })}${field("수업명", "course_name", a?.course_name, { max: 120, placeholder: "예: 문학의 다양한 시선" })}${field("학급명", "class_name", a?.class_name, { max: 80, placeholder: "예: 2학년 3반" })}<div class="full">${field("수업 소개", "introduction", a?.introduction, { area: true, required: true, max: 3000, placeholder: "학생들에게 작품과 활동을 소개해 주세요." })}</div>${field("예상 참여 인원", "expected_student_count", a?.expected_student_count || 30, { type: "number", hint: "실제 참여 인원과 구분해 표시합니다." })}<div class="field"><span>기본 이미지 스타일</span>${customSelect({ name: "default_image_style", label: "기본 이미지 스타일", value: a?.default_image_style || STYLES[0], options: STYLES })}</div></div></section>${synopsisPanel(a?.synopsis)}${!a ? `<section class="panel editor-section class-password-panel"><h2>이 수업의 비밀번호</h2><div class="form-grid">${field("수업 비밀번호", "password", "", { type: "password", required: true, max: 128, hint: "8자 이상. 이 비밀번호를 입력해야 수업을 이어갈 수 있습니다." })}${field("비밀번호 확인", "confirm_password", "", { type: "password", required: true, max: 128 })}</div></section>` : ""}<section class="panel editor-section"><h2>02. 수업 목표와 활동 안내</h2><div class="stack">${field("수업 목표", "objectives", a?.objectives, { area: true, max: 2000, placeholder: "예: 인물의 말과 행동을 근거로 성격을 해석하고 서로 다른 해석을 비교한다." })}${field("교과 성취기준", "standards", a?.standards, { max: 1000, hint: "공식 교육과정의 코드와 문구를 직접 입력해 주세요." })}<div class="field"><span>학생이 해야 할 일 <b class="required">*</b></span><div class="task-list" id="task-list"></div><div>${button("할 일 추가", "plus", "ghost", 'id="add-task"')}</div></div>${field("작품의 배경 정보", "background", a?.background, { area: true, max: 2000 })}${field("프롬프트에 덧붙일 표현 안내", "prompt_template", a?.prompt_template, { area: true, max: 2000, hint: "학생의 해석을 바꾸지 않는 공통 표현 안내를 작성해 주세요." })}</div></section><section class="panel editor-section"><h2>03. 수업에 맞는 설정</h2><div class="stack">${field("기본 성격 키워드", "tags", (a?.tags || DEFAULT_TAGS).join(", "), { area: true, hint: "쉼표로 구분해 주세요. 학생도 새로운 키워드를 추가할 수 있어요." })}<div class="notice">인물 사진 한 장과 사건 장면 사진 한 장을 각각 제출합니다. 두 분석과 두 프롬프트는 필수입니다.</div>${[
-      ["allow_resubmit", "학생 이미지 재제출 허용", true],
-      ["require_approval", "공개 전시 전 교사 승인 필요", true],
-    ]
-      .map(
-        ([name, label, def]) =>
-          `<label class="check-field"><input type="checkbox" name="${name}" ${(a?.settings[name] ?? def) ? "checked" : ""}/><span>${label}</span></label>`,
-      )
-      .join(
-        "",
-      )}</div></section><p class="step-error" role="alert" id="editor-error"></p><div class="form-actions"><a class="btn secondary" href="${a ? `/teacher/activity/${a.id}/settings` : "/teacher"}">취소</a><button type="submit" class="btn primary">${icon("check")}${a ? "변경 사항 저장" : "수업 만들기"}</button></div></form>`,
+    `${pageHeading("CREATE YOUR CLASS", a ? "수업 정보 수정" : "수업 만들기", "네 단계로 준비하는, 우리만의 문학 수업.")}${lessonEditorView(a)}`,
   );
   const form = root.querySelector("#activity-form");
+  const wizard = bindLessonWizard(form, {
+    editing: !!a,
+    getTasks: () => tasks,
+  });
   bindSynopsis(root, () => ({
     title: form.elements.title.value,
     author: form.elements.author.value,
@@ -316,7 +311,7 @@ async function activityEditor(root, a) {
     list.innerHTML = tasks
       .map(
         (t, i) =>
-          `<div class="task-item"><span class="task-index">${i + 1}</span><input data-task="${i}" aria-label="할 일 ${i + 1}" value="${e(t)}" maxlength="300"/><div class="task-controls"><button class="icon-btn" type="button" data-move="${i}" data-dir="-1" aria-label="할 일 ${i + 1} 위로" ${i === 0 ? "disabled" : ""}>${icon("move-up")}</button><button class="icon-btn" type="button" data-move="${i}" data-dir="1" aria-label="할 일 ${i + 1} 아래로" ${i === tasks.length - 1 ? "disabled" : ""}>${icon("move-down")}</button><button type="button" class="icon-btn" data-remove="${i}" aria-label="할 일 ${i + 1} 삭제">${icon("x")}</button></div></div>`,
+          `<div class="task-item"><span class="task-index">${i + 1}</span><textarea rows="1" data-task="${i}" aria-label="할 일 ${i + 1}" maxlength="300">${e(t)}</textarea><div class="task-controls"><button class="icon-btn" type="button" data-move="${i}" data-dir="-1" aria-label="할 일 ${i + 1} 위로" ${i === 0 ? "disabled" : ""}>${icon("move-up")}</button><button class="icon-btn" type="button" data-move="${i}" data-dir="1" aria-label="할 일 ${i + 1} 아래로" ${i === tasks.length - 1 ? "disabled" : ""}>${icon("move-down")}</button><button type="button" class="icon-btn" data-remove="${i}" aria-label="할 일 ${i + 1} 삭제">${icon("x")}</button></div></div>`,
       )
       .join("");
     refreshIcons();
@@ -348,37 +343,25 @@ async function activityEditor(root, a) {
     }
     tasks.push("");
     drawTasks();
-    list.querySelector("[data-task]:last-of-type")?.focus();
+    list.querySelector(`[data-task="${tasks.length - 1}"]`)?.focus();
   };
   initSelects(root);
   refreshIcons();
+  let saving = false;
   form.onsubmit = async (ev) => {
     ev.preventDefault();
-    if (formErrors(form)) return;
+    if (saving) return;
+    if (wizard.current < 3) {
+      wizard.next();
+      return;
+    }
+    if (!wizard.validateAll()) return;
     const values = Object.fromEntries(new FormData(form));
-    if (
-      !a &&
-      (values.password.length < 8 ||
-        values.password !== values.confirm_password)
-    ) {
-      root.querySelector("#editor-error").textContent =
-        "비밀번호를 8자 이상으로 입력하고 확인란에 동일하게 적어 주세요.";
-      return;
-    }
     const count = Number(values.expected_student_count);
-    if (!Number.isInteger(count) || count < 1 || count > 1000) {
-      root.querySelector("#editor-error").textContent =
-        "예상 참여 인원은 1~1,000 사이의 정수로 입력해 주세요.";
-      return;
-    }
     const cleanedTasks = tasks.map((t) => t.trim()).filter(Boolean);
-    if (!cleanedTasks.length) {
-      root.querySelector("#editor-error").textContent =
-        "학생이 해야 할 일을 하나 이상 작성해 주세요.";
-      return;
-    }
     const activity = {
       ...values,
+      class_name: a?.class_name || "",
       expected_student_count: count,
       tasks: cleanedTasks,
       tags: normalizeTags(values.tags, 50),
@@ -396,7 +379,12 @@ async function activityEditor(root, a) {
     delete activity.require_approval;
     delete activity.enable_scene;
     const btn = form.querySelector("[type=submit]");
+    saving = true;
     btn.disabled = true;
+    form.setAttribute("aria-busy", "true");
+    const originalLabel = btn.innerHTML;
+    btn.innerHTML = `${icon("loader-circle")} 저장 중…`;
+    refreshIcons();
     try {
       const saved = await request("teacher/save", {
         id: a?.id,
@@ -414,7 +402,11 @@ async function activityEditor(root, a) {
       );
     } catch (error) {
       root.querySelector("#editor-error").textContent = error.message;
+      saving = false;
       btn.disabled = false;
+      btn.innerHTML = originalLabel;
+      form.removeAttribute("aria-busy");
+      refreshIcons();
     }
   };
 }

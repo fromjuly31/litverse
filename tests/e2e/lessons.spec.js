@@ -9,10 +9,10 @@ async function createLesson(page, title) {
   await page.getByLabel("작품 제목").fill(title);
   await page.getByLabel("작가", { exact: true }).fill("수업 작가");
   await page.getByLabel("수업명", { exact: true }).fill(`${title} 함께 읽기`);
-  await page.getByLabel("학급명").fill("1학년 2반");
   await page
     .getByLabel("수업 소개", { exact: true })
     .fill("본문의 근거로 배경, 인물과 사건을 함께 읽습니다.");
+  await page.getByRole("tab", { name: "4단계 확인과 시작" }).click();
   await page
     .getByLabel("수업 비밀번호", { exact: true })
     .fill("lesson-test-password");
@@ -78,9 +78,11 @@ test("classroom creates isolated lesson projects and restores saved settings", a
   await page
     .getByRole("button", { name: "수업 정보 수정", exact: true })
     .click();
+  await page.getByRole("tab", { name: "2단계 줄거리와 목표" }).click();
   await page
     .getByLabel("수업 목표", { exact: true })
     .fill("본문 근거를 중심으로 세 가지 관점을 비교한다.");
+  await page.getByRole("tab", { name: "4단계 확인과 시작" }).click();
   await page.getByRole("button", { name: "변경 사항 저장" }).click();
   await expect(page).toHaveURL(`${first}/settings`);
   await page.reload();

@@ -13,6 +13,7 @@ import { generateSynopsis } from "../netlify/lib/synopsis.js";
 import { runDeletion } from "../netlify/lib/server.js";
 import { finalResult, publicLesson } from "../src/utils/archive.js";
 import { seedData } from "../src/services/seed.js";
+import { passwordHash, checkPassword } from "../src/services/demo-access.js";
 
 test("password hashes are salted and grants are scoped, expiring and versioned", async () => {
   process.env.TOKEN_SECRET = "test-only-token-secret-of-at-least-32-characters";
@@ -22,7 +23,7 @@ test("password hashes are salted and grants are scoped, expiring and versioned",
   assert.ok(!first.includes("class-password"));
   assert.ok(await verifyPassword("class-password", first));
   assert.equal(await verifyPassword("wrong-password", first), false);
-  await assert.rejects(hashPassword("short"));
+  await assert.rejects(hashPassword("123"));
   const { token } = issueAccess("lesson-one", 1);
   assert.ok(verifyAccess(token, "lesson-one", 1));
   assert.equal(verifyAccess(token, "lesson-two", 1), false);
@@ -35,6 +36,22 @@ test("password hashes are salted and grants are scoped, expiring and versioned",
   } finally {
     Date.now = now;
   }
+});
+
+test("four-character lesson passwords work in server and demo modes", async () => {
+  for (const password of ["1234", "문학수업"]) {
+    const serverHash = await hashPassword(password);
+    assert.ok(await verifyPassword(password, serverHash));
+    assert.equal(await verifyPassword("4321", serverHash), false);
+    const demoHash = await passwordHash(password);
+    assert.ok(await checkPassword(password, demoHash));
+    assert.equal(await checkPassword("4321", demoHash), false);
+  }
+  for (const invalid of ["", "123", "x".repeat(129), null]) {
+    await assert.rejects(hashPassword(invalid));
+    await assert.rejects(passwordHash(invalid));
+  }
+  await assert.rejects(passwordHash("1234", undefined, 8));
 });
 
 test("AI summary handles schema, unknown works, refusal and missing configuration", async () => {

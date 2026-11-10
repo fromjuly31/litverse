@@ -159,6 +159,7 @@ export function openModal({
   document.body.style.overflow = "hidden";
   document.querySelector("#app").inert = true;
   document.querySelector("#overlays").append(overlay);
+  initPasswordFields(overlay);
   const focusable = () =>
     [
       ...overlay.querySelectorAll(
@@ -413,11 +414,37 @@ export function field(
     type = "text",
     max = 2000,
     placeholder = "",
+    minLength,
+    autocomplete = "",
   } = {},
 ) {
   const hintId = `field-hint-${++selectId}`;
-  const attrs = `aria-label="${e(label)}" ${hint ? `aria-describedby="${hintId}"` : ""}`;
-  return `<label class="field"><span>${e(label)}${required ? '<b class="required" aria-hidden="true">*</b>' : ""}</span>${area ? `<textarea name="${e(name)}" ${attrs} maxlength="${max}" placeholder="${e(placeholder)}" ${required ? "required" : ""}>${e(value)}</textarea>` : `<input name="${e(name)}" ${attrs} type="${type}" value="${e(value)}" maxlength="${max}" placeholder="${e(placeholder)}" ${required ? "required" : ""}/>`}${hint ? `<small id="${hintId}">${e(hint)}</small>` : ""}</label>`;
+  const controlId = `field-control-${selectId}`;
+  const attrs = `id="${controlId}" aria-label="${e(label)}" ${hint ? `aria-describedby="${hintId}"` : ""} ${minLength !== undefined ? `minlength="${minLength}"` : ""} ${autocomplete ? `autocomplete="${e(autocomplete)}"` : ""}`;
+  const input = `<input name="${e(name)}" ${attrs} type="${type}" value="${e(value)}" maxlength="${max}" placeholder="${e(placeholder)}" ${required ? "required" : ""}/>`;
+  const control =
+    type === "password"
+      ? `<div class="password-input">${input}<button type="button" class="password-toggle" data-password-toggle aria-label="${e(label)} 표시" aria-pressed="false">${icon("eye")}</button></div>`
+      : input;
+  if (type === "password")
+    return `<div class="field"><label for="${controlId}">${e(label)}${required ? '<b class="required" aria-hidden="true">*</b>' : ""}</label>${control}${hint ? `<small id="${hintId}">${e(hint)}</small>` : ""}</div>`;
+  return `<label class="field"><span>${e(label)}${required ? '<b class="required" aria-hidden="true">*</b>' : ""}</span>${area ? `<textarea name="${e(name)}" ${attrs} maxlength="${max}" placeholder="${e(placeholder)}" ${required ? "required" : ""}>${e(value)}</textarea>` : control}${hint ? `<small id="${hintId}">${e(hint)}</small>` : ""}</label>`;
+}
+export function initPasswordFields(root) {
+  root.querySelectorAll("[data-password-toggle]").forEach((toggle) => {
+    toggle.onclick = () => {
+      const input = toggle.previousElementSibling;
+      const visible = input.type === "password";
+      input.type = visible ? "text" : "password";
+      toggle.setAttribute("aria-pressed", String(visible));
+      toggle.setAttribute(
+        "aria-label",
+        `${input.getAttribute("aria-label")} ${visible ? "숨기기" : "표시"}`,
+      );
+      toggle.innerHTML = icon(visible ? "eye-off" : "eye");
+      refreshIcons();
+    };
+  });
 }
 export function formErrors(form) {
   let first;

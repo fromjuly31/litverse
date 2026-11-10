@@ -87,12 +87,13 @@ for (const [name, entry, embedded] of entries) {
     await page
       .getByLabel("수업 소개", { exact: true })
       .fill("배경과 인물과 사건을 읽는 정적 HTML 수업입니다.");
+    await page.getByRole("tab", { name: "4단계 확인과 시작" }).click();
     await page
       .getByLabel("수업 비밀번호", { exact: true })
-      .fill("pages-test-password");
+      .fill("1234");
     await page
       .getByLabel("비밀번호 확인", { exact: true })
-      .fill("pages-test-password");
+      .fill("1234");
     await page
       .getByRole("button", { name: "수업 만들기", exact: true })
       .click();
@@ -122,7 +123,7 @@ for (const [name, entry, embedded] of entries) {
     await otherTab.goto(new URL(link, page.url()).href);
     await otherTab
       .getByLabel("수업 비밀번호", { exact: true })
-      .fill("pages-test-password");
+      .fill("1234");
     await otherTab
       .getByRole("button", { name: "수업 열기", exact: true })
       .click();

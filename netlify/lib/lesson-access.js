@@ -1,14 +1,11 @@
 import { scrypt, randomBytes, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { check, fail, hmac } from "./server.js";
+import { passwordLengthError } from "../../src/utils/password.js";
 const derive = promisify(scrypt);
 export async function hashPassword(password) {
-  if (
-    typeof password !== "string" ||
-    password.length < 8 ||
-    password.length > 128
-  )
-    fail(400, "비밀번호는 8~128자로 입력해 주세요.");
+  const problem = passwordLengthError(password);
+  if (problem) fail(400, problem);
   const salt = randomBytes(24).toString("hex");
   const hash = await derive(password, salt, 64, {
     N: 32768,

@@ -17,7 +17,7 @@ export async function unlockPage(root, id, next) {
   const a = (await request("public/list")).find((a) => a.id === id);
   if (!a) throw new Error("수업을 찾을 수 없어요.");
   const setup = a.needs_password_setup;
-  root.innerHTML = `${museumHeader()}<main id="main" class="lesson-lock"><section class="lock-card"><span class="eyebrow">A KEY TO YOUR CLASSROOM</span><h1>${e(a.title)}</h1><p>${e(a.author)} · ${e(a.class_name || "문학 수업")}</p><div class="lock-symbol">${icon("lock-keyhole")}</div><h2>${setup ? "이 수업의 비밀번호를 설정해 주세요." : "우리 수업의 문을 다시 열어요."}</h2><p>${setup ? "이전 데모 수업에 처음 한 번 비밀번호를 정합니다. 다음부터 이 비밀번호로 이어갈 수 있어요." : "수업을 만들 때 설정한 비밀번호를 입력해 주세요."}</p><form id="unlock-form" novalidate>${field("수업 비밀번호", "password", "", { type: "password", required: true, max: 128, hint: "8자 이상 · 비밀번호는 공개되지 않습니다." })}${setup ? field("비밀번호 확인", "confirm_password", "", { type: "password", required: true, max: 128 }) : ""}<p class="step-error" role="alert"></p><button class="btn primary" type="submit">${icon("arrow-right")} ${setup ? "비밀번호 설정하고 시작" : "수업 열기"}</button></form><a class="text-link" href="/teacher">${icon("arrow-left")} 수업 목록으로</a></section></main>${museumFooter()}`;
+  root.innerHTML = `${museumHeader()}<main id="main" class="lesson-lock"><section class="lock-card"><span class="eyebrow">A KEY TO YOUR CLASSROOM</span><h1>${e(a.title)}</h1><p>${e(a.author)} · ${e(a.course_name || "문학 수업")}</p><div class="lock-symbol">${icon("lock-keyhole")}</div><h2>${setup ? "이 수업의 비밀번호를 설정해 주세요." : "우리 수업의 문을 다시 열어요."}</h2><p>${setup ? "이전 데모 수업에 처음 한 번 비밀번호를 정합니다. 다음부터 이 비밀번호로 이어갈 수 있어요." : "수업을 만들 때 설정한 비밀번호를 입력해 주세요."}</p><form id="unlock-form" novalidate>${field("수업 비밀번호", "password", "", { type: "password", required: true, max: 128, minLength: 4, hint: "4자리 이상 · 비밀번호는 공개되지 않습니다." })}${setup ? field("비밀번호 확인", "confirm_password", "", { type: "password", required: true, max: 128 }) : ""}<p class="step-error" role="alert"></p><button class="btn primary" type="submit">${icon("arrow-right")} ${setup ? "비밀번호 설정하고 시작" : "수업 열기"}</button></form><a class="text-link" href="/teacher">${icon("arrow-left")} 수업 목록으로</a></section></main>${museumFooter()}`;
   const form = root.querySelector("form");
   form.elements.password.autocomplete = setup
     ? "new-password"
@@ -111,7 +111,7 @@ export async function adminPage(root) {
     if (ev.target.closest("[data-reset-password]")) {
       const modal = openModal({
         title: "수업 비밀번호 재설정",
-        body: `${field("새 수업 비밀번호", "password", "", { type: "password", required: true, max: 128 })}<p class="step-error" role="alert"></p>`,
+        body: `${field("새 수업 비밀번호", "password", "", { type: "password", required: true, max: 128, minLength: 4, hint: "4자리 이상으로 설정해 주세요." })}<p class="step-error" role="alert"></p>`,
         footer: button(
           "새 비밀번호 저장",
           "check",

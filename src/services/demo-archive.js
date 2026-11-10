@@ -35,7 +35,7 @@ export async function demoArchive(state, action, p) {
     if (action === "admin/setup") {
       if (state.admin_password)
         accessError("이미 관리자가 설정되어 있어요. 로그인해 주세요.");
-      state.admin_password = await passwordHash(p.password);
+      state.admin_password = await passwordHash(p.password, undefined, 8);
     } else if (!(await checkPassword(p.password, state.admin_password)))
       return done(
         { error: "관리자 비밀번호가 일치하지 않아요.", status: 401 },
@@ -72,24 +72,22 @@ export async function demoArchive(state, action, p) {
       );
     return done({
       total: all.length,
-      items: all
-        .slice(offset, offset + 24)
-        .map((a) => ({
-          ...publicLesson(a),
-          result: a.final_result,
-          images: state.images
-            .filter((i) =>
-              [
-                a.final_result.character.image_id,
-                a.final_result.scene.image_id,
-              ].includes(i.id),
-            )
-            .map(({ id, image_type, image_url }) => ({
-              id,
-              image_type,
-              image_url,
-            })),
-        })),
+      items: all.slice(offset, offset + 24).map((a) => ({
+        ...publicLesson(a),
+        result: a.final_result,
+        images: state.images
+          .filter((i) =>
+            [
+              a.final_result.character.image_id,
+              a.final_result.scene.image_id,
+            ].includes(i.id),
+          )
+          .map(({ id, image_type, image_url }) => ({
+            id,
+            image_type,
+            image_url,
+          })),
+      })),
     });
   }
   if (action === "public/exhibit") {

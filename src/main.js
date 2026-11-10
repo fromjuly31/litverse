@@ -8,6 +8,7 @@ import "./styles/archive.css";
 import "./styles/entrance.css";
 import "./styles/screens.css";
 import "./styles/deepening.css";
+import "./styles/editor.css";
 import { museumHeader } from "./components/museum-shell.js";
 import { museumHome, exhibitionPage } from "./pages/museum.js";
 import { adminPage } from "./pages/lesson-access.js";
@@ -15,6 +16,7 @@ import {
   closeOverlays,
   refreshIcons,
   initSelects,
+  initPasswordFields,
   icon,
   toast,
   button,
@@ -72,6 +74,7 @@ export async function render() {
     cleanup = dispose;
     refreshIcons();
     initSelects(surface);
+    initPasswordFields(surface);
     surface.querySelector("main")?.setAttribute("tabindex", "-1");
   } catch (error) {
     if (id !== renderId) return;

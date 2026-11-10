@@ -1,16 +1,20 @@
 import { randomCode } from "../utils/helpers.js";
+import {
+  LESSON_PASSWORD_MIN_LENGTH,
+  passwordLengthError,
+} from "../utils/password.js";
 const encoder = new TextEncoder();
 const hex = (bytes) =>
   [...new Uint8Array(bytes)]
     .map((x) => x.toString(16).padStart(2, "0"))
     .join("");
-export async function passwordHash(password, salt = randomCode()) {
-  if (
-    typeof password !== "string" ||
-    password.length < 8 ||
-    password.length > 128
-  )
-    throw new Error("비밀번호는 8~128자로 입력해 주세요.");
+export async function passwordHash(
+  password,
+  salt = randomCode(),
+  minimum = LESSON_PASSWORD_MIN_LENGTH,
+) {
+  const problem = passwordLengthError(password, minimum);
+  if (problem) throw new Error(problem);
   const key = await crypto.subtle.importKey(
     "raw",
     encoder.encode(password),
@@ -33,13 +37,7 @@ export async function passwordHash(password, salt = randomCode()) {
   return { salt, hash };
 }
 export async function checkPassword(password, record) {
-  if (
-    !record ||
-    typeof password !== "string" ||
-    password.length < 8 ||
-    password.length > 128
-  )
-    return false;
+  if (!record || passwordLengthError(password)) return false;
   return (await passwordHash(password, record.salt)).hash === record.hash;
 }
 const tokenHash = async (token) =>

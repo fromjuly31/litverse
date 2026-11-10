@@ -21,7 +21,7 @@ HTTP로 배포판을 미리 보려면 `npm run preview:pages`를 실행하고 `h
 
 ## GitHub에서 수동 배포
 
-현재는 GitHub에 코드만 보관합니다. 아래 배포 절차는 필요할 때 별도로 실행하며, 코드 푸시만으로는 배포되지 않습니다.
+[현재 데모 주소](https://fromjuly31.github.io/litverse/)에 변경 사항을 반영하려면 아래 절차를 실행합니다. 코드 푸시만으로는 배포되지 않습니다.
 
 1. 이 프로젝트 소스를 GitHub 저장소의 `main` 브랜치에 올립니다. `.github/workflows/deploy-pages.yml`, `src`, `public`, `scripts`, `tests`, `package.json`, `package-lock.json`, `vite.config.js`, `playwright.pages.config.js`, 개발용 `index.html`을 포함합니다. `.env`, `node_modules`, 로컬 테스트 산출물은 올리지 않습니다.
 2. 저장소의 **Settings → Pages → Build and deployment → Source**에서 **GitHub Actions**를 선택합니다.
