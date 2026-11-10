@@ -1,6 +1,17 @@
-import { field, button, customSelect, icon, formErrors } from "./ui.js";
-import { synopsisPanel } from "./synopsis.js";
-import { DEFAULT_TAGS, STYLES } from "../utils/domain.js";
+import {
+  field,
+  button,
+  customSelect,
+  icon,
+  formErrors,
+  refreshIcons,
+} from "./ui.js";
+import { STYLES } from "../utils/domain.js";
+import {
+  MAX_SUBMISSION_QUESTIONS,
+  QUESTION_MAX_LENGTH,
+  EXAMPLE_SUBMISSION_QUESTION,
+} from "../utils/submission-questions.js";
 import { e } from "../utils/helpers.js";
 import {
   LESSON_PASSWORD_MIN_LENGTH,
@@ -15,14 +26,14 @@ const steps = [
     "작품과 수업의 기본 정보를 정해요. 별표가 있는 항목은 꼭 입력해 주세요.",
   ],
   [
-    "줄거리와 목표",
+    "작품 줄거리",
     "어떤 이야기를 함께 나눌까요?",
-    "줄거리와 수업 목표는 선택 사항이에요. 필요한 내용만 작성하고 다음으로 이동하세요.",
+    "학생들과 함께 읽을 작품의 줄거리를 적어 주세요.",
   ],
   [
-    "활동과 설정",
-    "우리 수업에 맞게 다듬어 보세요.",
-    "기본 활동을 그대로 사용하거나, 순서와 안내를 자유롭게 바꿀 수 있어요.",
+    "질문 목록",
+    "사진과 함께 어떤 생각을 나눌까요?",
+    "학생들이 사진 파일을 제출하면서 응답할 질문을 1~3개 작성해 주세요.",
   ],
   [
     "확인과 시작",
@@ -51,43 +62,11 @@ export function lessonEditorView(a) {
       ${field("예상 참여 인원", "expected_student_count", a?.expected_student_count ?? 30, { type: "number", hint: "실제 참여 인원과 구분해 표시해요." })}
       <div class="field"><span id="image-style-label">기본 이미지 스타일</span>${customSelect({ name: "default_image_style", label: "기본 이미지 스타일", value: a?.default_image_style || STYLES[0], options: STYLES })}<small>학생은 활동 중 다른 스타일을 선택할 수 있어요.</small></div>
     </div></section>`,
-    `<div class="wizard-columns equal-columns">${synopsisPanel(a?.synopsis)}
-      <section class="panel editor-section">${cardHeading("수업 목표", "작품을 읽고 함께 발견할 내용을 적어 주세요.")}
-        <div class="stack">${field("수업 목표", "objectives", a?.objectives, { area: true, max: 2000, placeholder: "예: 인물의 말과 행동을 근거로 성격을 해석하고, 서로 다른 해석을 비교한다." })}
-        ${field("교과 성취기준", "standards", a?.standards, { max: 1000, placeholder: "예: 작품을 다양한 관점에서 해석하고 평가한다.", hint: "필요한 경우 교육과정의 코드와 문구를 입력해 주세요." })}</div>
-        <div class="editor-tip">${icon("info")}<p>줄거리와 목표는 수업을 만든 뒤에도 수정할 수 있어요.</p></div>
-      </section>
-    </div>`,
-    `<div class="wizard-columns">
-      <section class="panel editor-section">${cardHeading("학생 활동 안내", "수업에 맞게 순서를 바꾸거나 활동을 추가해 보세요.")}
-        <div class="field"><span>학생이 해야 할 일 <b class="required" aria-hidden="true">*</b></span><div class="task-list" id="task-list"></div><div>${button("할 일 추가", "plus", "secondary", 'type="button" id="add-task"')}</div></div>
-        <details class="editor-details"><summary>배경·표현 안내 추가 <span>선택</span>${icon("chevron-down")}</summary><div class="stack">
-          ${field("작품의 배경 정보", "background", a?.background, { area: true, max: 2000, placeholder: "학생들이 참고할 작품의 배경을 적어 주세요." })}
-          ${field("프롬프트에 덧붙일 표현 안내", "prompt_template", a?.prompt_template, { area: true, max: 2000, hint: "학생의 해석을 바꾸지 않는 공통 표현 안내를 작성해 주세요." })}
-        </div></details>
-      </section>
-      <section class="panel editor-section">${cardHeading("수업에 맞는 설정", "기본 설정으로도 바로 시작할 수 있어요.")}
-        <div class="stack">${field("기본 성격 키워드", "tags", (a?.tags || DEFAULT_TAGS).join(", "), { area: true, hint: "쉼표로 구분해 주세요. 학생도 키워드를 추가할 수 있어요." })}
-        ${[
-          [
-            "allow_resubmit",
-            "학생 이미지 재제출 허용",
-            "학생이 자신의 해석과 이미지를 다시 다듬을 수 있어요.",
-          ],
-          [
-            "require_approval",
-            "공개 전시 전 교사 승인 필요",
-            "선생님이 확인한 작품만 전시해요.",
-          ],
-        ]
-          .map(
-            ([name, label, hint]) =>
-              `<label class="check-field editor-setting"><input type="checkbox" name="${name}" ${(a?.settings?.[name] ?? true) ? "checked" : ""}/><span><strong>${label}</strong><small>${hint}</small></span></label>`,
-          )
-          .join("")}
-        <div class="editor-tip">${icon("images")}<p>학생은 인물 사진과 사건 장면 사진을 각각 한 장씩 제출해요.</p></div></div>
-      </section>
-    </div>`,
+    `<section class="panel editor-section synopsis-only">${field("작품 줄거리", "synopsis", a?.synopsis, { area: true, max: 1800, placeholder: "작품의 주요 인물과 사건, 이야기의 흐름을 적어 주세요.", hint: "줄거리는 수업을 만든 뒤에도 수정할 수 있어요." })}</section>`,
+    `<section class="panel editor-section question-editor">${cardHeading("사진 제출 질문", "작성한 질문은 학생의 사진 제출 화면에 표시돼요. 회색 예시는 저장되지 않습니다.")}
+      <div id="submission-question-list" class="submission-question-list"></div>
+      <div class="question-editor-actions">${button("질문 추가", "plus", "secondary", 'id="add-submission-question"')}<span id="submission-question-count" role="status"></span></div>
+    </section>`,
     `<div class="wizard-columns review-columns"><section class="panel editor-section">${cardHeading("수업 미리보기", "수정할 내용이 있으면 해당 단계로 돌아갈 수 있어요.")}<div id="lesson-review" class="lesson-review"></div></section>
       <section class="panel editor-section class-password-panel">${cardHeading(a ? "수업 준비 완료" : "이 수업의 비밀번호", a ? "확인한 내용으로 수업 정보를 저장해 주세요." : "이 비밀번호로 수업을 다시 열 수 있어요.")}
         ${a ? `<div class="editor-tip">${icon("lock-keyhole")}<p>기존 수업 비밀번호로 계속 이용할 수 있어요.</p></div>` : `<div class="stack">${field("수업 비밀번호", "password", "", { ...passwordOptions, placeholder: "4자리 이상 입력", hint: "4자리 이상 · 숫자와 문자를 사용할 수 있어요." })}${field("비밀번호 확인", "confirm_password", "", { ...passwordOptions, placeholder: "같은 비밀번호를 한 번 더 입력" })}</div><div class="editor-tip">${icon("lock-keyhole")}<p>수업을 이어갈 때 필요하니 따로 기억해 주세요. 비밀번호는 공개되지 않아요.</p></div>`}
@@ -114,20 +93,59 @@ export function lessonEditorView(a) {
   </form>`;
 }
 
-export function bindLessonWizard(form, { editing, getTasks }) {
+export function bindLessonWizard(form, { editing, initialQuestions = [] }) {
   let current = 0;
   const completed = new Set();
   const panels = [...form.querySelectorAll(".wizard-step")];
   const tabs = [...form.querySelectorAll("[data-editor-step]")];
   const error = form.querySelector("#editor-error");
   const value = (name) => form.elements.namedItem(name)?.value || "";
-  const tasks = () =>
-    getTasks()
-      .map((task) => task.trim())
+  const questionList = form.querySelector("#submission-question-list");
+  const questionValues = () =>
+    [...questionList.querySelectorAll("textarea")].map((input) => input.value);
+  const questions = () =>
+    questionValues()
+      .map((question) => question.trim())
       .filter(Boolean);
+  const drawQuestions = (values) => {
+    questionList.innerHTML = values
+      .map(
+        (question, index) =>
+          `<div class="submission-question-item"><span class="question-number" aria-hidden="true">${index + 1}.</span>${field(`질문 ${index + 1}`, "submission_question", question, { area: true, max: QUESTION_MAX_LENGTH, placeholder: index === 0 ? EXAMPLE_SUBMISSION_QUESTION : "학생이 사진과 함께 답할 질문을 입력해 주세요." })}<button type="button" class="icon-btn" data-remove-question="${index}" aria-label="질문 ${index + 1} 삭제">${icon("x")}</button></div>`,
+      )
+      .join("");
+    form.querySelector("#add-submission-question").disabled =
+      values.length >= MAX_SUBMISSION_QUESTIONS;
+    form.querySelector("#submission-question-count").textContent =
+      `${values.length} / ${MAX_SUBMISSION_QUESTIONS}개 · 최대 3개`;
+    refreshIcons();
+  };
+  form.querySelector("#add-submission-question").onclick = () => {
+    const values = questionValues();
+    if (values.length >= MAX_SUBMISSION_QUESTIONS) return;
+    drawQuestions([...values, ""]);
+    questionList.querySelectorAll("textarea")[values.length].focus();
+  };
+  questionList.onclick = (event) => {
+    const remove = event.target.closest("[data-remove-question]");
+    if (!remove) return;
+    const values = questionValues();
+    const index = Number(remove.dataset.removeQuestion);
+    values.splice(index, 1);
+    drawQuestions(values.length ? values : [""]);
+    questionList
+      .querySelectorAll("textarea")
+      [Math.min(index, Math.max(0, values.length - 1))].focus();
+  };
+  drawQuestions(
+    initialQuestions.length
+      ? initialQuestions.slice(0, MAX_SUBMISSION_QUESTIONS)
+      : [""],
+  );
 
   const fieldProblem = (name, message) => {
-    const input = form.elements.namedItem(name);
+    const input =
+      typeof name === "string" ? form.elements.namedItem(name) : name;
     input.setAttribute("aria-invalid", "true");
     let notice = input.closest(".field").querySelector(".field-error");
     if (!notice) {
@@ -153,7 +171,10 @@ export function bindLessonWizard(form, { editing, getTasks }) {
         count <= 1000
       );
     }
-    if (step === 2) return tasks().length > 0;
+    if (step === 2)
+      return (
+        questions().length > 0 && questions().length <= MAX_SUBMISSION_QUESTIONS
+      );
     if (step === 3 && !editing)
       return (
         !passwordLengthError(value("password")) &&
@@ -169,8 +190,10 @@ export function bindLessonWizard(form, { editing, getTasks }) {
       `<div class="review-heading"><h4>${label}</h4><button type="button" class="text-link" data-review-step="${step}" aria-label="${label} 수정">수정 ${icon("arrow-up-right")}</button></div>`;
     form.querySelector("#lesson-review").innerHTML =
       `<div>${heading("작품과 수업", 0)}<dl class="review-facts">${line("작품", `${value("title")} · ${value("author")}`)}${line("수업명", value("course_name"))}${line("참여 인원", `${value("expected_student_count")}명`)}${line("이미지 스타일", value("default_image_style"))}</dl></div>
-      <div>${heading("줄거리와 목표", 1)}<p class="review-excerpt">${e(value("objectives") || value("synopsis") || "별도로 입력한 줄거리와 목표가 없어요. 수업 중에도 추가할 수 있어요.")}</p></div>
-      <div>${heading("활동과 설정", 2)}<p class="review-excerpt">학생 활동 ${tasks().length}개 · ${form.elements.require_approval.checked ? "교사 승인 후 전시" : "바로 전시"} · ${form.elements.allow_resubmit.checked ? "재제출 허용" : "재제출 닫힘"}</p></div>`;
+      <div>${heading("작품 줄거리", 1)}<p class="review-excerpt">${e(value("synopsis") || "별도로 입력한 줄거리가 없어요. 수업 중에도 추가할 수 있어요.")}</p></div>
+      <div>${heading("질문 목록", 2)}<ol class="review-questions">${questions()
+        .map((question) => `<li>${e(question)}</li>`)
+        .join("")}</ol></div>`;
   };
 
   const updateNavigation = () => {
@@ -232,13 +255,11 @@ export function bindLessonWizard(form, { editing, getTasks }) {
           "예상 참여 인원은 1~1,000 사이의 정수로 입력해 주세요.",
         );
     }
-    if (step === 2 && !tasks().length) {
-      error.textContent = "학생이 해야 할 일을 하나 이상 작성해 주세요.";
-      (
-        form.querySelector("[data-task]") || form.querySelector("#add-task")
-      ).focus();
-      return false;
-    }
+    if (step === 2 && !questions().length)
+      return fieldProblem(
+        questionList.querySelector("textarea"),
+        "사진 제출 질문을 하나 이상 작성해 주세요. 회색 예시는 저장되지 않습니다.",
+      );
     if (step === 3 && !editing) {
       const problem = passwordLengthError(value("password"));
       if (problem) return fieldProblem("password", problem);
@@ -292,6 +313,7 @@ export function bindLessonWizard(form, { editing, getTasks }) {
 
   return {
     next,
+    questions,
     get current() {
       return current;
     },

@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { normalizeTags } from "../../src/utils/domain.js";
+import {
+  MAX_SUBMISSION_QUESTIONS,
+  QUESTION_MAX_LENGTH,
+  ANSWER_MAX_LENGTH,
+} from "../../src/utils/submission-questions.js";
 const text = (min, max) => z.string().trim().min(min).max(max);
 const optional = (max = 3000) => z.string().trim().max(max).default("");
 export const uuid = z.string().uuid();
@@ -35,6 +40,11 @@ export const activitySchema = z.object({
     require_approval: z.boolean(),
     enable_scene: z.literal(true),
     max_images: z.literal(1),
+    submission_questions: z
+      .array(text(1, QUESTION_MAX_LENGTH))
+      .min(1)
+      .max(MAX_SUBMISSION_QUESTIONS)
+      .optional(),
   }),
 });
 export const worksheetSchema = z.object({
@@ -73,6 +83,15 @@ export const uploadSchema = z.object({
   mime: z.enum(["image/jpeg", "image/png", "image/webp"]),
   hashtags: tags(5),
   one_line_description: text(1, 150),
+  question_responses: z
+    .array(
+      z.object({
+        question: text(1, QUESTION_MAX_LENGTH),
+        answer: text(1, ANSWER_MAX_LENGTH),
+      }),
+    )
+    .max(MAX_SUBMISSION_QUESTIONS)
+    .default([]),
 });
 export const questionSchema = z.object({
   kind: z.enum(["temporal", "spatial"]),

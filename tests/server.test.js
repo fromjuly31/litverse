@@ -25,6 +25,15 @@ test("PostgreSQL migration, access policies, atomic uploads and cleanup", async 
       "utf8",
     ),
   );
+  await db.exec(
+    await readFile(
+      new URL(
+        "../supabase/migrations/005_submission_questions.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
   const teacher = randomUUID(),
     otherTeacher = randomUUID(),
     activityId = randomUUID();
@@ -422,6 +431,75 @@ test("PostgreSQL migration, access policies, atomic uploads and cleanup", async 
         "select count(distinct worksheet_id)::int as students,count(*)::int as images from image_submissions",
       );
       assert.deepEqual(analytics.rows[0], { students: 30, images: 60 });
+    },
+  );
+  await t.test(
+    "photo questions and answers survive reservation, retries and replacement",
+    async () => {
+      const questions = [
+        "내가 파악한 인물의 특징은?",
+        "사진에 어떻게 표현했나요?",
+      ];
+      await db.query(
+        "update activities set settings=jsonb_set(settings,'{submission_questions}',$2::jsonb) where id=$1",
+        [activityId, JSON.stringify(questions)],
+      );
+      await assert.rejects(reserve(worksheet), /INVALID_QUESTION_RESPONSES/);
+      const responses = questions.map((question, index) => ({
+        question,
+        answer: `사진과 연결한 나의 해석 ${index + 1}`,
+      }));
+      await assert.rejects(
+        reserve(
+          worksheet,
+          upload({ question_responses: [...responses, responses[0]] }),
+        ),
+        /INVALID_QUESTION_RESPONSES/,
+      );
+      await assert.rejects(
+        reserve(
+          worksheet,
+          upload({
+            question_responses: responses.map((response) => ({
+              ...response,
+              answer: " ",
+            })),
+          }),
+        ),
+        /INVALID_QUESTION_RESPONSES/,
+      );
+      const reserved = await reserve(
+        worksheet,
+        upload({ question_responses: responses }),
+      );
+      assert.deepEqual(reserved.question_responses, responses);
+      const saved = await call("finalize_upload", {
+        a: activityId,
+        w: worksheet.id,
+        j: reserved.id,
+      });
+      assert.deepEqual(saved.question_responses, responses);
+      const again = await call("finalize_upload", {
+        a: activityId,
+        w: worksheet.id,
+        j: reserved.id,
+      });
+      assert.deepEqual(again.question_responses, responses);
+      const revised = responses.map((response) => ({
+        ...response,
+        answer: "수정한 사진 해석",
+      }));
+      const replacement = await reserve(
+        worksheet,
+        upload({ question_responses: revised }),
+      );
+      const replaced = await call("finalize_upload", {
+        a: activityId,
+        w: worksheet.id,
+        j: replacement.id,
+      });
+      assert.deepEqual(replaced.question_responses, revised);
+      assert.equal(replaced.id, saved.id);
     },
   );
   await t.test(

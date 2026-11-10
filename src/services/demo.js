@@ -2,6 +2,10 @@ import { seedData } from "./seed.js";
 import { demoArchive } from "./demo-archive.js";
 import { demoDeepening } from "./demo-deepening.js";
 import { passwordHash, issueDemoAccess } from "./demo-access.js";
+import {
+  validateQuestionResponses,
+  validateSubmissionQuestions,
+} from "../utils/submission-questions.js";
 import { randomCode } from "../utils/helpers.js";
 import {
   createPrompt,
@@ -101,6 +105,11 @@ export async function demoRequest(action, payload = {}) {
         images: state.images.filter((i) => i.activity_id === a.id),
       };
     } else if (action === "teacher/save") {
+      if (payload.activity.settings?.submission_questions !== undefined)
+        payload.activity.settings.submission_questions =
+          validateSubmissionQuestions(
+            payload.activity.settings.submission_questions,
+          );
       const id = payload.id || crypto.randomUUID();
       const previous = state.activities.find((a) => a.id === id);
       if (!previous)
@@ -373,6 +382,10 @@ export async function demoRequest(action, payload = {}) {
         image_url: payload.image_url,
         hashtags: normalizeTags(payload.hashtags),
         one_line_description: payload.one_line_description,
+        question_responses: validateQuestionResponses(
+          a,
+          payload.question_responses,
+        ),
         approval_status: a.settings.require_approval ? "pending" : "approved",
         created_at: new Date().toISOString(),
       };

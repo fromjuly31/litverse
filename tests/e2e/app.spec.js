@@ -235,6 +235,10 @@ test("activity creation, stage change, comparison, deletion and tag mapping use 
     .getByLabel("수업 소개", { exact: true })
     .fill("서로 다른 해석을 근거를 통해 나눠 보아요.");
   await choose(page, "기본 이미지 스타일", "연필 드로잉");
+  await page.getByRole("tab", { name: "3단계 질문 목록" }).click();
+  await page
+    .getByLabel("질문 1", { exact: true })
+    .fill("사진에 표현한 인물의 특징은?");
   await page.getByRole("tab", { name: "4단계 확인과 시작" }).click();
   await page
     .getByLabel("수업 비밀번호", { exact: true })

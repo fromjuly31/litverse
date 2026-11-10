@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateQuestionResponses } from "../../src/utils/submission-questions.js";
 import { archiveAction } from "../lib/archive.js";
 import { deepeningAction } from "../lib/deepening.js";
 import { lessonOwner, adminUser } from "../lib/lesson-access.js";
@@ -348,6 +349,10 @@ export async function dispatch(db, req, context, action, p) {
     }
     if (action === "student/upload-init") {
       const input = uploadSchema.parse(p);
+      input.question_responses = validateQuestionResponses(
+        a,
+        input.question_responses,
+      );
       const job = check(
         await db.rpc("reserve_upload", {
           p_activity: a.id,

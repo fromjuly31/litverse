@@ -4,7 +4,6 @@ import {
   customSelect,
   initSelects,
   refreshIcons,
-  field,
   openModal,
   confirmDialog,
   copyText,
@@ -13,12 +12,7 @@ import {
 import { request, isDemo, subscribe } from "../services/api.js";
 import { e, downloadText, safeStorage } from "../utils/helpers.js";
 import { publicRouteUrl, currentRoute } from "../utils/paths.js";
-import {
-  STAGES,
-  DEFAULT_TASKS,
-  normalizeTags,
-  submissionProgress,
-} from "../utils/domain.js";
+import { STAGES, DEFAULT_TASKS, submissionProgress } from "../utils/domain.js";
 import { artCard, showArt } from "../components/art.js";
 import { galleryPage, analyticsPage } from "./gallery.js";
 import { navigate, render } from "../main.js";
@@ -30,7 +24,6 @@ import { rememberAccess, forgetLessons } from "../services/access.js";
 import { finalizePage, completedLesson } from "./finalize.js";
 import { showcasePage } from "./showcase.js";
 import { museumHeader, museumFooter } from "../components/museum-shell.js";
-import { bindSynopsis } from "../components/synopsis.js";
 import {
   lessonEditorView,
   bindLessonWizard,
@@ -174,7 +167,7 @@ async function activityDetail(root, data) {
     root,
     "detail",
     a,
-    `${pageHeading("CLASS SETTINGS", "수업 설정", "진행 단계를 바꾸고 참여 현황을 확인하세요.", button("수업 정보 수정", "sliders-horizontal", "secondary", 'id="edit-activity"'))}<section class="panel"><div class="between wrap"><div><span class="eyebrow" style="margin-bottom:10px">ACTIVITY STATUS</span><h2>${STAGES[a.stage]}</h2></div><div class="flex wrap">${customSelect({ name: "stage", label: "활동 진행 단계", value: a.stage, options: Object.entries(STAGES).map(([value, label]) => ({ value, label })) })}${button("단계 변경", "check", "primary", 'id="change-stage"')}</div></div><hr class="divider"/><p class="muted" style="font-size:13px">배경 탐구에서 시간적·공간적 배경을 질문하고 정리한 뒤, 인물·사건 분석과 두 사진 제출을 차례로 열어 주세요. 종료 후에는 학생의 작성과 제출이 잠깁니다.</p><div class="flex wrap" style="margin-top:23px">${button("학생 참여 QR", "qr-code", "secondary", 'id="class-qr"')}<a class="btn ghost" href="/teacher/activity/${a.id}/live">제출 현황 ${icon("arrow-up-right")}</a></div></section>${statistics(data)}<div class="form-grid"><section class="panel"><h3>활동 소개</h3><p class="muted" style="font-size:14px;margin-top:18px;white-space:pre-wrap">${e(a.introduction)}</p><hr class="divider"/><h3>수업 목표</h3><p class="muted" style="font-size:13px;margin-top:15px">${e(a.objectives || "등록된 수업 목표가 없습니다.")}</p>${a.standards ? `<p class="muted" style="font-size:12px;margin-top:15px">${e(a.standards)}</p>` : ""}</section><section class="panel"><h3>학생 활동 안내</h3><ol class="student-task-list" style="margin-bottom:0">${a.tasks.map((t) => `<li>${e(t)}</li>`).join("")}</ol></section></div><div class="between wrap" style="margin-top:28px"><p class="muted" style="font-size:12px">분석 기록과 이미지 정보는 JSON 파일로 보관할 수 있습니다.</p><div class="flex wrap">${button("데이터 내보내기", "download", "secondary", 'id="export-data"')}${button("활동 삭제", "trash-2", "danger", 'id="delete-activity"')}</div></div>`,
+    `${pageHeading("CLASS SETTINGS", "수업 설정", "진행 단계를 바꾸고 참여 현황을 확인하세요.", button("수업 정보 수정", "sliders-horizontal", "secondary", 'id="edit-activity"'))}<section class="panel"><div class="between wrap"><div><span class="eyebrow" style="margin-bottom:10px">ACTIVITY STATUS</span><h2>${STAGES[a.stage]}</h2></div><div class="flex wrap">${customSelect({ name: "stage", label: "활동 진행 단계", value: a.stage, options: Object.entries(STAGES).map(([value, label]) => ({ value, label })) })}${button("단계 변경", "check", "primary", 'id="change-stage"')}</div></div><hr class="divider"/><p class="muted" style="font-size:13px">배경 탐구에서 시간적·공간적 배경을 질문하고 정리한 뒤, 인물·사건 분석과 두 사진 제출을 차례로 열어 주세요. 종료 후에는 학생의 작성과 제출이 잠깁니다.</p><div class="flex wrap" style="margin-top:23px">${button("학생 참여 QR", "qr-code", "secondary", 'id="class-qr"')}<a class="btn ghost" href="/teacher/activity/${a.id}/live">제출 현황 ${icon("arrow-up-right")}</a></div></section>${statistics(data)}<div class="form-grid"><section class="panel"><h3>활동 소개</h3><p class="muted" style="font-size:14px;margin-top:18px;white-space:pre-wrap">${e(a.introduction)}</p><hr class="divider"/><h3>작품 줄거리</h3><p class="muted" style="font-size:14px;margin-top:15px;white-space:pre-wrap">${e(a.synopsis || "등록된 줄거리가 없습니다.")}</p></section><section class="panel"><h3>${a.settings.submission_questions ? "사진 제출 질문" : "학생 활동 안내"}</h3><ol class="student-task-list" style="margin-bottom:0">${(a.settings.submission_questions || a.tasks).map((t) => `<li>${e(t)}</li>`).join("")}</ol></section></div><div class="between wrap" style="margin-top:28px"><p class="muted" style="font-size:12px">분석 기록과 이미지 정보는 JSON 파일로 보관할 수 있습니다.</p><div class="flex wrap">${button("데이터 내보내기", "download", "secondary", 'id="export-data"')}${button("활동 삭제", "trash-2", "danger", 'id="delete-activity"')}</div></div>`,
   );
   initSelects(root);
   root.querySelector("#edit-activity").onclick = () =>
@@ -290,7 +283,6 @@ export async function showQR(
   await display();
 }
 async function activityEditor(root, a) {
-  let tasks = [...(a?.tasks || DEFAULT_TASKS)];
   teacherShell(
     root,
     a ? "edit" : "new",
@@ -300,51 +292,8 @@ async function activityEditor(root, a) {
   const form = root.querySelector("#activity-form");
   const wizard = bindLessonWizard(form, {
     editing: !!a,
-    getTasks: () => tasks,
+    initialQuestions: a?.settings?.submission_questions || [],
   });
-  bindSynopsis(root, () => ({
-    title: form.elements.title.value,
-    author: form.elements.author.value,
-  }));
-  const list = root.querySelector("#task-list");
-  const drawTasks = () => {
-    list.innerHTML = tasks
-      .map(
-        (t, i) =>
-          `<div class="task-item"><span class="task-index">${i + 1}</span><textarea rows="1" data-task="${i}" aria-label="할 일 ${i + 1}" maxlength="300">${e(t)}</textarea><div class="task-controls"><button class="icon-btn" type="button" data-move="${i}" data-dir="-1" aria-label="할 일 ${i + 1} 위로" ${i === 0 ? "disabled" : ""}>${icon("move-up")}</button><button class="icon-btn" type="button" data-move="${i}" data-dir="1" aria-label="할 일 ${i + 1} 아래로" ${i === tasks.length - 1 ? "disabled" : ""}>${icon("move-down")}</button><button type="button" class="icon-btn" data-remove="${i}" aria-label="할 일 ${i + 1} 삭제">${icon("x")}</button></div></div>`,
-      )
-      .join("");
-    refreshIcons();
-  };
-  drawTasks();
-  list.oninput = (ev) => {
-    if (ev.target.dataset.task !== undefined)
-      tasks[Number(ev.target.dataset.task)] = ev.target.value;
-  };
-  list.onclick = (ev) => {
-    const move = ev.target.closest("[data-move]");
-    const remove = ev.target.closest("[data-remove]");
-    if (move) {
-      const i = Number(move.dataset.move),
-        j = i + Number(move.dataset.dir);
-      [tasks[i], tasks[j]] = [tasks[j], tasks[i]];
-      drawTasks();
-      list.querySelector(`[data-task="${j}"]`).focus();
-    }
-    if (remove) {
-      tasks.splice(Number(remove.dataset.remove), 1);
-      drawTasks();
-    }
-  };
-  root.querySelector("#add-task").onclick = () => {
-    if (tasks.length >= 20) {
-      toast("할 일은 최대 20개까지 등록할 수 있어요.", "error");
-      return;
-    }
-    tasks.push("");
-    drawTasks();
-    list.querySelector(`[data-task="${tasks.length - 1}"]`)?.focus();
-  };
   initSelects(root);
   refreshIcons();
   let saving = false;
@@ -358,20 +307,25 @@ async function activityEditor(root, a) {
     if (!wizard.validateAll()) return;
     const values = Object.fromEntries(new FormData(form));
     const count = Number(values.expected_student_count);
-    const cleanedTasks = tasks.map((t) => t.trim()).filter(Boolean);
     const activity = {
       ...values,
       class_name: a?.class_name || "",
       expected_student_count: count,
-      tasks: cleanedTasks,
-      tags: normalizeTags(values.tags, 50),
+      tasks: a?.tasks || DEFAULT_TASKS,
+      objectives: a?.objectives || "",
+      standards: a?.standards || "",
+      background: a?.background || "",
+      prompt_template: a?.prompt_template || "",
+      tags: a?.tags || [],
       settings: {
-        allow_resubmit: form.elements.allow_resubmit.checked,
-        require_approval: form.elements.require_approval.checked,
+        allow_resubmit: a?.settings?.allow_resubmit ?? true,
+        require_approval: a?.settings?.require_approval ?? true,
         enable_scene: true,
         max_images: 1,
+        submission_questions: wizard.questions(),
       },
     };
+    delete activity.submission_question;
     delete activity.password;
     delete activity.confirm_password;
     delete activity.max_images;

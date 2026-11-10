@@ -18,6 +18,70 @@ import {
 } from "../netlify/lib/validation.js";
 import { seedData } from "../src/services/seed.js";
 import handler from "../netlify/functions/api.js";
+import {
+  validateSubmissionQuestions,
+  validateQuestionResponses,
+} from "../src/utils/submission-questions.js";
+
+test("photo questions are limited to three and every configured question needs its own answer", () => {
+  const questions = [
+    "인물의 특징은?",
+    "사진에 어떻게 표현했나요?",
+    "본문의 근거는?",
+  ];
+  const activity = { settings: { submission_questions: questions } };
+  assert.deepEqual(validateSubmissionQuestions(questions), questions);
+  assert.throws(() => validateSubmissionQuestions([]));
+  assert.throws(() => validateSubmissionQuestions([...questions, "추가 질문"]));
+  assert.throws(() => validateSubmissionQuestions([" "]));
+  assert.throws(() => validateSubmissionQuestions(["가".repeat(301)]));
+  const responses = questions.map((question) => ({
+    question,
+    answer: " 내 해석 ",
+  }));
+  assert.equal(
+    validateQuestionResponses(activity, responses)[0].answer,
+    "내 해석",
+  );
+  assert.throws(() =>
+    validateQuestionResponses(activity, responses.slice(0, 2)),
+  );
+  assert.throws(() =>
+    validateQuestionResponses(activity, [...responses].reverse()),
+  );
+  assert.throws(() =>
+    validateQuestionResponses(
+      activity,
+      responses.map((r) => ({ ...r, answer: " " })),
+    ),
+  );
+  assert.throws(() =>
+    validateQuestionResponses(
+      activity,
+      responses.map((r) => ({ ...r, answer: "가".repeat(2001) })),
+    ),
+  );
+  assert.deepEqual(validateQuestionResponses({ settings: {} }), []);
+  assert.ok(
+    activitySchema.safeParse({
+      ...seedData().activities[0],
+      settings: {
+        ...seedData().activities[0].settings,
+        submission_questions: questions,
+      },
+    }).success,
+  );
+  assert.equal(
+    activitySchema.safeParse({
+      ...seedData().activities[0],
+      settings: {
+        ...seedData().activities[0].settings,
+        submission_questions: [...questions, "네 번째"],
+      },
+    }).success,
+    false,
+  );
+});
 test("tags are normalized, deduplicated, length bounded, and reject markup", () => {
   assert.deepEqual(
     normalizeTags([

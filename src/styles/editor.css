@@ -446,6 +446,94 @@ button:focus-visible {
 .wizard-error:empty {
   display: none;
 }
+.lesson-wizard .synopsis-only textarea {
+  min-height: 280px;
+}
+.submission-question-list {
+  display: grid;
+  gap: 24px;
+}
+.submission-question-item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 16px;
+}
+.question-number {
+  padding-top: 46px;
+  font:
+    19px/1.5 Georgia,
+    serif;
+  color: var(--muted);
+}
+.submission-question-item > .icon-btn {
+  margin-top: 32px;
+}
+.lesson-wizard .submission-question-item textarea {
+  min-height: 96px;
+}
+.lesson-wizard .submission-question-item textarea::placeholder {
+  color: #89877e;
+}
+.question-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 24px 0 0 44px;
+}
+.question-editor-actions > span {
+  font-size: 14px;
+  color: var(--muted);
+}
+.review-questions {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 15px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.review-questions li + li {
+  margin-top: 10px;
+}
+.submission-responses h4 {
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+.submission-responses dl {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+}
+.submission-responses dt {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.submission-responses dt span {
+  color: var(--accent);
+}
+.submission-responses dd {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.upload-questions {
+  display: grid;
+  gap: 24px;
+}
+.upload-questions > h2 {
+  font-size: 22px;
+}
+.upload-questions .field {
+  font-size: 15px;
+}
+.upload-questions textarea {
+  min-height: 110px;
+}
 .wizard-error {
   padding: 16px 0;
   margin: 0;
@@ -537,6 +625,19 @@ button:focus-visible {
   }
 }
 @media (max-width: 600px) {
+  .submission-question-item {
+    grid-template-columns: 20px minmax(0, 1fr) 36px;
+    gap: 8px;
+  }
+  .submission-question-item > .icon-btn {
+    width: 36px;
+  }
+  .question-editor-actions {
+    margin-left: 28px;
+  }
+  .lesson-wizard .synopsis-only textarea {
+    min-height: 230px;
+  }
   .museum-classroom .form-grid {
     grid-template-columns: 1fr;
   }

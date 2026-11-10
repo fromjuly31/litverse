@@ -32,9 +32,10 @@ test("guided lesson creation keeps input, validates passwords, and reopens with 
   await page
     .getByLabel("작품 줄거리", { exact: true })
     .fill("소년과 점순이의 서툰 마음이 봄날의 농촌에서 펼쳐진다.");
-  await page
-    .getByLabel("수업 목표", { exact: true })
-    .fill("인물의 행동과 말을 근거로 마음을 해석한다.");
+  await expect(page.getByLabel("수업 목표", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("교과 성취기준", { exact: true })).toHaveCount(
+    0,
+  );
   await page.getByRole("button", { name: "이전 단계" }).click();
   await expect(page.getByLabel("수업명", { exact: true })).toHaveValue(
     "함께 읽는 봄날의 이야기",
@@ -43,15 +44,33 @@ test("guided lesson creation keeps input, validates passwords, and reopens with 
   await page.keyboard.press("ArrowRight");
   await expect(step(page, 3)).toBeFocused();
   await expect(step(page, 3)).toHaveAttribute("aria-selected", "true");
-  const firstTask = await page
-    .getByRole("textbox", { name: "할 일 1", exact: true })
-    .inputValue();
+  await expect(page.getByLabel("기본 성격 키워드")).toHaveCount(0);
+  await expect(page.getByLabel("질문 1", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("질문 1", { exact: true })).toHaveAttribute(
+    "placeholder",
+    "내가 파악한 인물의 특징은?",
+  );
   await page
-    .getByRole("button", { name: "할 일 1 아래로", exact: true })
-    .click();
+    .getByLabel("질문 1", { exact: true })
+    .fill("사진 속 인물의 특징은?");
+  await page.getByRole("button", { name: "질문 추가", exact: true }).click();
+  await page
+    .getByLabel("질문 2", { exact: true })
+    .fill("어떤 장면을 표현했나요?");
+  await page.getByRole("button", { name: "질문 추가", exact: true }).click();
+  await page
+    .getByLabel("질문 3", { exact: true })
+    .fill("작품 속 근거는 무엇인가요?");
   await expect(
-    page.getByRole("textbox", { name: "할 일 2", exact: true }),
-  ).toHaveValue(firstTask);
+    page.getByRole("button", { name: "질문 추가", exact: true }),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "질문 3 삭제", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "질문 추가", exact: true }),
+  ).toBeEnabled();
+  await expect(page.getByLabel("질문 2", { exact: true })).toHaveValue(
+    "어떤 장면을 표현했나요?",
+  );
   await next(page).click();
   await expect(page.getByRole("progressbar")).toHaveAttribute(
     "aria-valuenow",
@@ -105,11 +124,11 @@ test("guided lesson creation keeps input, validates passwords, and reopens with 
     .getByRole("button", { name: "수업 정보 수정", exact: true })
     .click();
   await step(page, 2).click();
-  await expect(page.getByLabel("수업 목표", { exact: true })).toHaveValue(
-    "인물의 행동과 말을 근거로 마음을 해석한다.",
+  await expect(page.getByLabel("작품 줄거리", { exact: true })).toHaveValue(
+    "소년과 점순이의 서툰 마음이 봄날의 농촌에서 펼쳐진다.",
   );
   await page
-    .getByLabel("수업 목표", { exact: true })
+    .getByLabel("작품 줄거리", { exact: true })
     .fill("다른 관점과 나의 해석을 비교한다.");
   await step(page, 4).click();
   await expect(page.getByLabel("수업 비밀번호", { exact: true })).toHaveCount(
@@ -123,7 +142,7 @@ test("guided lesson creation keeps input, validates passwords, and reopens with 
   expect(errors).toEqual([]);
 });
 
-test("submission returns to missing steps and requires at least one student task", async ({
+test("submission returns to missing steps and does not save the example as a question", async ({
   page,
 }) => {
   await page.goto("/teacher/activities/new");
@@ -141,18 +160,13 @@ test("submission returns to missing steps and requires at least one student task
   await expect(page.locator("#editor-error")).toContainText("1~1,000");
   await page.getByLabel("예상 참여 인원").fill("30");
   await step(page, 3).click();
-  while (await page.locator("[data-remove]").count())
-    await page.locator("[data-remove]").first().click();
   await next(page).click();
-  await expect(page.locator("#editor-error")).toContainText("하나 이상");
-  await expect(page.getByRole("button", { name: "할 일 추가" })).toBeFocused();
-  await page.getByRole("button", { name: "할 일 추가" }).click();
-  await expect(
-    page.getByRole("textbox", { name: "할 일 1", exact: true }),
-  ).toBeFocused();
+  await expect(page.locator("#editor-error")).toContainText("질문을 하나 이상");
+  await expect(page.getByLabel("질문 1", { exact: true })).toBeFocused();
+  await expect(page.getByLabel("질문 1", { exact: true })).toHaveValue("");
   await page
-    .getByRole("textbox", { name: "할 일 1", exact: true })
-    .fill("작품의 근거를 찾아 해석하기");
+    .getByLabel("질문 1", { exact: true })
+    .fill("사진에서 어떤 특징을 표현했나요?");
   await next(page).click();
   await expect(step(page, 4)).toHaveAttribute("aria-selected", "true");
   await expect(page.getByLabel("수업 비밀번호", { exact: true })).toHaveValue(
