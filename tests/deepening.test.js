@@ -211,6 +211,7 @@ test("deepening SQL migration preserves lessons, separates rounds and enforces p
     "004_deepening.sql",
     "20261104010332_supabase_connection_indexes.sql",
     "20261121015654_deepening_class_questions.sql",
+    "20261121055238_life_connection.sql",
   ])
     await db.exec(
       await readFile(
@@ -539,6 +540,46 @@ test("deepening SQL migration preserves lessons, separates rounds and enforces p
     (await db.query("select * from deepening_exhibit_index")).rows.length,
     0,
   );
+  await t.test(
+    "life connection keeps the original prompt and one private response per student",
+    async () => {
+      const question = "우리 삶에서는 어떻게 다르게 행동할 수 있을까요?";
+      const entry = {
+        article_url: "https://news.example.org/classroom",
+        article_summary: "갈등을 해결한 청소년의 사례를 소개한다.",
+        answer: "서로의 입장을 먼저 물어보겠다.",
+      };
+      const submit = (hash, values = entry) =>
+        rpc("submit_life_response", [activity, hash, "07번", question, values]);
+      await db.exec("set role anon");
+      await assert.rejects(
+        db.query("select * from life_questions"),
+        /permission denied/,
+      );
+      await assert.rejects(submit("anonymous"), /permission denied/);
+      await db.exec("reset role; set role service_role");
+      await rpc("control_life_question", [activity, question]);
+      assert.equal(
+        (await submit("student-hash")).article_summary,
+        entry.article_summary,
+      );
+      assert.deepEqual(
+        await submit("student-hash"),
+        await submit("student-hash"),
+      );
+      await rpc("control_life_question", [activity, null]);
+      await assert.rejects(submit("late"), /LIFE_CLOSED/);
+      await assert.rejects(
+        submit("student-hash", { ...entry, answer: "바꾼 답변" }),
+        /LIFE_ALREADY_SUBMITTED/,
+      );
+      await assert.rejects(
+        rpc("control_life_question", [activity, "새 질문"]),
+        /LIFE_QUESTION_LOCKED/,
+      );
+      await db.exec("reset role");
+    },
+  );
   await db.query("update activities set deletion_pending=true where id=$1", [
     activity,
   ]);
@@ -547,6 +588,7 @@ test("deepening SQL migration preserves lessons, separates rounds and enforces p
     0,
   );
   await db.query("delete from activities where id=$1", [activity]);
+  assert.equal((await db.query("select * from life_responses")).rows.length, 0);
   assert.equal(
     (await db.query("select * from deepening_records")).rows.length,
     0,

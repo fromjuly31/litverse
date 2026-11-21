@@ -31,15 +31,21 @@ import {
 import { learningTabs } from "../components/deepening.js";
 import { deepeningTeacher } from "./deepening-teacher.js";
 import { classQuestionsEditor } from "./class-questions-teacher.js";
+import { lifeTeacher } from "./life-connection.js";
 import { textStudyPage } from "./text-study.js";
 import { bindTextStudyEditor } from "../components/text-study-editor.js";
 import { saveLessonPdf } from "../services/lesson-pdf.js";
 export function teacherShell(root, page, activity, content) {
   const base = activity ? `/teacher/activity/${e(activity.id)}` : "";
-  const deep = page.startsWith("deepening");
+  const section =
+    page === "life"
+      ? "life"
+      : page.startsWith("deepening")
+        ? "deepening"
+        : "background";
   const completed = page === "completed";
   const tabs =
-    activity && !deep && !completed
+    activity && section === "background" && !completed
       ? [
           ["background", "book-open", "배경 탐구", `${base}/background`],
           ["text-study", "file-text", "본문 학습", `${base}/text-study`],
@@ -51,8 +57,8 @@ export function teacherShell(root, page, activity, content) {
     key === page || (key === "gallery" && page === "analytics");
   const project = activity
     ? `<section class="lesson-context" aria-label="현재 수업">
-    <div class="lesson-context-heading"><div><h2>${e(activity.title)}</h2><p>${[activity.author, activity.course_name, activity.class_name].filter(Boolean).map(e).join(" · ")}${!deep ? ` <span class="badge">${e(STAGES[activity.stage])}</span>` : ""}</p></div>${tabs.length ? `<div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div>` : ""}</div>
-    ${learningTabs(base, deep)}
+    <div class="lesson-context-heading"><div><h2>${e(activity.title)}</h2><p>${[activity.author, activity.course_name, activity.class_name].filter(Boolean).map(e).join(" · ")}${section === "background" ? ` <span class="badge">${e(STAGES[activity.stage])}</span>` : ""}</p></div>${tabs.length ? `<div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div>` : ""}</div>
+    ${learningTabs(base, section)}
     ${tabs.length ? `<nav class="lesson-tabs" aria-label="수업 활동">${tabs.map(([key, ico, label, path], index) => `<a href="${path}" ${active(key) ? 'class="active" aria-current="page"' : ""}><span class="lesson-tab-number">0${index + 1}</span>${icon(ico)}<span>${label}</span></a>`).join("")}</nav>` : ""}
   </section>`
     : "";
@@ -141,6 +147,7 @@ export async function teacherPage(root, path) {
       if (parts[5] === "new") return classQuestionsEditor(root, data.activity);
       return deepeningTeacher(root, data, parts[5]);
     }
+    if (parts[4] === "life") return lifeTeacher(root, data.activity);
     if (data.activity.finalized_at) return completedLesson(root, data);
     if (parts[4] === "finalize") return finalizePage(root, data);
     if (parts[4] === "showcase") return showcasePage(root, id);
@@ -234,7 +241,12 @@ export async function showQR(
   kind = activity.stage === "SUBMISSION" ? "submission" : "analysis",
   suffix = "",
 ) {
-  if (activity.stage === "DRAFT" && activity.active_phase !== "deepening") {
+  const life = suffix === "/life";
+  if (
+    !life &&
+    activity.stage === "DRAFT" &&
+    activity.active_phase !== "deepening"
+  ) {
     toast(
       "먼저 수업 설정에서 배경 탐구 또는 인물·사건 분석을 시작해 주세요.",
       "error",
@@ -255,8 +267,9 @@ export async function showQR(
       errorCorrectionLevel: "M",
     });
     const modal = openModal({
-      title:
-        currentKind === "analysis"
+      title: life
+        ? "삶과 연계하기 참여"
+        : currentKind === "analysis"
           ? suffix === "/deepening"
             ? "이해 심화하기 참여"
             : activity.stage === "BACKGROUND"
@@ -266,18 +279,20 @@ export async function showQR(
       eyebrow: `${activity.title} · ${currentKind === "analysis" ? "ANALYSIS" : "SUBMISSION"}`,
       wide: !large,
       className: large ? "qr-large" : "",
-      body: `<div class="${large ? "" : "qr-grid"}"><div class="qr-paper"><img src="${qr}" alt="${currentKind === "analysis" ? "학생 활동지" : "이미지 제출"} 접속 QR 코드"/></div>${large ? "" : `<div class="qr-info"><h3>카메라로 QR을 읽어 주세요.</h3><p class="muted" style="font-size:13px">${currentKind === "analysis" ? "별도의 회원가입 없이 나만의 인물 해석을 시작할 수 있어요." : "분석 완료 후 받은 개인 제출 코드가 필요해요."}</p><div class="link-box">${e(url)}</div>${isDemo ? '<div class="notice">데모는 같은 브라우저에서만 연결됩니다. 실제 기기 간 수업은 실서비스 설정 후 이용해 주세요.</div>' : ""}${currentKind === "submission" && activity.stage !== "SUBMISSION" ? '<p class="step-error">현재는 이미지 제출이 닫혀 있습니다.</p>' : ""}</div>`}</div>`,
-      footer: `${button("링크 복사", "copy", "secondary", 'id="copy-qr"')}<a class="btn secondary" href="${e(url)}">학생 화면 열기</a>${button(large ? "작게 보기" : "크게 보기", "maximize-2", "secondary", 'id="expand-qr"')}${button(currentKind === "analysis" ? "제출 QR 보기" : "활동지 QR 보기", "qr-code", "primary", 'id="toggle-qr"')}`,
+      body: `<div class="${large ? "" : "qr-grid"}"><div class="qr-paper"><img src="${qr}" alt="${life ? "삶과 연계하기 참여" : currentKind === "analysis" ? "학생 활동지" : "이미지 제출"} 접속 QR 코드"/></div>${large ? "" : `<div class="qr-info"><h3>카메라로 QR을 읽어 주세요.</h3><p class="muted" style="font-size:13px">${life ? "기사 링크와 요약을 첨부하고 수업 질문에 답해 주세요." : currentKind === "analysis" ? "별도의 회원가입 없이 나만의 인물 해석을 시작할 수 있어요." : "분석 완료 후 받은 개인 제출 코드가 필요해요."}</p><div class="link-box">${e(url)}</div>${isDemo ? '<div class="notice">데모는 같은 브라우저에서만 연결됩니다. 실제 기기 간 수업은 실서비스 설정 후 이용해 주세요.</div>' : ""}${currentKind === "submission" && activity.stage !== "SUBMISSION" ? '<p class="step-error">현재는 이미지 제출이 닫혀 있습니다.</p>' : ""}</div>`}</div>`,
+      footer: `${button("링크 복사", "copy", "secondary", 'id="copy-qr"')}<a class="btn secondary" href="${e(url)}">학생 화면 열기</a>${button(large ? "작게 보기" : "크게 보기", "maximize-2", "secondary", 'id="expand-qr"')}${life ? "" : button(currentKind === "analysis" ? "제출 QR 보기" : "활동지 QR 보기", "qr-code", "primary", 'id="toggle-qr"')}`,
     });
     modal.element.querySelector("#copy-qr").onclick = () => copyText(url);
     modal.element.querySelector("#expand-qr").onclick = () => {
       large = !large;
       display();
     };
-    modal.element.querySelector("#toggle-qr").onclick = () => {
-      currentKind = currentKind === "analysis" ? "submission" : "analysis";
-      display();
-    };
+    const toggle = modal.element.querySelector("#toggle-qr");
+    if (toggle)
+      toggle.onclick = () => {
+        currentKind = currentKind === "analysis" ? "submission" : "analysis";
+        display();
+      };
   };
   await display();
 }

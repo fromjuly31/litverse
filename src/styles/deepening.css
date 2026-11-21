@@ -27,6 +27,22 @@
   width: 17px;
   height: 17px;
 }
+.life-prompt,
+.life-response dd {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.life-response {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+}
+.life-response dt {
+  font-weight: 650;
+}
+.life-response dd {
+  margin: 0 0 10px;
+}
 .classroom-overview .teacher-main {
   gap: 16px;
 }

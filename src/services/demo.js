@@ -3,6 +3,7 @@ import { textStudySchema } from "../utils/text-study.js";
 import { removeDocuments } from "./document-store.js";
 import { demoArchive } from "./demo-archive.js";
 import { demoDeepening } from "./demo-deepening.js";
+import { demoLife } from "./demo-life.js";
 import { passwordHash, issueDemoAccess } from "./demo-access.js";
 import {
   validateQuestionResponses,
@@ -75,7 +76,10 @@ export async function demoRequest(action, payload = {}) {
     state.questions ||= [];
     state.responses ||= [];
     state.revoked_codes ||= [];
-    const deepening = await demoDeepening(state, action, payload);
+    const life = await demoLife(state, action, payload);
+    const deepening = life.handled
+      ? life
+      : await demoDeepening(state, action, payload);
     const archive = deepening.handled
       ? deepening
       : await demoArchive(state, action, payload);
@@ -237,6 +241,8 @@ export async function demoRequest(action, payload = {}) {
       result = { ok: true };
     } else if (action === "teacher/delete-activity") {
       activity();
+      delete state.life_questions?.[payload.id];
+      delete state.life_responses?.[payload.id];
       await removeDocuments(payload.id);
       state.images = state.images.filter((i) => i.activity_id !== payload.id);
       state.worksheets = state.worksheets.filter(

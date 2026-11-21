@@ -3,6 +3,7 @@ import { MAX_PDF_BYTES } from "../../src/utils/text-study.js";
 import { validateQuestionResponses } from "../../src/utils/submission-questions.js";
 import { archiveAction } from "../lib/archive.js";
 import { deepeningAction } from "../lib/deepening.js";
+import { lifeAction } from "../lib/life-connection.js";
 import { lessonOwner, adminUser } from "../lib/lesson-access.js";
 import {
   activitySchema,
@@ -51,6 +52,8 @@ async function rows(queryFactory) {
   );
 }
 export async function dispatch(db, req, context, action, p) {
+  const life = await lifeAction(db, req, context, action, p);
+  if (life.handled) return life.value;
   const deepening = await deepeningAction(db, req, context, action, p);
   if (deepening.handled) return deepening.value;
   const archive = await archiveAction(db, req, context, action, p);

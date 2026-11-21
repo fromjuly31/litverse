@@ -7,8 +7,13 @@ import {
   progressLabel,
 } from "../utils/deepening.js";
 
-export function learningTabs(base, deepening) {
-  return `<nav class="learning-tabs" aria-label="수업 분야"><a href="${base}/background" ${deepening ? "" : 'aria-current="page"'}>${icon("book-open")} 작품 파악하기</a><a href="${base}/deepening" ${deepening ? 'aria-current="page"' : ""}>${icon("messages-square")} 이해 심화하기</a></nav>`;
+export function learningTabs(base, active) {
+  const tabs = [
+    ["background", "book-open", "작품 파악하기"],
+    ["deepening", "messages-square", "이해 심화하기"],
+    ["life", "newspaper", "삶과 연계하기"],
+  ];
+  return `<nav class="learning-tabs" aria-label="수업 분야">${tabs.map(([path, symbol, label]) => `<a href="${base}/${path}" ${active === path ? 'aria-current="page"' : ""}>${icon(symbol)} ${label}</a>`).join("")}</nav>`;
 }
 export const analysisFields = {
   characters: "주요 인물 또는 화자",
