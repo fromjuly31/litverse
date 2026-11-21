@@ -30,6 +30,7 @@ function demoPoster(state, activity) {
   return {
     ...publicLesson(activity),
     result,
+    can_reopen: !activity.images,
     images:
       activity.images ||
       state.images

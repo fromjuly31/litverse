@@ -6,15 +6,19 @@ async function choose(page, label, option) {
   await page.getByRole("option", { name: option, exact: true }).click();
 }
 async function seedLegacyLesson(page) {
-  await page.goto("/teacher?tab=deepening");
+  await page.goto("/teacher");
   const id = await page.evaluate(async () => {
     const { request } = await import("/src/services/api.js");
+    const { seedData } = await import("/src/services/seed.js");
     const input = { title: "운수 좋은 날", author: "현진건" };
+    const { id } = await request("teacher/save", {
+      activity: { ...seedData().activities[0], ...input },
+      password: "legacy-lesson-password",
+    });
     const { analysis, source } = await request("deepening/analyze", input);
     const lesson = await request("deepening/save", {
-      activity_id: crypto.randomUUID(),
+      id,
       request_id: crypto.randomUUID(),
-      password: "legacy-lesson-password",
       input,
       analysis,
       source,
@@ -225,9 +229,10 @@ test("legacy deepening retains personalized questions, live progress, peers and 
     .getByRole("navigation", { name: "수업 분야", exact: true })
     .getByRole("link", { name: "작품 파악하기" })
     .click();
-  await expect(
-    page.getByRole("link", { name: "수업 만들기", exact: true }),
-  ).toBeVisible();
+  await expect(page).toHaveURL(
+    `${teacherUrl.replace(/\/deepening$/, "/background")}`,
+  );
+  await expect(page.getByRole("link", { name: /배경 탐구/ })).toBeVisible();
   expect(errors).toEqual([]);
   await student.close();
 });
@@ -313,18 +318,39 @@ test("teacher questions open with a round QR and answers appear without a reload
   page,
   context,
 }) => {
-  await page.goto("/teacher?tab=deepening");
+  await page.goto("/teacher/deepening/new");
+  await expect(page).toHaveURL(/\/teacher$/);
   await page.getByRole("link", { name: "관람하기", exact: true }).click();
   await page.getByRole("link", { name: "수업하기", exact: true }).click();
+  const tabs = page.getByRole("navigation", { name: "수업 분야" });
+  await expect(tabs).toHaveCount(0);
   await expect(
-    page.getByRole("link", { name: "심화 수업 만들기", exact: true }),
+    page.getByRole("link", { name: "수업 만들기", exact: true }),
   ).toBeVisible();
-  await page
-    .getByRole("link", { name: "심화 수업 만들기", exact: true })
-    .click();
-  await page
-    .getByLabel("수업 이름 (선택)", { exact: true })
-    .fill("동백꽃 함께 읽기");
+  const title = "동백꽃 함께 읽기";
+  const { id, worksheet_token: token } = await page.evaluate(async (title) => {
+    const { request } = await import("/src/services/api.js");
+    const { seedData } = await import("/src/services/seed.js");
+    return request("teacher/save", {
+      activity: { ...seedData().activities[0], title },
+      password: "shared-lesson-password",
+    });
+  }, title);
+  await page.reload();
+  const card = page.getByRole("link", {
+    name: `${title} 수업 열기`,
+    exact: true,
+  });
+  await expect(card).toHaveCount(1);
+  const initialCount = await page.locator(".lesson-count").textContent();
+  const lessonUrl = new URL(`/teacher/activity/${id}`, page.url()).href;
+  await card.click();
+  const understandingTab = tabs.getByRole("link", { name: "작품 파악하기" });
+  const deepeningTab = tabs.getByRole("link", { name: "이해 심화하기" });
+  await expect(understandingTab).toHaveAttribute("aria-current", "page");
+  await deepeningTab.click();
+  await expect(deepeningTab).toHaveAttribute("aria-current", "page");
+  await expect(page).toHaveURL(`${lessonUrl}/deepening`);
   const first = "점순이는 왜 감자를 건넸을까요?";
   const second = "마지막 장면에서 둘은 어떤 마음이었을까요?";
   const start = page.getByRole("button", { name: "시작하기", exact: true });
@@ -355,6 +381,7 @@ test("teacher questions open with a round QR and answers appear without a reload
   const link = await qr
     .getByRole("link", { name: "학생 화면 열기" })
     .getAttribute("href");
+  expect(link).toContain(`/activity/${token}/deepening/`);
   expect(link).toMatch(/\/deepening\/[a-f0-9-]{36}$/);
   await page.keyboard.press("Escape");
   await expect(page.getByText("0명 제출", { exact: true })).toBeVisible();
@@ -381,8 +408,14 @@ test("teacher questions open with a round QR and answers appear without a reload
       .locator("#class-responses")
       .getByText("이제는 안심했을 것 같아요.", { exact: false }),
   ).toBeVisible();
+  await understandingTab.click();
+  await expect(page).toHaveURL(`${lessonUrl}/background`);
+  await deepeningTab.click();
+  await expect(page.getByText("1명 제출", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "마감하기" }).click();
   await expect(page.getByText("마감", { exact: true })).toBeVisible();
+  await student.reload();
+  await expect(student.getByText("답변을 제출했어요.")).toBeVisible();
   await page.getByRole("link", { name: "새 회차 만들기" }).click();
   await page.getByLabel("질문 1", { exact: true }).fill("새 회차 질문");
   await start.click();
@@ -394,5 +427,9 @@ test("teacher questions open with a round QR and answers appear without a reload
   await expect(student.getByText("새 회차 질문", { exact: false })).toHaveCount(
     0,
   );
+  await page.keyboard.press("Escape");
+  await page.getByRole("link", { name: "수업하기", exact: true }).click();
+  await expect(page.locator(".lesson-count")).toHaveText(initialCount);
+  await expect(card).toHaveCount(1);
   await student.close();
 });

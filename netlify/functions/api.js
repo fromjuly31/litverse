@@ -320,7 +320,9 @@ export async function dispatch(db, req, context, action, p) {
       : action.startsWith("student/upload")
         ? "submission"
         : null;
-    const a = await tokenActivity(db, token, kind);
+    const a = await tokenActivity(db, token, kind, {
+      deepening: action === "student/activity" && p.phase === "deepening",
+    });
     if (action === "student/activity") return enrichActivity(db, a, true);
     const code = codeSchema.parse(p.code);
     await limit(db, `student-code:${code}`, 100, 600);

@@ -25,6 +25,9 @@ test("published showcase starts with only the completed Dongbaek exhibit", async
       .getByRole("link", { name: "동백꽃 전시작 자세히 보기", exact: true })
       .click();
     await expect(page.locator(".poster-signature")).toContainText("1학년 7반");
+    await expect(
+      page.getByRole("link", { name: "수업 다시 열기" }),
+    ).toHaveCount(0);
     const photos = page.locator(".literary-poster img");
     await expect(photos).toHaveCount(2);
     await photos.evaluateAll((images) =>

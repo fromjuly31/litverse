@@ -10,8 +10,8 @@ import {
   toast,
 } from "../components/ui.js";
 import { request, isDemo, subscribe } from "../services/api.js";
-import { e, downloadText, safeStorage } from "../utils/helpers.js";
-import { publicRouteUrl, currentRoute } from "../utils/paths.js";
+import { e, downloadText } from "../utils/helpers.js";
+import { publicRouteUrl } from "../utils/paths.js";
 import { STAGES, DEFAULT_TASKS, submissionProgress } from "../utils/domain.js";
 import { artCard, showArt } from "../components/art.js";
 import { galleryPage, analyticsPage } from "./gallery.js";
@@ -37,9 +37,9 @@ import { saveLessonPdf } from "../services/lesson-pdf.js";
 export function teacherShell(root, page, activity, content) {
   const base = activity ? `/teacher/activity/${e(activity.id)}` : "";
   const deep = page.startsWith("deepening");
-  safeStorage("litverse-learning-tab", deep ? "deepening" : "understanding");
+  const completed = page === "completed";
   const tabs =
-    activity && !deep
+    activity && !deep && !completed
       ? [
           ["background", "book-open", "배경 탐구", `${base}/background`],
           ["text-study", "file-text", "본문 학습", `${base}/text-study`],
@@ -49,15 +49,15 @@ export function teacherShell(root, page, activity, content) {
       : [];
   const active = (key) =>
     key === page || (key === "gallery" && page === "analytics");
-  const project =
-    activity && !deep
-      ? `<section class="lesson-context" aria-label="현재 수업">
-    <div class="lesson-context-heading"><div><span class="eyebrow">${e(activity.course_name || "문학 수업")}</span><h2>${e(activity.title)}</h2><p>${e(activity.author)} · ${e(activity.course_name || "문학 수업")} <span class="badge">${e(STAGES[activity.stage])}</span></p></div><div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div></div>
-    <nav class="lesson-tabs" aria-label="수업 활동">${tabs.map(([key, ico, label, path], index) => `<a href="${path}" ${active(key) ? 'class="active" aria-current="page"' : ""}><span class="lesson-tab-number">0${index + 1}</span>${icon(ico)}<span>${label}</span></a>`).join("")}</nav>
+  const project = activity
+    ? `<section class="lesson-context" aria-label="현재 수업">
+    <div class="lesson-context-heading"><div><h2>${e(activity.title)}</h2><p>${[activity.author, activity.course_name, activity.class_name].filter(Boolean).map(e).join(" · ")}${!deep ? ` <span class="badge">${e(STAGES[activity.stage])}</span>` : ""}</p></div>${tabs.length ? `<div class="lesson-tools">${["detail", "edit"].includes(page) ? "" : `<a class="btn secondary small" href="${base}/settings">${icon("sliders-horizontal")} 수업 설정</a>`}${page === "finalize" ? "" : `<a class="btn primary small" href="${base}/finalize">${icon("check")} 수업 마무리</a>`}</div>` : ""}</div>
+    ${learningTabs(base, deep)}
+    ${tabs.length ? `<nav class="lesson-tabs" aria-label="수업 활동">${tabs.map(([key, ico, label, path], index) => `<a href="${path}" ${active(key) ? 'class="active" aria-current="page"' : ""}><span class="lesson-tab-number">0${index + 1}</span>${icon(ico)}<span>${label}</span></a>`).join("")}</nav>` : ""}
   </section>`
-      : "";
+    : "";
   root.classList.add("museum-classroom");
-  root.innerHTML = `${museumHeader()}<div class="teacher-layout"><main id="main" class="teacher-main" data-page="${page}">${learningTabs(deep ? "deepening" : "understanding", activity)}${project}${content}</main></div>${museumFooter()}`;
+  root.innerHTML = `${museumHeader()}<div class="teacher-layout"><main id="main" class="teacher-main" data-page="${page}">${project}${content}</main></div>${museumFooter()}`;
 }
 export function pageHeading(
   eyebrow,
@@ -120,7 +120,7 @@ function statistics(data) {
   );
 }
 export async function teacherPage(root, path) {
-  if (path === "/teacher/deepening/new") return classQuestionsEditor(root);
+  if (path === "/teacher/deepening/new") return navigate("/teacher", true);
   if (path === "/teacher/activities/new") return activityEditor(root, null);
   if (path === "/teacher/settings") {
     if (!(await request("admin/session")).authenticated) return adminPage(root);
@@ -141,8 +141,6 @@ export async function teacherPage(root, path) {
       if (parts[5] === "new") return classQuestionsEditor(root, data.activity);
       return deepeningTeacher(root, data, parts[5]);
     }
-    if (data.activity.lesson_kind === "deepening")
-      return navigate(`/teacher/activity/${id}/deepening`, true);
     if (data.activity.finalized_at) return completedLesson(root, data);
     if (parts[4] === "finalize") return finalizePage(root, data);
     if (parts[4] === "showcase") return showcasePage(root, id);
@@ -160,15 +158,7 @@ export async function teacherPage(root, path) {
   }
   if (path !== "/teacher") throw new Error("교사 메뉴의 주소를 확인해 주세요.");
   forgetLessons();
-  const tab =
-    new URLSearchParams(currentRoute().split("?")[1] || "").get("tab") ||
-    safeStorage("litverse-learning-tab") ||
-    "understanding";
-  return dashboard(
-    root,
-    await request("public/list"),
-    tab === "deepening" ? "deepening" : "understanding",
-  );
+  return dashboard(root, await request("public/list"));
 }
 async function activityDetail(root, data) {
   const a = data.activity;

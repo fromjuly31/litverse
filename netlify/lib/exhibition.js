@@ -112,6 +112,7 @@ async function readPosters(db, ids) {
         signature: row.signature,
         result: row.final_result,
         images: images.get(row.id),
+        can_reopen: !row.character_image_path,
       },
     ]),
   );

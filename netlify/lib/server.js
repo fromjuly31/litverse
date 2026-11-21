@@ -60,7 +60,12 @@ export async function ownedActivity(db, id, teacher) {
   if (!a) fail(404, "활동을 찾을 수 없거나 접근 권한이 없습니다.");
   return a;
 }
-export async function tokenActivity(db, token, kind) {
+export async function tokenActivity(
+  db,
+  token,
+  kind,
+  { deepening = false } = {},
+) {
   const hash = hmac(`qr:${token}`);
   let query = db.from("activities").select("*").eq("deletion_pending", false);
   query = kind
@@ -74,7 +79,12 @@ export async function tokenActivity(db, token, kind) {
         `worksheet_token_hash.eq.${hash},submission_token_hash.eq.${hash}`,
       );
   const a = check(await query.maybeSingle());
-  if (!a || (a.stage === "DRAFT" && a.active_phase !== "deepening"))
+  if (
+    !a ||
+    (a.stage === "DRAFT" &&
+      a.active_phase !== "deepening" &&
+      !(deepening && a.deepening_session_id))
+  )
     fail(404, "유효하지 않거나 아직 열리지 않은 활동입니다.");
   return a;
 }

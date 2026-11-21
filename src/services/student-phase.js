@@ -3,7 +3,8 @@ import { e } from "../utils/helpers.js";
 import { refreshIcons } from "../components/ui.js";
 
 // Announce the teacher's next activity without replacing a student's editor.
-export function watchStudentPhase(root, activity, token) {
+export function watchStudentPhase(root, activity, link) {
+  const { token } = link;
   let stopped = false,
     busy = false,
     latest = activity;
@@ -14,7 +15,12 @@ export function watchStudentPhase(root, activity, token) {
     if (!latest.deepening_session_id) return;
     const inDeep = !!root.querySelector(".deep-student");
     const wantsDeep = latest.active_phase === "deepening";
-    if (inDeep && (wantsDeep || latest.lesson_kind === "deepening")) {
+    if (
+      inDeep &&
+      (wantsDeep ||
+        latest.stage === "DRAFT" ||
+        latest.lesson_kind === "deepening")
+    ) {
       notice?.remove();
       return;
     }
@@ -38,7 +44,7 @@ export function watchStudentPhase(root, activity, token) {
     if (stopped || busy) return;
     busy = true;
     try {
-      const next = await request("student/activity", { token });
+      const next = await request("student/activity", link);
       if (!stopped) {
         latest = next;
         show();

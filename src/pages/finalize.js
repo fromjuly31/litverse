@@ -18,7 +18,7 @@ export function completedLesson(root, data) {
   teacherShell(
     root,
     "completed",
-    null,
+    a,
     `<section class="panel completed-class"><span class="eyebrow">A STORY, NOW IN OUR COLLECTION</span><h1>「${e(a.title)}」 수업을 마쳤어요.</h1><p>줄거리와 배경, 두 장의 최종 작품이 문학 전시관에 보관되어 있습니다.<br/>다시 열면 전시가 잠시 내려가고, 수정 후 다시 완성할 수 있어요.<br/>이전에 정리한 나머지 사진은 복구되지 않습니다.</p><div class="flex wrap"><a class="btn primary" href="/exhibition/${e(a.id)}">${icon("images")} 완성 포스터 관람</a><button class="btn secondary" id="reopen-lesson">${icon("rotate-ccw")} 수업 다시 열기</button></div><a class="text-link" href="/teacher">수업 목록으로</a></section>`,
   );
   root.querySelector("#reopen-lesson").onclick = () =>

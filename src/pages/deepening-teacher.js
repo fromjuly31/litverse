@@ -1,6 +1,6 @@
 import { teacherShell, pageHeading, showQR } from "./teacher.js";
 import { request, subscribe, isDemo } from "../services/api.js";
-import { e, safeStorage, randomCode, downloadText } from "../utils/helpers.js";
+import { e, safeStorage, downloadText } from "../utils/helpers.js";
 import {
   field,
   button,
@@ -29,9 +29,7 @@ import {
   GENRES,
   progressLabel,
 } from "../utils/deepening.js";
-import { rememberAccess } from "../services/access.js";
 import { navigate } from "../main.js";
-import { STAGES } from "../utils/domain.js";
 import { currentRoute } from "../utils/paths.js";
 import { isClassQuestions } from "../utils/class-questions.js";
 import {
@@ -50,60 +48,37 @@ function temporaryPassword(key, value) {
   }
 }
 
-export async function deepeningEditor(
-  root,
-  linked = null,
-  previous = null,
-  newRound = false,
-) {
-  const activity = linked?.activity;
-  const key = `litverse-deep-teacher:${activity?.id || "new"}:${newRound ? "round" : "draft"}`;
-  let saved = safeStorage(key) || {},
-    stopped = false,
+async function deepeningEditor(root, linked, previous) {
+  const activity = linked.activity;
+  const key = `litverse-deep-teacher:${activity.id}:draft`;
+  const saved = safeStorage(key) || {};
+  let stopped = false,
     busy = false;
-  let input =
-    saved.input ||
-    (previous?.work
-      ? {
-          title: previous.work.title,
-          author: previous.work.author,
-          edition: previous.work.edition,
-          source_text: previous.work.source_text,
-        }
-      : {
-          title: activity?.title || "",
-          author: activity?.author || "",
-          edition: "",
-          source_text: activity?.synopsis || "",
-        });
-  let result =
-    saved.result ||
-    (previous?.work
-      ? {
-          analysis: previous.work.reviewed_analysis,
-          original: previous.work.ai_draft,
-          source: previous.work.analysis_source,
-          note: "이전 분석을 새 버전으로 저장합니다.",
-        }
-      : null);
-  const activityId = saved.activityId || activity?.id || crypto.randomUUID();
+  let input = {
+    title: activity.title,
+    author: activity.author,
+    edition: saved.input?.edition ?? previous.work.edition,
+    source_text: saved.input?.source_text ?? previous.work.source_text,
+  };
+  let result = saved.result || {
+    analysis: previous.work.reviewed_analysis,
+    original: previous.work.ai_draft,
+    source: previous.work.analysis_source,
+    note: "이전 분석을 새 버전으로 저장합니다.",
+  };
   const requestId = saved.requestId || crypto.randomUUID();
-  const password = temporaryPassword(key) || randomCode().slice(0, 16);
-  temporaryPassword(key, password);
-  const persist = () =>
-    safeStorage(key, { input, result, activityId, requestId });
+  const persist = () => safeStorage(key, { input, result, requestId });
   function draw() {
     teacherShell(
       root,
       "deepening-editor",
-      null,
-      `${pageHeading("READ DEEPER", activity ? `${e(activity.title)} · 이해 심화하기` : "새로운 심화 수업", activity ? "작품 파악 기록과 같은 수업에 연결됩니다. 기존 기록은 그대로 남습니다." : "작품명과 작가로 시작하세요. 분석은 검토한 뒤 수업으로 확정합니다.")}<div class="deep-editor"><form id="deep-input" class="panel" novalidate><div class="form-grid">${field("문학 작품명", "title", input.title, { required: true, max: 120 })}${field("작가명", "author", input.author, { required: true, max: 80 })}</div><details ${result && !result.analysis.identified ? "open" : ""}><summary>수록본·줄거리·핵심 지문 추가</summary>${field("교과서 또는 수록본", "edition", input.edition, { max: 160 })}${field("줄거리 또는 핵심 지문", "source_text", input.source_text, { area: true, max: 12000, hint: "작품을 식별하기 어렵거나 일부 지문을 다루는 경우 입력해 주세요." })}</details><p class="step-error" role="alert"></p><div class="flex wrap"><button type="submit" class="btn primary">${icon("sparkles")} 작품 분석하기</button>${button("분석 직접 작성", "pencil", "secondary", 'type="button" id="manual-analysis"')}</div><p class="student-note">${isDemo ? "데모에서는 내장 예시를 사용합니다. 실제 AI 호출은 운영 서버 연결 후 가능합니다." : "원문과 대조해 검토할 초안입니다. 작품 정보가 불확실하면 추가 지문을 요청합니다."}</p></form>${activity ? `<details class="panel"><summary>연결된 작품 파악 기록</summary><p>${e(activity.author)} · ${e(activity.course_name || "문학 수업")} · ${e(STAGES[activity.stage])}</p><p>기존 분석 ${linked.worksheets.length}명 · 이미지 ${linked.images.length}장</p><p>${e(activity.temporal_background || "")}</p><p>${e(activity.spatial_background || "")}</p><p>수업 ID와 참여 링크, 개인 제출 코드가 유지됩니다.</p></details>` : ""}<section id="deep-analysis-preview"></section></div>`,
+      activity,
+      `${pageHeading("", "심화 분석 수정", "")}<div class="deep-editor"><form id="deep-input" class="panel" novalidate><details ${result && !result.analysis.identified ? "open" : ""}><summary>수록본·줄거리·핵심 지문 추가</summary>${field("교과서 또는 수록본", "edition", input.edition, { max: 160 })}${field("줄거리 또는 핵심 지문", "source_text", input.source_text, { area: true, max: 12000, hint: "작품을 식별하기 어렵거나 일부 지문을 다루는 경우 입력해 주세요." })}</details><p class="step-error" role="alert"></p><div class="flex wrap"><button type="submit" class="btn primary">${icon("sparkles")} 작품 분석하기</button>${button("분석 직접 작성", "pencil", "secondary", 'type="button" id="manual-analysis"')}</div><p class="student-note">${isDemo ? "데모에서는 내장 예시를 사용합니다. 실제 AI 호출은 운영 서버 연결 후 가능합니다." : "원문과 대조해 검토할 초안입니다. 작품 정보가 불확실하면 추가 지문을 요청합니다."}</p></form><section id="deep-analysis-preview"></section></div>`,
     );
     const form = root.querySelector("#deep-input");
     const collect = () => {
       input = {
-        title: form.elements.title.value.trim(),
-        author: form.elements.author.value.trim(),
+        ...input,
         edition: form.elements.edition.value.trim(),
         source_text: form.elements.source_text.value,
       };
@@ -122,7 +97,7 @@ export async function deepeningEditor(
         const requested = JSON.stringify(input);
         const next = await request("deepening/analyze", {
           ...input,
-          ...(activity ? { id: activity.id } : {}),
+          id: activity.id,
         });
         if (stopped) return;
         collect();
@@ -166,7 +141,7 @@ export async function deepeningEditor(
   }
   function preview() {
     const area = root.querySelector("#deep-analysis-preview");
-    area.innerHTML = `<form id="deep-review" class="panel" novalidate><div class="between wrap"><div><span class="eyebrow">TEACHER REVIEW</span><h2>분석 미리보기 · 수정</h2></div><span class="badge">${result.source === "ai" ? "AI 초안" : result.source === "example" ? "내장 예시" : "직접 작성"}</span></div><div class="notice">${e(result.note)}<br/>${e(result.analysis.uncertainty)}</div>${analysisForm(result.analysis)}${button("갈래에 맞는 질문 틀 적용", "refresh-cw", "ghost", 'type="button" id="genre-questions"')}<label class="deep-review-check"><input type="checkbox" name="reviewed" required/> 작품 정보·갈래·질문을 원문과 대조해 확인했습니다.</label>${!activity ? `<details class="deep-password"><summary>이 수업의 비밀번호 확인</summary><p>자동으로 만든 비밀번호입니다. 수업을 다시 열 때 필요하므로 따로 보관해 주세요.</p><code>${e(password)}</code>${button("비밀번호 복사", "copy", "secondary small", 'type="button" id="copy-deep-password"')}</details>` : ""}<p class="step-error" role="alert"></p><div class="flex wrap"><button type="submit" class="btn primary">${icon("check")} ${newRound ? "새 회차로 보관하기" : "이 분석으로 수업 만들기"}</button><a class="btn ghost" href="${activity ? `/teacher/activity/${e(activity.id)}/deepening` : "/teacher?tab=deepening"}">취소</a></div></form>`;
+    area.innerHTML = `<form id="deep-review" class="panel" novalidate><div class="between wrap"><div><span class="eyebrow">TEACHER REVIEW</span><h2>분석 미리보기 · 수정</h2></div><span class="badge">${result.source === "ai" ? "AI 초안" : result.source === "example" ? "내장 예시" : "직접 작성"}</span></div><div class="notice">${e(result.note)}<br/>${e(result.analysis.uncertainty)}</div>${analysisForm(result.analysis)}${button("갈래에 맞는 질문 틀 적용", "refresh-cw", "ghost", 'type="button" id="genre-questions"')}<label class="deep-review-check"><input type="checkbox" name="reviewed" required/> 작품 정보·갈래·질문을 원문과 대조해 확인했습니다.</label><p class="step-error" role="alert"></p><div class="flex wrap"><button type="submit" class="btn primary">${icon("check")} 분석 저장</button><a class="btn ghost" href="/teacher/activity/${e(activity.id)}/deepening">취소</a></div></form>`;
     const form = area.querySelector("form");
     const remember = () => {
       result.analysis = readAnalysis(form, result.analysis);
@@ -174,9 +149,6 @@ export async function deepeningEditor(
     };
     form.oninput = remember;
     form.onchange = remember;
-    form
-      .querySelector("#copy-deep-password")
-      ?.addEventListener("click", () => copyText(password));
     form.querySelector("#genre-questions").onclick = () => {
       const genre = form.elements.genre.value;
       form.elements.opening_question.value = startingQuestions[genre];
@@ -206,20 +178,14 @@ export async function deepeningEditor(
           readAnalysis(form, result.analysis),
         );
         const response = await request("deepening/save", {
-          ...(activity
-            ? { id: activity.id }
-            : { activity_id: activityId, password }),
+          id: activity.id,
           request_id: requestId,
           input,
           analysis,
           draft: result.original || result.analysis,
           source: result.source,
-          new_round: newRound,
         });
-        if (response.access) rememberAccess(response.id, response.access);
         safeStorage(key, null);
-        if (!activity) temporaryPassword(response.id, password);
-        temporaryPassword(key, null);
         if (!stopped)
           await navigate(`/teacher/activity/${response.id}/deepening`);
       } catch (error) {
@@ -317,7 +283,7 @@ export async function deepeningTeacher(root, linked, sessionId) {
       root,
       "deepening",
       a,
-      `${pageHeading("DEEPER READING", "이해 심화하기", `${e(a.title)} · ${e(a.author)} · ${s.round}회차 · 분석 버전 ${data.work.version}`)}<section class="panel deep-control"><div class="between wrap"><div><span class="badge ${s.status === "OPEN" ? "blue" : ""}">${{ DRAFT: "준비 중", OPEN: "심화 진행 중", CLOSED: "심화 종료" }[s.status]}</span><p>${a.lesson_kind === "deepening" ? "독립 심화 수업" : `작품 파악: ${e(STAGES[a.stage])}`} · 학생에게 안내 중: ${a.active_phase === "deepening" ? "이해 심화하기" : "작품 파악하기"}</p></div><div class="flex wrap">${s.status !== "OPEN" ? button(s.status === "CLOSED" ? "심화 활동 다시 열기" : "심화 활동 시작", "play", "primary", 'id="deep-start"') : button("심화 활동 종료", "pause", "secondary", 'id="deep-close"')}${s.status !== "DRAFT" ? button("학생 참여 QR", "qr-code", "secondary", 'id="deep-qr"') : ""}${a.lesson_kind !== "deepening" && s.status === "OPEN" ? button(a.active_phase === "deepening" ? "학생에게 작품 파악 안내" : "학생에게 심화 활동 안내", "arrow-left-right", "ghost", 'id="deep-phase"') : ""}</div></div>${password ? `<details class="deep-password"><summary>이 수업의 비밀번호</summary><code>${e(password)}</code>${button("비밀번호 복사", "copy", "secondary small", 'id="copy-deep-password"')}<p>수업을 다시 열 때 필요합니다. 따로 보관한 뒤 ${button("이 기기에서 숨기기", "eye-off", "ghost small", 'id="hide-deep-password"')}</p></details>` : ""}<div class="deep-options">${customSelect({ name: "deep_round", label: "활동 회차", value: selected, options: data.sessions.map((s) => ({ value: s.id, label: `${s.round}회차${s.status === "CLOSED" ? " · 종료" : ""}` })) })}${customSelect(
+      `${pageHeading("DEEPER READING", "이해 심화하기", `${s.round}회차 · 분석 버전 ${data.work.version}`)}<section class="panel deep-control"><div class="between wrap"><div><span class="badge ${s.status === "OPEN" ? "blue" : ""}">${{ DRAFT: "준비 중", OPEN: "심화 진행 중", CLOSED: "심화 종료" }[s.status]}</span><p>학생에게 안내 중: ${a.active_phase === "deepening" ? "이해 심화하기" : "작품 파악하기"}</p></div><div class="flex wrap">${s.status !== "OPEN" ? button(s.status === "CLOSED" ? "심화 활동 다시 열기" : "심화 활동 시작", "play", "primary", 'id="deep-start"') : button("심화 활동 종료", "pause", "secondary", 'id="deep-close"')}${s.status !== "DRAFT" ? button("학생 참여 QR", "qr-code", "secondary", 'id="deep-qr"') : ""}${a.lesson_kind !== "deepening" && s.status === "OPEN" ? button(a.active_phase === "deepening" ? "학생에게 작품 파악 안내" : "학생에게 심화 활동 안내", "arrow-left-right", "ghost", 'id="deep-phase"') : ""}</div></div>${password ? `<details class="deep-password"><summary>이 수업의 비밀번호</summary><code>${e(password)}</code>${button("비밀번호 복사", "copy", "secondary small", 'id="copy-deep-password"')}<p>수업을 다시 열 때 필요합니다. 따로 보관한 뒤 ${button("이 기기에서 숨기기", "eye-off", "ghost small", 'id="hide-deep-password"')}</p></details>` : ""}<div class="deep-options">${customSelect({ name: "deep_round", label: "활동 회차", value: selected, options: data.sessions.map((s) => ({ value: s.id, label: `${s.round}회차${s.status === "CLOSED" ? " · 종료" : ""}` })) })}${customSelect(
         {
           name: "deep_visibility",
           label: "결과 공개 범위",

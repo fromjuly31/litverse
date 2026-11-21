@@ -159,20 +159,22 @@ test("many ongoing lessons remain reachable without scrolling and pagination ada
     .first()
     .getAttribute("data-lesson-id");
   await page.setViewportSize({ width: 320, height: 520 });
-  await expect(page.locator(".lesson-card")).toHaveCount(1);
+  await expect(page.locator(".lesson-card")).toHaveCount(2);
   await expect(
     page.locator(`.lesson-card[data-lesson-id="${firstVisible}"]`),
   ).toBeVisible();
   await expectScreenFits(page, ".lesson-card, .classroom-pagination");
-  await next.click();
-  await expect(next).toBeDisabled();
+  await expect(previous).toBeEnabled();
   await previous.focus();
   await page.keyboard.press("Enter");
+  await next.click();
   await expect(
     page.locator(`.lesson-card[data-lesson-id="${firstVisible}"]`),
   ).toBeVisible();
   await page.setViewportSize({ width: 844, height: 390 });
-  await expect(page.locator(".lesson-card")).toHaveCount(2);
+  await expect(
+    page.locator(`.lesson-card[data-lesson-id="${firstVisible}"]`),
+  ).toBeVisible();
   await expectScreenFits(page, ".lesson-card, .classroom-pagination");
   await page.locator(".lesson-card").last().click();
   await expect(page.getByLabel("수업 비밀번호", { exact: true })).toBeVisible();

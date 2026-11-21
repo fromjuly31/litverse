@@ -12,15 +12,7 @@ import {
   classResponseSchema,
   isClassQuestions,
 } from "../utils/class-questions.js";
-import {
-  hasDemoAccess,
-  accessError,
-  passwordHash,
-  checkPassword,
-  issueDemoAccess,
-} from "./demo-access.js";
-import { randomCode } from "../utils/helpers.js";
-import { DEFAULT_TASKS, DEFAULT_TAGS } from "../utils/domain.js";
+import { hasDemoAccess, accessError } from "./demo-access.js";
 
 export function demoPublicDeepeningSessions(state) {
   const activities = new Set(state.activities.map(({ id }) => id));
@@ -141,58 +133,20 @@ export async function demoDeepening(state, action, p) {
     return done(demoPublicDeepeningExhibit(state, session));
   }
   if (action === "deepening/save" || action === "deepening/questions-start") {
+    if (!p.id) fail("작품 수업을 열고 이해 심화하기에서 시작해 주세요.");
     const startsQuestions = action === "deepening/questions-start";
-    const standalone = !p.id;
+    const a = await teacher(p.id);
+    const { title, author } = a;
+    const input = startsQuestions
+      ? { title, author }
+      : { ...analysisInputSchema.parse(p.input), title, author };
     const analysis = startsQuestions
       ? classQuestionAnalysis(p.questions)
       : reviewedSchema.parse(p.analysis);
     const draft = startsQuestions
       ? analysis
       : analysisSchema.parse(p.draft || p.analysis);
-    let input =
-      !startsQuestions || standalone
-        ? analysisInputSchema.parse(p.input)
-        : null;
     const newRound = startsQuestions || p.new_round;
-    let a;
-    if (standalone) {
-      a = state.activities.find((a) => a.id === p.activity_id);
-      if (a && !(await checkPassword(p.password, state.lesson_passwords[a.id])))
-        accessError();
-      if (!a) {
-        state.lesson_passwords[p.activity_id] = await passwordHash(p.password);
-        a = {
-          id: p.activity_id,
-          title: input.title,
-          author: input.author,
-          course_name: "이해 심화하기",
-          class_name: "",
-          introduction: "문학을 통해 삶과 사회를 성찰합니다.",
-          objectives: "다른 관점과 판단 근거를 살펴봅니다.",
-          tasks: DEFAULT_TASKS,
-          tags: DEFAULT_TAGS,
-          settings: {
-            allow_resubmit: true,
-            require_approval: true,
-            enable_scene: true,
-            max_images: 1,
-          },
-          default_image_style: "문학 일러스트레이션",
-          expected_student_count: 30,
-          stage: "DRAFT",
-          lesson_kind: "deepening",
-          active_phase: "understanding",
-          worksheet_token: randomCode(),
-          submission_token: randomCode(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        state.activities.push(a);
-      }
-    } else {
-      a = await teacher(p.id);
-      if (startsQuestions) input = { title: a.title, author: a.author };
-    }
     const retried = state.deepening_sessions.find((s) => s.id === p.request_id);
     if (retried) {
       if (retried.activity_id !== a.id) accessError();
@@ -201,14 +155,7 @@ export async function demoDeepening(state, action, p) {
         !isClassQuestions(bundle(retried).work.reviewed_analysis)
       )
         accessError();
-      return done(
-        {
-          id: a.id,
-          session: retried,
-          ...(standalone ? { access: await issueDemoAccess(state, a.id) } : {}),
-        },
-        standalone,
-      );
+      return done({ id: a.id, session: retried });
     }
     let session = state.deepening_sessions.find(
       (s) => s.id === a.deepening_session_id,
@@ -251,18 +198,8 @@ export async function demoDeepening(state, action, p) {
       state.deepening_sessions.push(session);
     }
     a.deepening_session_id = session.id;
-    if (startsQuestions) {
-      a.active_phase = "deepening";
-      if (standalone) a.stage = "ANALYSIS";
-    }
-    return done(
-      {
-        id: a.id,
-        session,
-        ...(standalone ? { access: await issueDemoAccess(state, a.id) } : {}),
-      },
-      true,
-    );
+    if (startsQuestions) a.active_phase = "deepening";
+    return done({ id: a.id, session }, true);
   }
   if (action === "deepening/get" || action === "deepening/control") {
     const a = await teacher(p.id),

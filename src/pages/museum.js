@@ -49,7 +49,7 @@ async function workDetail(root, id) {
           .join("")}</nav>`
       : "";
   const posterTools = poster
-    ? `<div><a class="btn secondary" href="/teacher/activity/${e(poster.id)}/background">${icon("lock-keyhole")} 수업 다시 열기</a><button class="btn secondary" id="download-poster">${icon("download")} 포스터 HTML 저장</button><button class="btn primary" id="print-poster">${icon("file-text")} 인쇄 · PDF 저장</button></div>`
+    ? `<div>${poster.can_reopen ? `<a class="btn secondary" href="/teacher/activity/${e(poster.id)}/background">${icon("lock-keyhole")} 수업 다시 열기</a>` : ""}<button class="btn secondary" id="download-poster">${icon("download")} 포스터 HTML 저장</button><button class="btn primary" id="print-poster">${icon("file-text")} 인쇄 · PDF 저장</button></div>`
     : "";
   const heading = poster
     ? `<h1 class="sr-only">${e(work.title)} 완성 전시작</h1>`

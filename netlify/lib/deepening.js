@@ -6,14 +6,8 @@ import {
   ownedActivity,
   tokenActivity,
   hmac,
-  activityTokens,
 } from "./server.js";
-import {
-  lessonOwner,
-  hashPassword,
-  issueAccess,
-  verifyPassword,
-} from "./lesson-access.js";
+import { lessonOwner } from "./lesson-access.js";
 import { uuid, token, code } from "./validation.js";
 import {
   analysisInputSchema,
@@ -189,55 +183,15 @@ export async function deepeningAction(db, req, context, action, p) {
     return done({ items, total: response.count });
   }
   if (action === "deepening/save" || action === "deepening/questions-start") {
+    if (!p.id) fail(400, "작품 수업을 열고 이해 심화하기에서 시작해 주세요.");
     const startsQuestions = action === "deepening/questions-start";
-    const standalone = !p.id,
-      id = standalone ? uuid.parse(p.activity_id) : uuid.parse(p.id);
+    const id = uuid.parse(p.id);
     const requestId = uuid.parse(p.request_id);
-    let input =
-      !startsQuestions || standalone
-        ? analysisInputSchema.parse(p.input)
-        : null;
-    const analysis = startsQuestions
-      ? classQuestionAnalysis(p.questions)
-      : reviewedSchema.parse(p.analysis);
-    let teacher,
-      password = null;
-    if (standalone) {
-      await limit(db, `deepening-create:${context.ip || "local"}`, 10, 3600);
-      password = await hashPassword(p.password);
-      const profiles = check(
-        await db
-          .from("teacher_profiles")
-          .select("id")
-          .eq("is_admin", true)
-          .order("created_at")
-          .limit(1),
-      );
-      if (!profiles.length) fail(503, "관리자 계정 설정이 필요합니다.");
-      teacher = profiles[0].id;
-      // Retrying a creation requires the same newly generated session UUID and password.
-      const existing = check(
-        await db.from("activities").select("id").eq("id", id).maybeSingle(),
-      );
-      if (existing) {
-        const access = check(
-          await db
-            .from("lesson_access")
-            .select("password_hash")
-            .eq("activity_id", id)
-            .single(),
-        );
-        if (!(await verifyPassword(p.password, access.password_hash)))
-          fail(403, "이 수업을 생성한 요청이 아닙니다.");
-      }
-    } else {
-      teacher = await lessonOwner(db, req, id);
-      if (startsQuestions) {
-        const { title, author } = await ownedActivity(db, id, teacher);
-        input = { title, author };
-      }
-    }
-    const tokens = activityTokens({ id });
+    const teacher = await lessonOwner(db, req, id);
+    const { title, author } = await ownedActivity(db, id, teacher);
+    const input = startsQuestions
+      ? { title, author }
+      : { ...analysisInputSchema.parse(p.input), title, author };
     const session = check(
       await db.rpc(
         startsQuestions
@@ -248,39 +202,20 @@ export async function deepeningAction(db, req, context, action, p) {
           p_activity: id,
           p_session: requestId,
           p_input: input,
-          p_analysis: analysis,
+          p_analysis: startsQuestions
+            ? classQuestionAnalysis(p.questions)
+            : reviewedSchema.parse(p.analysis),
           ...(!startsQuestions && {
             p_draft: analysisSchema.parse(p.draft || p.analysis),
             p_source: z.enum(["ai", "example", "manual"]).parse(p.source),
             p_new_round: !!p.new_round,
           }),
-          p_password: password,
-          p_tokens: {
-            worksheet: hmac(`qr:${tokens.worksheet_token}`),
-            submission: hmac(`qr:${tokens.submission_token}`),
-          },
+          p_password: null,
+          p_tokens: {},
         },
       ),
     );
-    let access;
-    if (standalone) {
-      // A concurrent first request may have established a different password.
-      const stored = check(
-        await db
-          .from("lesson_access")
-          .select("password_hash,version")
-          .eq("activity_id", id)
-          .single(),
-      );
-      if (!(await verifyPassword(p.password, stored.password_hash)))
-        fail(403, "이 수업을 생성한 요청이 아닙니다.");
-      access = issueAccess(id, stored.version);
-    }
-    return done({
-      id,
-      session,
-      ...(access && { access }),
-    });
+    return done({ id, session });
   }
   if (action === "deepening/get" || action === "deepening/control") {
     const id = uuid.parse(p.id),
@@ -331,7 +266,9 @@ export async function deepeningAction(db, req, context, action, p) {
     return done({ ...data, sessions, records: records.map(safeRecord) });
   }
   if (action.startsWith("deepening/student-")) {
-    const activity = await tokenActivity(db, token.parse(p.token));
+    const activity = await tokenActivity(db, token.parse(p.token), null, {
+      deepening: true,
+    });
     const sessionId = p.session_id
       ? uuid.parse(p.session_id)
       : activity.deepening_session_id;

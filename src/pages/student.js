@@ -7,21 +7,25 @@ import { watchStudentPhase } from "../services/student-phase.js";
 export async function studentPage(root, path) {
   const [, , rawToken, mode, sessionId] = path.split("/");
   const token = decodeURIComponent(rawToken || "");
-  const activity = await request("student/activity", { token });
+  const studentLink = { token, phase: mode === "deepening" ? mode : undefined };
+  const activity = await request("student/activity", studentLink);
   let dispose;
-  if (
+  const showingDeepening =
     mode === "deepening" ||
     (activity.deepening_session_id &&
       activity.active_phase === "deepening" &&
-      !path.endsWith("/understanding"))
-  )
+      !path.endsWith("/understanding"));
+  if (showingDeepening)
     dispose = await deepeningStudent(root, activity, token, sessionId);
   else if (path.startsWith("/submit/"))
     dispose = submissionPage(root, activity, token);
   else if (activity.stage === "BACKGROUND")
     dispose = backgroundStudent(root, activity, token);
   else dispose = worksheetPage(root, activity, token);
-  const unwatch = watchStudentPhase(root, activity, token);
+  const unwatch = watchStudentPhase(root, activity, {
+    token,
+    phase: showingDeepening ? "deepening" : undefined,
+  });
   return () => {
     dispose?.();
     unwatch();

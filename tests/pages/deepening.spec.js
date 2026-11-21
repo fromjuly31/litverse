@@ -12,17 +12,25 @@ for (const [name, entry] of [
   }) => {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.goto(`${entry}#/teacher/deepening/new`);
-    const question = "서시의 화자는 어떤 삶을 바랐나요?";
-    const answer = "스스로에게 부끄럽지 않은 삶을 살고 싶어 해요.";
-    await page.getByLabel("수업 이름 (선택)", { exact: true }).fill("서시");
+    await page.goto(`${entry}#/teacher`);
+    const tabs = page.getByRole("navigation", { name: "수업 분야" });
+    await expect(tabs).toHaveCount(0);
+    await page.getByRole("link", { name: "동백꽃 수업 열기" }).click();
+    await page.getByLabel("수업 비밀번호", { exact: true }).fill("demo-lesson");
+    await page.getByLabel("비밀번호 확인", { exact: true }).fill("demo-lesson");
+    await page.getByRole("button", { name: "비밀번호 설정하고 시작" }).click();
+    await tabs.getByRole("link", { name: "이해 심화하기" }).click();
+    const question = "점순이는 왜 감자를 건넸을까요?";
+    const answer = "감자를 건네며 마음을 표현하고 싶었어요.";
     await page.getByLabel("질문 1", { exact: true }).fill(question);
     await page.getByRole("button", { name: "시작하기", exact: true }).click();
     const link = await page
       .getByRole("link", { name: "학생 화면 열기", exact: true })
       .getAttribute("href");
     expect(link).toContain(`${entry}#/activity/`);
-    expect(link).toMatch(/\/deepening\/[a-f0-9-]{36}$/);
+    expect(link).toMatch(
+      /\/activity\/demo-dongbaek-analysis\/deepening\/[a-f0-9-]{36}$/,
+    );
     await page.goto(link);
     await page.getByLabel("학생 번호 또는 별칭", { exact: true }).fill("01번");
     const field = page.getByLabel(`1. ${question}`, { exact: true });

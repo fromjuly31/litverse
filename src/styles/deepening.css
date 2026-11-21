@@ -3,7 +3,6 @@
   gap: 6px;
   border-bottom: 1px solid var(--line);
   padding: 0 0 8px;
-  margin-bottom: 24px;
   flex-shrink: 0;
 }
 .learning-tabs a {
@@ -27,10 +26,6 @@
 .learning-tabs svg {
   width: 17px;
   height: 17px;
-}
-.classroom-overview .learning-tabs {
-  margin: 0;
-  padding-bottom: 8px;
 }
 .classroom-overview .teacher-main {
   gap: 16px;
@@ -555,7 +550,6 @@
 @media (max-width: 600px) {
   .learning-tabs {
     gap: 4px;
-    margin-bottom: 20px;
   }
   .learning-tabs a {
     font-size: 12px;
@@ -569,9 +563,6 @@
   }
   .classroom-overview .teacher-main {
     gap: 12px;
-  }
-  .classroom-overview .learning-tabs {
-    padding-bottom: 5px;
   }
   .classroom-overview .lesson-grid {
     grid-auto-rows: 112px;
@@ -703,10 +694,6 @@
   .classroom-overview .teacher-main {
     gap: 8px;
     padding-top: 6px;
-  }
-  .classroom-overview .learning-tabs {
-    margin: 0;
-    padding: 0;
   }
   .learning-tabs a {
     min-height: 30px;

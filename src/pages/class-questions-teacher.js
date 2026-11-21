@@ -2,7 +2,6 @@ import QRCode from "qrcode";
 import { navigate } from "../main.js";
 import { teacherShell, pageHeading } from "./teacher.js";
 import { request, subscribe } from "../services/api.js";
-import { rememberAccess } from "../services/access.js";
 import {
   button,
   copyText,
@@ -15,7 +14,7 @@ import {
   refreshIcons,
   toast,
 } from "../components/ui.js";
-import { e, randomCode } from "../utils/helpers.js";
+import { e } from "../utils/helpers.js";
 import { currentRoute, publicRouteUrl, routeHref } from "../utils/paths.js";
 import {
   CLASS_QUESTION_LENGTH,
@@ -38,20 +37,14 @@ function tabValue(key, value) {
 const passwordKey = (id) => `litverse-deep-password:${id}`;
 
 export function classQuestionsEditor(root, activity) {
-  const key = `litverse-class-questions:${activity?.id || "new"}`;
-  const cancelPath = !activity
-    ? "/teacher?tab=deepening"
-    : activity.deepening_session_id
-      ? pathFor(activity.id)
-      : `/teacher/activity/${activity.id}/background`;
+  const key = `litverse-class-questions:${activity.id}`;
+  const cancelPath = activity.deepening_session_id
+    ? pathFor(activity.id)
+    : `/teacher/activity/${activity.id}/background`;
   const draft = tabValue(key) || {
-    title: "",
-    author: "",
     count: 1,
     questions: [],
-    activityId: activity?.id || crypto.randomUUID(),
     requestId: crypto.randomUUID(),
-    password: activity ? null : randomCode().slice(0, 16),
   };
   const count = customSelect({
     name: "question_count",
@@ -66,9 +59,8 @@ export function classQuestionsEditor(root, activity) {
     root,
     "deepening-editor",
     activity,
-    `${pageHeading("", activity ? `${e(activity.title)} · 이해 심화하기` : "심화 수업 만들기", "")}
+    `${pageHeading("", "심화 질문 작성", "")}
     <form id="class-questions-form" class="panel class-questions stack" novalidate>
-      ${activity ? "" : `<div class="form-grid">${field("수업 이름 (선택)", "title", draft.title, { max: 120, placeholder: "이해 심화하기" })}${field("작가 (선택)", "author", draft.author, { max: 80 })}</div>`}
       ${count}
       <div id="class-question-fields" class="stack"></div>
       <p class="step-error" role="alert" id="class-start-error"></p>
@@ -96,10 +88,6 @@ export function classQuestionsEditor(root, activity) {
     ).join("");
   }
   const persist = () => {
-    if (!activity) {
-      draft.title = form.elements.title.value;
-      draft.author = form.elements.author.value;
-    }
     [...fields.querySelectorAll("textarea")].forEach((entry, index) => {
       draft.questions[index] = entry.value;
     });
@@ -128,26 +116,13 @@ export function classQuestionsEditor(root, activity) {
     }
     trigger.disabled = true;
     try {
-      const started = await request("deepening/questions-start", {
-        ...(activity
-          ? { id: activity.id }
-          : {
-              activity_id: draft.activityId,
-              password: draft.password,
-              input: {
-                title: draft.title.trim() || "이해 심화하기",
-                author: draft.author.trim() || "미입력",
-              },
-            }),
+      await request("deepening/questions-start", {
+        id: activity.id,
         request_id: draft.requestId,
         questions: parsed.data,
       });
-      if (started.access) {
-        rememberAccess(started.id, started.access);
-        tabValue(passwordKey(started.id), draft.password);
-      }
       tabValue(key, null);
-      if (!stopped) await navigate(`${pathFor(started.id)}?qr=1`);
+      if (!stopped) await navigate(`${pathFor(activity.id)}?qr=1`);
     } catch (error) {
       if (!stopped) errorMessage.textContent = error.message;
     } finally {
@@ -187,7 +162,7 @@ export function classQuestionsTeacher(root, activity, data, showQr = false) {
     root,
     "deepening",
     activity,
-    `${pageHeading("", e(activity.title), "이해 심화하기")}
+    `${pageHeading("", "이해 심화하기", "")}
     <div class="class-questions stack">
       <section class="panel stack" aria-label="심화 수업">
         <div class="between wrap"><p id="class-session-status" class="badge"></p><div class="flex wrap" id="class-session-actions"></div></div>

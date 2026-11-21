@@ -295,7 +295,11 @@ export async function demoRequest(action, payload = {}) {
     else if (action === "teacher/retry-cleanup") result = { ok: true };
     else if (action === "student/activity") {
       const a = byToken();
-      if (a.stage === "DRAFT" && a.active_phase !== "deepening")
+      if (
+        a.stage === "DRAFT" &&
+        a.active_phase !== "deepening" &&
+        !(payload.phase === "deepening" && a.deepening_session_id)
+      )
         fail("아직 활동이 시작되지 않았어요.");
       result = {
         ...a,
