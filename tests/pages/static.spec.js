@@ -1,7 +1,39 @@
 import { test, expect } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { readFile } from "node:fs/promises";
+
+test("published showcase starts with only the completed Dongbaek exhibit", async ({
+  page,
+}) => {
+  test.skip(
+    process.env.LITVERSE_PAGES_EXHIBIT_ONLY !== "1",
+    "Only the published showcase has this seed.",
+  );
+  for (const entry of [
+    "http://127.0.0.1:4174/preview-repository/",
+    pathToFileURL(resolve("release/index.html")).href,
+  ]) {
+    await page.goto(`${entry}#/teacher`);
+    await expect(
+      page.getByRole("link", { name: "수업 만들기", exact: true }),
+    ).toBeVisible();
+    await expect(page.locator(".lesson-card")).toHaveCount(0);
+    await page.goto(`${entry}#/exhibition`);
+    await expect(page.locator(".exhibit-card")).toHaveCount(1);
+    await page
+      .getByRole("link", { name: "동백꽃 전시작 자세히 보기", exact: true })
+      .click();
+    await expect(page.locator(".poster-signature")).toContainText(
+      "동백꽃 예시 학급",
+    );
+    const photos = page.locator(".literary-poster img");
+    await expect(photos).toHaveCount(2);
+    await photos.evaluateAll((images) =>
+      Promise.all(images.map((image) => image.decode())),
+    );
+  }
+});
 
 const tabs = (page) =>
   page.getByRole("navigation", { name: "수업 활동", exact: true });

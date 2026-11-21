@@ -1,11 +1,18 @@
 import { build } from "vite";
-import { readFile, writeFile, readdir, mkdir } from "node:fs/promises";
+import {
+  copyFile,
+  readFile,
+  writeFile,
+  readdir,
+  mkdir,
+} from "node:fs/promises";
 import { resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const output = resolve(root, "github-pages");
 const release = resolve(root, "release");
+const exhibitOnly = process.env.LITVERSE_PAGES_EXHIBIT_ONLY === "1";
 
 // This static edition intentionally has no server credentials or live API calls.
 await build({
@@ -15,6 +22,7 @@ await build({
   define: {
     "import.meta.env.VITE_APP_MODE": JSON.stringify("demo"),
     "import.meta.env.VITE_ROUTER_MODE": JSON.stringify("hash"),
+    "import.meta.env.LITVERSE_PAGES_EXHIBIT_ONLY": JSON.stringify(exhibitOnly),
     "import.meta.env.VITE_PUBLIC_SITE_URL": JSON.stringify(""),
     "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(""),
     "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(""),
@@ -28,6 +36,11 @@ await build({
     rollupOptions: { output: { inlineDynamicImports: true } },
   },
 });
+if (exhibitOnly)
+  await copyFile(
+    resolve(root, "scripts/fixtures/dongbaek-art/dongbaek-potatoes.jpg"),
+    resolve(output, "art/dongbaek-potatoes.jpg"),
+  );
 await writeFile(resolve(output, ".nojekyll"), "");
 
 // Also provide one HTML file that can be opened directly or uploaded on its own.
@@ -64,9 +77,11 @@ async function embedDocuments(folder, prefix = "/document-assets") {
 }
 await embedDocuments(resolve(output, "document-assets"));
 for (const filename of await readdir(resolve(output, "art"))) {
-  const type = { ".webp": "image/webp", ".svg": "image/svg+xml" }[
-    extname(filename)
-  ];
+  const type = {
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+    ".jpg": "image/jpeg",
+  }[extname(filename)];
   if (!type) continue;
   const data = await readFile(resolve(output, "art", filename));
   assets[`/art/${filename}`] = `data:${type};base64,${data.toString("base64")}`;

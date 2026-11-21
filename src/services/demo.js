@@ -1,4 +1,4 @@
-import { seedData } from "./seed.js";
+import { seedData, seedExhibition } from "./seed.js";
 import { textStudySchema } from "../utils/text-study.js";
 import { removeDocuments } from "./document-store.js";
 import { demoArchive } from "./demo-archive.js";
@@ -17,6 +17,10 @@ import {
   validScene,
 } from "../utils/domain.js";
 let database;
+const loadDemoState = (stored) =>
+  import.meta.env.LITVERSE_PAGES_EXHIBIT_ONLY
+    ? seedExhibition(stored)
+    : stored || seedData();
 const channel =
   typeof BroadcastChannel === "function"
     ? new BroadcastChannel("litverse-demo")
@@ -42,7 +46,7 @@ async function read() {
   const conn = await db();
   return new Promise((resolve, reject) => {
     const req = conn.transaction("state").objectStore("state").get("app");
-    req.onsuccess = () => resolve(req.result || seedData());
+    req.onsuccess = () => resolve(loadDemoState(req.result));
     req.onerror = () => reject(req.error);
   });
 }
@@ -403,7 +407,7 @@ export async function demoRequest(action, payload = {}) {
       result = image;
     } else if (action === "demo/reset") {
       await write({
-        ...seedData(),
+        ...loadDemoState(),
         admin_password: state.admin_password,
         access_sessions: state.access_sessions.filter(
           (s) => s.scope === "admin",

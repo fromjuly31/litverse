@@ -11,6 +11,7 @@ const mime = {
   ".css": "text/css; charset=utf-8",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
+  ".jpg": "image/jpeg",
 };
 await stat(resolve(root, "index.html")).catch(() => {
   throw new Error("Run npm run build:pages before starting the HTML preview.");

@@ -25,6 +25,12 @@ jobs:
       - run: npm run build:pages
       - run: npx playwright install --with-deps chromium
       - run: npm run test:pages
+      - name: Build and check the published showcase
+        env:
+          LITVERSE_PAGES_EXHIBIT_ONLY: "1"
+        run: |
+          npm run build:pages
+          npm run test:pages -- --grep "published showcase"
       - uses: actions/upload-pages-artifact@v4
         with:
           path: github-pages
