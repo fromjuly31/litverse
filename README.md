@@ -143,7 +143,10 @@ values ('생성한-관리자-사용자-UUID', 'admin@example.school', true);
 | `TOKEN_SECRET`              | 서버 Functions 전용·비밀 | 최소 32바이트의 무작위 비밀            |
 | `SITE_URL`                  | 서버 Functions 전용      | 실제 HTTPS 배포 주소                   |
 | `OPENAI_API_KEY`            | 서버 Functions 전용·비밀 | AI 줄거리·심화 분석용 OpenAI API 키    |
+| `OPENAI_DOCENT_API_KEY`    | 서버 Functions 전용·비밀 | GPT-Live와 Audio Voices 쓰기 권한이 있는 도슨트용 키. 비워 두면 `OPENAI_API_KEY` 사용 |
 | `OPENAI_SUMMARY_MODEL`      | 서버 Functions 전용      | 기본 `gpt-4.1-mini`, 필요하면 변경     |
+
+사건 오디오 도슨트를 배포하기 전에 Supabase에 `20261121052826_scene_audio_docents.sql`을 적용합니다. 학생이 적은 목소리 설명으로 GPT-Live에서 최대 20초의 음성을 만들고, 제출할 때 장면 사진에 연결합니다.
 
 심화 AI에 사용하는 추가 변수는 모두 **Functions 서버 전용**입니다.
 

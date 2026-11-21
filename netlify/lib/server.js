@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { createHmac, randomBytes } from "node:crypto";
+import { DOCENT_BUCKET, docentPath } from "../../src/utils/docent.js";
 export class HttpError extends Error {
   constructor(status, message) {
     super(message);
@@ -138,7 +139,7 @@ export async function enrichActivity(db, a, student = false) {
         }),
   };
 }
-export async function signedImages(db, images) {
+export async function signedImages(db, images, { withAudio = true } = {}) {
   if (!images.length) return [];
   const signed = check(
     await db.storage.from("literature-images").createSignedUrls(
@@ -146,9 +147,20 @@ export async function signedImages(db, images) {
       600,
     ),
   );
-  return images.map((image, index) => ({
+  const docents = withAudio ? images.filter((image) => image.docent) : [];
+  const paths = docents.map((image) => docentPath(image.image_path));
+  const audio = paths.length
+    ? check(await db.storage.from(DOCENT_BUCKET).createSignedUrls(paths, 3600))
+    : [];
+  const audioUrls = new Map(
+    docents.map((image, index) => [image.id, audio[index]?.signedUrl]),
+  );
+  return images.map(({ docent, ...image }, index) => ({
     ...image,
     image_url: signed[index]?.signedUrl || "",
+    ...(withAudio && docent
+      ? { docent: { ...docent, audio_url: audioUrls.get(image.id) } }
+      : {}),
   }));
 }
 export async function limit(db, key, max = 600, seconds = 600) {
@@ -162,11 +174,41 @@ export async function limit(db, key, max = 600, seconds = 600) {
   if (!allowed)
     fail(429, "요청이 너무 많아요. 잠시 기다린 뒤 다시 시도해 주세요.");
 }
+async function removeDocentDrafts(db, job) {
+  const bucket = db.storage.from(DOCENT_BUCKET);
+  const prefix = `drafts/${job.activity_id}`;
+  const names = async (path) => {
+    const entries = [];
+    for (let offset = 0; ; offset += 1000) {
+      const batch = check(await bucket.list(path, { limit: 1000, offset }));
+      entries.push(...batch.map((entry) => entry.name));
+      if (batch.length < 1000) return entries;
+    }
+  };
+  const worksheets =
+    job.target_type === "worksheet"
+      ? [job.target_id]
+      : (await names(prefix)).filter((name) => /^[a-f0-9-]{36}$/.test(name));
+  for (const worksheetId of worksheets) {
+    const path = `${prefix}/${worksheetId}`;
+    const files = (await names(path)).filter((name) =>
+      /^[a-f0-9]{64}\.wav$/.test(name),
+    );
+    for (let i = 0; i < files.length; i += 100)
+      check(
+        await bucket.remove(
+          files.slice(i, i + 100).map((name) => `${path}/${name}`),
+        ),
+      );
+  }
+}
 export async function runDeletion(db, id) {
   const job = check(await db.rpc("claim_deletion", { p_id: id }));
   if (!job?.id) return;
   try {
     let paths = [...new Set(job.image_paths)];
+    if (job.activity_id && ["activity", "worksheet"].includes(job.target_type))
+      await removeDocentDrafts(db, job);
     if (job.target_type === "activity" && job.activity_id) {
       const documents = [];
       for (let offset = 0; ; offset += 1000) {
@@ -200,12 +242,17 @@ export async function runDeletion(db, id) {
       );
       paths = paths.filter((p) => !used.some((i) => i.image_path === p));
     }
-    for (let i = 0; i < paths.length; i += 100)
-      check(
-        await db.storage
-          .from("literature-images")
-          .remove(paths.slice(i, i + 100)),
-      );
+    for (let i = 0; i < paths.length; i += 100) {
+      const batch = paths.slice(i, i + 100);
+      check(await db.storage.from("literature-images").remove(batch));
+      const audioPaths = batch
+        .filter((path) =>
+          /^(?:[a-f0-9-]{36}\/){2}[a-f0-9-]{36}\.(webp|png|jpg)$/.test(path),
+        )
+        .map(docentPath);
+      if (audioPaths.length)
+        check(await db.storage.from(DOCENT_BUCKET).remove(audioPaths));
+    }
     check(await db.rpc("finish_deletion", { p_id: job.id }));
   } catch (error) {
     await db
@@ -251,8 +298,10 @@ export function errorResponse(error) {
       { status: 400, headers: { "Cache-Control": "no-store" } },
     );
   const messages = {
-    CLASS_RESPONSE_SUBMITTED: "이미 이 회차에 답변을 제출했어요. 화면을 다시 열어 제출한 답변을 확인해 주세요.",
+    CLASS_RESPONSE_SUBMITTED:
+      "이미 이 회차에 답변을 제출했어요. 화면을 다시 열어 제출한 답변을 확인해 주세요.",
     INVALID_CLASS_RESPONSE: "모든 질문에 답변해 주세요.",
+    INVALID_DOCENT: "사건 해설 대본과 목소리를 확인해 주세요.",
     REVISION_CONFLICT:
       "다른 창에서 기록이 변경되었습니다. 임시저장 내용을 유지하고 최신 기록을 불러와 주세요.",
     INITIAL_IMMUTABLE: "최초 판단은 성찰과 비교하기 위해 보존됩니다.",

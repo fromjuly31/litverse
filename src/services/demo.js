@@ -1,5 +1,6 @@
 import { seedData, seedExhibition } from "./seed.js";
 import { textStudySchema } from "../utils/text-study.js";
+import { docentSchema } from "../utils/docent.js";
 import { removeDocuments } from "./document-store.js";
 import { demoArchive } from "./demo-archive.js";
 import { demoDeepening } from "./demo-deepening.js";
@@ -407,6 +408,9 @@ export async function demoRequest(action, payload = {}) {
           a,
           payload.question_responses,
         ),
+        ...(payload.image_type === "scene" && payload.docent
+          ? { docent: docentSchema.parse(payload.docent) }
+          : {}),
         approval_status: a.settings.require_approval ? "pending" : "approved",
         created_at: new Date().toISOString(),
       };

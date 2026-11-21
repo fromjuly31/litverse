@@ -1,12 +1,16 @@
 import { test, expect } from "@playwright/test";
 import { mkdir, readFile } from "node:fs/promises";
+import { pcmToWav } from "../../netlify/lib/docent.js";
 
 test("collection groups posters and public perspectives by work and author", async ({
   page,
 }) => {
   await page.goto("/");
   await expect(page.locator(".museum-choices")).toBeVisible();
-  await page.evaluate(async () => {
+  const fixtureAudio =
+    "data:audio/wav;base64," +
+    pcmToWav([Buffer.alloc(4800)]).toString("base64");
+  await page.evaluate(async (audioUrl) => {
     const { seedData } = await import("/src/services/seed.js");
     const { finalResult } = await import("/src/utils/archive.js");
     const { demoAnalysis } = await import("/src/utils/deepening.js");
@@ -47,7 +51,16 @@ test("collection groups posters and public perspectives by work and author", asy
       });
       state.images.push(
         { ...portrait, id: `${id}-character`, activity_id: id },
-        { ...scene, id: `${id}-scene`, activity_id: id },
+        {
+          ...scene,
+          id: `${id}-scene`,
+          activity_id: id,
+          docent: {
+            script: "두 인물이 감자를 사이에 두고 서 있는 장면입니다.",
+            voice: "marin",
+            audio_url: audioUrl,
+          },
+        },
       );
     }
     const work = { title: base.title, author: base.author };
@@ -90,7 +103,7 @@ test("collection groups posters and public perspectives by work and author", asy
       };
       request.onerror = () => reject(request.error);
     });
-  });
+  }, fixtureAudio);
   await page.reload();
   await expect(page.locator(".inventory-summary")).toHaveText(
     "전시 중인 작품2점",
@@ -106,6 +119,30 @@ test("collection groups posters and public perspectives by work and author", asy
   await expect(page.locator(".exhibit-card")).toHaveCount(1);
   await page.getByRole("link", { name: "동백꽃 전시작 자세히 보기" }).click();
   await expect(page.locator(".poster-signature")).toContainText("두 번째 반");
+  const docent = page.locator(".literary-poster audio");
+  await expect(docent).toHaveCount(1);
+  const duration = await docent.evaluate(
+    (audio) =>
+      new Promise((resolve, reject) => {
+        audio.addEventListener(
+          "loadedmetadata",
+          () => resolve(audio.duration),
+          { once: true },
+        );
+        audio.addEventListener(
+          "error",
+          () => reject(new Error("Audio did not load")),
+          { once: true },
+        );
+        audio.load();
+      }),
+  );
+  expect(duration).toBeCloseTo(0.1);
+  await docent.evaluate(async (audio) => {
+    audio.muted = true;
+    await audio.play();
+  });
+  await expect.poll(() => docent.evaluate((audio) => audio.ended)).toBe(true);
   await expect(
     page.getByRole("heading", { name: "이해 심화", exact: true }),
   ).toBeVisible();

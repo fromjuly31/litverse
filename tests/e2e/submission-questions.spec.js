@@ -58,14 +58,14 @@ test("photo submission saves the teacher's questions and each student's answers 
   await expect(
     page.getByLabel(`1. ${lesson.questions[0]}`, { exact: true }),
   ).toHaveValue(responses[0]);
-  await page.getByRole("tab", { name: /인상 깊은 사건/ }).click();
+  await page.getByRole("tab", { name: /사건 사진과 오디오 도슨트/ }).click();
   await expect(
     page.getByLabel(`1. ${lesson.questions[0]}`, { exact: true }),
   ).toHaveValue("");
   await page
     .getByLabel(`1. ${lesson.questions[0]}`, { exact: true })
     .fill("사건 사진에서 드러난 다른 해석");
-  await page.getByRole("tab", { name: /인물의 성격/ }).click();
+  await page.getByRole("tab", { name: /인물 사진과 본문 근거/ }).click();
   await expect(
     page.getByLabel(`1. ${lesson.questions[0]}`, { exact: true }),
   ).toHaveValue(responses[0]);

@@ -33,7 +33,9 @@ export async function request(action, payload = {}) {
       ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
     },
     body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(25000),
+    signal: AbortSignal.timeout(
+      action === "student/upload-docent" ? 55000 : 25000,
+    ),
   }).catch((error) => {
     throw new Error(
       error.name === "TimeoutError"

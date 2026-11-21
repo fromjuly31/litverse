@@ -189,7 +189,23 @@ test("mobile student completes both prompt activities and submits two independen
   await expect(
     page.getByRole("heading", { name: /두 장의 작품이/ }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "다음: 사건 장면 사진 제출" }).click();
+  await expect(page.locator("#student-work-panel")).toContainText("본문 근거");
+  await page
+    .getByRole("button", { name: "다음: 사건 사진과 도슨트 제출" })
+    .click();
+  const docentScript = "두 인물의 엇갈리는 시선을 함께 봐 주세요.";
+  await page.getByLabel("해설 대본", { exact: true }).fill(docentScript);
+  const saveVoice = page.getByRole("button", { name: "도슨트 설정 저장" });
+  await expect(saveVoice).toBeDisabled();
+  await page
+    .getByLabel("목소리 설명")
+    .fill("친절하고 나이 많은 할아버지처럼 따뜻한 목소리");
+  await saveVoice.click();
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "대본과 목소리 설명을 저장했어요." }),
+  ).toBeVisible();
   await page.getByLabel("사건 장면 이미지 파일 선택").setInputFiles({
     name: "scene.png",
     mimeType: "image/png",
@@ -199,12 +215,22 @@ test("mobile student completes both prompt activities and submits two independen
   await page
     .getByLabel("사건 장면 사진에서 강조한 특징")
     .fill("감자를 건네는 손과 외면하는 시선 사이의 거리를 강조했어요.");
-  await page.getByRole("button", { name: "사건 장면 사진 제출하기" }).click();
+  const submitScene = page.getByRole("button", {
+    name: "사건 장면 사진 제출하기",
+  });
+  await expect(submitScene).toBeEnabled();
+  await page
+    .getByLabel("목소리 설명")
+    .fill("따뜻하고 차분한 성인 안내자의 목소리");
+  await expect(submitScene).toBeDisabled();
+  await saveVoice.click();
+  await submitScene.click();
   await expect(
     page.getByRole("heading", {
       name: "두 장의 작품이 우리의 이야기에 더해졌어요.",
     }),
   ).toBeVisible();
+  await expect(page.locator(".docent-player")).toContainText(docentScript);
   await noOverflow(page);
   expect(errors).toEqual([]);
   await page.goto(route + "/gallery");
@@ -223,6 +249,10 @@ test("mobile student completes both prompt activities and submits two independen
   await page.locator("[data-select-image]").check();
   await page.getByRole("button", { name: "전시 승인", exact: true }).click();
   await expect(page.locator(".art-card .badge")).toHaveText("전시 중");
+  await page.locator(".art-hit").click();
+  await expect(
+    page.getByRole("dialog").locator(".docent-player"),
+  ).toContainText(docentScript);
 });
 test("activity creation, stage change, comparison, deletion and tag mapping use custom controls", async ({
   page,

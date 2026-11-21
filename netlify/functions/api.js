@@ -4,6 +4,12 @@ import { validateQuestionResponses } from "../../src/utils/submission-questions.
 import { archiveAction } from "../lib/archive.js";
 import { deepeningAction } from "../lib/deepening.js";
 import { lifeAction } from "../lib/life-connection.js";
+import {
+  attachDocentDraft,
+  readDocentDraft,
+  saveDocentDraft,
+} from "../lib/docent.js";
+import { docentSchema } from "../../src/utils/docent.js";
 import { lessonOwner, adminUser } from "../lib/lesson-access.js";
 import {
   activitySchema,
@@ -365,24 +371,50 @@ export async function dispatch(db, req, context, action, p) {
           .eq("submission_status", "complete")
           .order("created_at"),
       );
+      const draft = docentSchema.safeParse(p.docent_draft);
       return {
         activity: await enrichActivity(db, a, true),
         worksheet: cleanWorksheet(w),
         images: await signedImages(db, images),
+        ...(draft.success && a.stage === "SUBMISSION"
+          ? { docent_draft: await readDocentDraft(db, a.id, w.id, draft.data) }
+          : {}),
       };
+    }
+    if (action === "student/upload-docent") {
+      if (a.stage !== "SUBMISSION" || !a.settings.enable_scene)
+        fail(409, "사건 사진 제출 기간에 음성을 만들 수 있어요.");
+      if (!a.settings.allow_resubmit) {
+        const prior = check(
+          await db
+            .from("image_submissions")
+            .select("id")
+            .eq("worksheet_id", w.id)
+            .eq("image_type", "scene")
+            .eq("submission_status", "complete")
+            .eq("slot", 0)
+            .maybeSingle(),
+        );
+        if (prior) fail(409, "이미 사건 사진을 제출했어요.");
+      }
+      return saveDocentDraft(db, a.id, w.id, docentSchema.parse(p.docent));
     }
     if (action === "student/upload-init") {
       const input = uploadSchema.parse(p);
+      const docent = p.docent == null ? null : docentSchema.parse(p.docent);
+      if (docent && input.image_type !== "scene")
+        fail(400, "오디오 도슨트는 사건 사진과 함께 제출해 주세요.");
       input.question_responses = validateQuestionResponses(
         a,
         input.question_responses,
       );
       const job = check(
-        await db.rpc("reserve_upload", {
+        await db.rpc("reserve_docent_upload", {
           p_activity: a.id,
           p_worksheet: w.id,
           p_id: input.request_id,
           p_data: input,
+          p_docent: docent,
         }),
       );
       if (job.status === "complete") {
@@ -444,9 +476,10 @@ export async function dispatch(db, req, context, action, p) {
         const bytes = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
         if (!validImageSignature(bytes, job.mime))
           fail(400, "정상적인 JPG, PNG, WebP 파일만 제출할 수 있습니다.");
+        await attachDocentDraft(db, job);
       }
       const image = check(
-        await db.rpc("finalize_upload", {
+        await db.rpc("finalize_docent_upload", {
           p_activity: a.id,
           p_worksheet: w.id,
           p_job: job.id,

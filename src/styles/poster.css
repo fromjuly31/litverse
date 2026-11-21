@@ -371,3 +371,21 @@
     display: none !important;
   }
 }
+.docent-player {
+  display: grid;
+  gap: 8px;
+  margin-block: 16px;
+  font-size: 14px;
+}
+.docent-player audio {
+  width: min(100%, 340px);
+}
+.docent-player p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media print {
+  .docent-player {
+    display: none;
+  }
+}

@@ -12,10 +12,14 @@ export function backgroundSummary(a) {
     ? ""
     : `<details class="background-summary"><summary>${icon("book-open")} 함께 정리한 작품의 배경 ${icon("chevron-down")}</summary><div class="background-summary-grid"><article><span class="eyebrow">시간적 배경</span><p>${e(a.temporal_background || "아직 정리하지 않았어요.")}</p></article><article><span class="eyebrow">공간적 배경</span><p>${e(a.spatial_background || "아직 정리하지 않았어요.")}</p></article></div></details>`;
 }
-export function twoTabs(active, done = {}) {
+export function twoTabs(
+  active,
+  done = {},
+  labels = ["인물의 성격", "인상 깊은 사건"],
+) {
   return `<div class="work-tabs" role="tablist" aria-label="인물과 사건 활동">${[
-    ["character", "인물의 성격"],
-    ["scene", "인상 깊은 사건"],
+    ["character", labels[0]],
+    ["scene", labels[1]],
   ]
     .map(
       ([key, label], i) =>

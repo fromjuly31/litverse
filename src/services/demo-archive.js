@@ -38,10 +38,11 @@ function demoPoster(state, activity) {
           (image) =>
             image.activity_id === activity.id && imageIds.includes(image.id),
         )
-        .map(({ id, image_type, image_url }) => ({
+        .map(({ id, image_type, image_url, docent }) => ({
           id,
           image_type,
           image_url,
+          ...(docent && { docent }),
         })),
   };
 }

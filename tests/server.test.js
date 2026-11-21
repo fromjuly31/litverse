@@ -2,8 +2,168 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import { EventEmitter } from "node:events";
 import { PGlite } from "@electric-sql/pglite";
 import { seedData } from "../src/services/seed.js";
+import {
+  attachDocentDraft,
+  pcmToWav,
+  saveDocentDraft,
+  synthesizeDocent,
+} from "../netlify/lib/docent.js";
+import { signedImages } from "../netlify/lib/server.js";
+
+test("docent synthesis creates a described voice and stores up to 20 seconds of WAV audio", async () => {
+  const socket = new EventEmitter();
+  const sent = [];
+  const providerRequests = [];
+  const event = (value) => socket.emit("message", JSON.stringify(value));
+  socket.send = (value) => {
+    const message = JSON.parse(value);
+    sent.push(message);
+    if (message.type === "session.close") event({ type: "session.closed" });
+  };
+  socket.close = () => socket.emit("close");
+  const script = "이 장면을 함께 읽어 보세요.";
+  const description = "친절하고 나이 많은 할아버지 같은 목소리";
+  const output = synthesizeDocent(
+    { script, voice_description: description },
+    {
+      key: "test-key",
+      fetcher: async (url, options) => {
+        providerRequests.push([url, options]);
+        return Response.json({ id: "voice_test" });
+      },
+      connect: (url) => {
+        assert.equal(url, "wss://api.openai.com/v1/live/sessions");
+        setImmediate(() => {
+          socket.emit("open");
+          event({ type: "session.started" });
+          event({
+            type: "session.output_audio.delta",
+            delta: Buffer.from([120, 0, 140, 0]).toString("base64"),
+          });
+          event({ type: "session.output_transcript.delta", delta: script });
+          event({
+            type: "session.output_audio.delta",
+            delta: Buffer.alloc(28800).toString("base64"),
+          });
+        });
+        return socket;
+      },
+    },
+  );
+  const audio = await output;
+  assert.ok(
+    JSON.parse(providerRequests[0][1].body).prompt.includes(description),
+  );
+  assert.equal(providerRequests[1][1].method, "DELETE");
+  assert.equal(sent[0].session.audio.output.voice.id, "voice_test");
+  assert.ok(sent[0].session.input[0].content[0].text.includes(script));
+  assert.equal(sent[1].type, "session.input_audio.append");
+  assert.equal(audio.toString("ascii", 0, 4), "RIFF");
+  assert.equal(audio.readUInt32LE(24), 24000);
+  assert.deepEqual([...audio.subarray(44, 48)], [120, 0, 140, 0]);
+  assert.equal(pcmToWav([Buffer.alloc(960000)]).length, 960044);
+  assert.throws(
+    () => pcmToWav([Buffer.alloc(960002)]),
+    /Invalid narration audio/,
+  );
+});
+
+test("scene audio is uploaded once and only signed when playback is requested", async () => {
+  const files = new Map();
+  const db = {
+    rpc: async () => ({ data: true }),
+    from: () => ({
+      select: () => ({
+        eq() {
+          return this;
+        },
+        maybeSingle: async () => ({ data: { id: "worksheet" } }),
+      }),
+    }),
+    storage: {
+      from: (bucket) => ({
+        exists: async (path) =>
+          files.has(`${bucket}/${path}`)
+            ? { data: true, error: null }
+            : { data: false, error: { status: 404 } },
+        upload: async (path, bytes, options) => {
+          assert.equal(options.contentType, "audio/wav");
+          files.set(`${bucket}/${path}`, bytes);
+          return { data: { path } };
+        },
+        copy: async (source, destination) => {
+          files.set(
+            `${bucket}/${destination}`,
+            files.get(`${bucket}/${source}`),
+          );
+          return { data: { path: destination } };
+        },
+        createSignedUrl: async (path) => ({
+          data: { signedUrl: `https://storage.test/${bucket}/${path}` },
+        }),
+        createSignedUrls: async (paths) => ({
+          data: paths.map((path) => ({
+            signedUrl: `https://storage.test/${bucket}/${path}`,
+          })),
+        }),
+      }),
+    },
+  };
+  const docent = {
+    script: "이 장면의 두 인물을 살펴보세요.",
+    voice_description: "따뜻한 목소리",
+  };
+  const image = {
+    id: randomUUID(),
+    activity_id: "lesson",
+    worksheet_id: randomUUID(),
+    image_path: "lesson/work/scene.webp",
+    docent,
+  };
+  const generate = async (narration) => {
+    assert.deepEqual(narration, docent);
+    return pcmToWav([Buffer.from([1, 0, 2, 0])]);
+  };
+  process.env.TOKEN_SECRET ||= "test-only-secret-of-at-least-32-characters";
+  await assert.rejects(attachDocentDraft(db, image), { status: 409 });
+  const saved = await saveDocentDraft(
+    db,
+    image.activity_id,
+    image.worksheet_id,
+    docent,
+    generate,
+  );
+  assert.match(saved.audio_url, /\/literature-docents\/drafts\//);
+  await saveDocentDraft(db, image.activity_id, image.worksheet_id, docent, () =>
+    assert.fail("An existing file should be reused"),
+  );
+  await assert.rejects(
+    attachDocentDraft(db, {
+      ...image,
+      docent: { ...docent, script: "바뀐 대본" },
+    }),
+    { status: 409 },
+  );
+  await attachDocentDraft(db, image);
+  await attachDocentDraft(db, image);
+  assert.equal(
+    files
+      .get("literature-docents/lesson/work/scene.wav")
+      .toString("ascii", 8, 12),
+    "WAVE",
+  );
+  const [full] = await signedImages(db, [image]);
+  const [compact] = await signedImages(db, [image], { withAudio: false });
+  assert.equal(
+    full.docent.audio_url,
+    "https://storage.test/literature-docents/lesson/work/scene.wav",
+  );
+  assert.equal(compact.docent, undefined);
+});
+
 test("PostgreSQL migration, access policies, atomic uploads and cleanup", async (t) => {
   const db = new PGlite();
   t.after(() => db.close());
@@ -525,6 +685,64 @@ test("PostgreSQL migration, access policies, atomic uploads and cleanup", async 
       });
       assert.deepEqual(replaced.question_responses, revised);
       assert.equal(replaced.id, saved.id);
+    },
+  );
+  await t.test(
+    "scene narration stays linked on retries and cannot be attached to a portrait",
+    async () => {
+      await db.exec(
+        await readFile(
+          new URL(
+            "../supabase/migrations/20261121052826_scene_audio_docents.sql",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+      const docent = {
+        script: "두 인물의 마음이 엇갈리는 장면입니다.",
+        voice_description: "차분하고 밝은 목소리",
+      };
+      const question_responses = [
+        "내가 파악한 인물의 특징은?",
+        "사진에 어떻게 표현했나요?",
+      ].map((question) => ({
+        question,
+        answer: "본문에 나오는 행동을 표현했습니다.",
+      }));
+      const reserveDocent = (id, type, narration) =>
+        call("reserve_docent_upload", {
+          a: activityId,
+          w: worksheet.id,
+          id,
+          d: JSON.stringify(upload({ image_type: type, question_responses })),
+          docent: narration ? JSON.stringify(narration) : null,
+        });
+      await assert.rejects(
+        reserveDocent(randomUUID(), "character", docent),
+        /INVALID_DOCENT/,
+      );
+      const job = await reserveDocent(randomUUID(), "scene", docent);
+      assert.deepEqual(job.docent, docent);
+      await assert.rejects(
+        reserveDocent(job.id, "scene", {
+          ...docent,
+          voice_description: "낮고 느린 목소리",
+        }),
+        /INVALID_DOCENT/,
+      );
+      const finalize = (jobId) =>
+        call("finalize_docent_upload", {
+          a: activityId,
+          w: worksheet.id,
+          j: jobId,
+        });
+      const saved = await finalize(job.id);
+      assert.deepEqual(saved.docent, docent);
+      assert.equal((await finalize(job.id)).id, saved.id);
+      const replacement = await reserveDocent(randomUUID(), "scene", null);
+      assert.equal((await finalize(replacement.id)).docent, null);
+      await assert.rejects(finalize(job.id), /UPLOAD_SUPERSEDED/);
     },
   );
   await t.test(

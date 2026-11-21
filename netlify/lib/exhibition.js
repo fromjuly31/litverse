@@ -41,7 +41,7 @@ async function availableWorks(db) {
   return groupExhibits(posters, perspectives);
 }
 
-export async function readPosterImages(db, rows) {
+export async function readPosterImages(db, rows, { withAudio = true } = {}) {
   const itemIds = (row) => [
     row.final_result.character.image_id,
     row.final_result.scene.image_id,
@@ -52,7 +52,7 @@ export async function readPosterImages(db, rows) {
     ? check(
         await db
           .from("image_submissions")
-          .select("id,activity_id,image_type,image_path")
+          .select("id,activity_id,image_type,image_path,docent")
           .eq("submission_status", "complete")
           .in("id", lessons.flatMap(itemIds))
           .in(
@@ -72,10 +72,9 @@ export async function readPosterImages(db, rows) {
       })),
     );
   const photos = new Map(
-    (await signedImages(db, [...uploads, ...standaloneImages])).map((photo) => [
-      photo.id,
-      photo,
-    ]),
+    (
+      await signedImages(db, [...uploads, ...standaloneImages], { withAudio })
+    ).map((photo) => [photo.id, photo]),
   );
   return new Map(
     rows.map((row) => [
@@ -83,16 +82,19 @@ export async function readPosterImages(db, rows) {
       itemIds(row)
         .map((id) => photos.get(id))
         .filter((photo) => photo?.activity_id === row.id)
-        .map(({ id, image_type, image_url }) => ({
+        .map(({ id, image_type, image_url, docent }) => ({
           id,
           image_type,
           image_url,
+          ...(docent && {
+            docent: { script: docent.script, audio_url: docent.audio_url },
+          }),
         })),
     ]),
   );
 }
 
-async function readPosters(db, ids) {
+async function readPosters(db, ids, withAudio = true) {
   if (!ids.length) return new Map();
   const rows = check(
     await db
@@ -103,7 +105,7 @@ async function readPosters(db, ids) {
       .not("final_result", "is", null)
       .in("id", ids),
   );
-  const images = await readPosterImages(db, rows);
+  const images = await readPosterImages(db, rows, { withAudio });
   return new Map(
     rows.map((row) => [
       row.id,
@@ -131,7 +133,7 @@ export async function publicCollection(db, payload) {
   if (payload.count_only === true) return { total: works.length };
   const page = works.slice(offset, offset + WORKS_PER_PAGE);
   const ids = page.map((work) => work.posters[0]?.id).filter(Boolean);
-  const posters = await readPosters(db, ids);
+  const posters = await readPosters(db, ids, false);
   return {
     total: works.length,
     items: page.map((work) =>
