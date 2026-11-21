@@ -30,12 +30,18 @@ function demoPoster(state, activity) {
   return {
     ...publicLesson(activity),
     result,
-    images: state.images
-      .filter(
-        (image) =>
-          image.activity_id === activity.id && imageIds.includes(image.id),
-      )
-      .map(({ id, image_type, image_url }) => ({ id, image_type, image_url })),
+    images:
+      activity.images ||
+      state.images
+        .filter(
+          (image) =>
+            image.activity_id === activity.id && imageIds.includes(image.id),
+        )
+        .map(({ id, image_type, image_url }) => ({
+          id,
+          image_type,
+          image_url,
+        })),
   };
 }
 
@@ -80,7 +86,7 @@ export async function demoArchive(state, action, p) {
     );
   if (action === "public/collection" || action === "public/work") {
     const works = groupExhibits(
-      state.activities.filter(
+      [...state.activities, ...(state.standalone_posters || [])].filter(
         (activity) =>
           activity.finalized_at &&
           activity.final_result &&
@@ -118,7 +124,7 @@ export async function demoArchive(state, action, p) {
         .trim()
         .toLocaleLowerCase(),
       offset = Math.max(0, Number(p.offset) || 0);
-    const all = state.activities
+    const all = [...state.activities, ...(state.standalone_posters || [])]
       .filter(
         (a) =>
           a.finalized_at &&
@@ -138,7 +144,9 @@ export async function demoArchive(state, action, p) {
     });
   }
   if (action === "public/exhibit") {
-    const a = lesson();
+    const a =
+      state.standalone_posters?.find((poster) => poster.id === p.id) ||
+      lesson();
     if (!a.finalized_at || !a.final_result)
       throw new Error("아직 전시되지 않은 수업이에요.");
     return done(demoPoster(state, a));

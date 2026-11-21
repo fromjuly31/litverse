@@ -7,7 +7,6 @@ import {
   activityTokens,
   hmac,
   enrichActivity,
-  signedImages,
   runDeletion,
 } from "./server.js";
 import {
@@ -19,7 +18,11 @@ import {
 } from "./lesson-access.js";
 import { finalResult, publicLesson } from "../../src/utils/archive.js";
 import { generateSynopsis } from "./synopsis.js";
-import { publicCollection, publicWork } from "./exhibition.js";
+import {
+  publicCollection,
+  publicWork,
+  readPosterImages,
+} from "./exhibition.js";
 
 export async function archiveAction(db, req, context, action, p) {
   const done = (value) => ({ handled: true, value });
@@ -58,8 +61,10 @@ export async function archiveAction(db, req, context, action, p) {
       return done(all);
     }
     let q = db
-      .from("activities")
-      .select(fields + ",final_result", { count: "exact" })
+      .from("exhibition_posters")
+      .select(fields + ",final_result,character_image_path,scene_image_path", {
+        count: "exact",
+      })
       .eq("deletion_pending", false)
       .not("finalized_at", "is", null)
       .order("finalized_at", { ascending: false })
@@ -83,29 +88,14 @@ export async function archiveAction(db, req, context, action, p) {
       .max(1000000)
       .default(0)
       .parse(p.offset);
-    const response = await q.range(offset, offset + 23),
-      activities = check(response);
-    const exhibits = await Promise.all(
-      activities
-        .filter((a) => a.final_result)
-        .map(async (a) => {
-          const rows = check(
-            await db
-              .from("image_submissions")
-              .select("*")
-              .eq("activity_id", a.id)
-              .eq("submission_status", "complete")
-              .in("id", [
-                a.final_result.character.image_id,
-                a.final_result.scene.image_id,
-              ]),
-          );
-          const images = (await signedImages(db, rows)).map(
-            ({ id, image_type, image_url }) => ({ id, image_type, image_url }),
-          );
-          return { ...publicLesson(a), result: a.final_result, images };
-        }),
-    );
+    const response = await q.range(offset, offset + 23);
+    const posters = check(response).filter((poster) => poster.final_result);
+    const images = await readPosterImages(db, posters);
+    const exhibits = posters.map((poster) => ({
+      ...publicLesson(poster),
+      result: poster.final_result,
+      images: images.get(poster.id),
+    }));
     if (action === "public/exhibit" && !exhibits.length)
       fail(404, "아직 전시되지 않은 수업이에요.");
     return done(

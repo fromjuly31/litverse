@@ -206,39 +206,44 @@ export function seedExhibition(existing) {
     revoked_codes: [],
     jobs: [],
   };
-  if (state.exhibit_sample_seeded) return state;
-  state.exhibit_sample_seeded = true;
-  if (
-    state.activities.some(
-      ({ title, author, finalized_at, final_result }) =>
-        title === "동백꽃" &&
-        author === "김유정" &&
-        finalized_at &&
-        final_result,
-    )
-  )
+  const id = "demo-dongbaek-exhibit";
+  if (state.standalone_posters?.some((poster) => poster.id === id))
     return state;
 
-  const id = "demo-dongbaek-exhibit";
-  const signature = "동백꽃 예시 학급";
+  const oldLessons = new Set(["demo-dongbaek", "demo-memil", id]);
+  state.activities = state.activities.filter(
+    (lesson) => !oldLessons.has(lesson.id),
+  );
+  for (const key of [
+    "worksheets",
+    "images",
+    "questions",
+    "responses",
+    "jobs",
+    "deepening_records",
+    "deepening_sessions",
+    "literary_work_versions",
+  ]) {
+    if (state[key])
+      state[key] = state[key].filter(
+        (entry) => !oldLessons.has(entry.activity_id),
+      );
+  }
+  if (state.access_sessions)
+    state.access_sessions = state.access_sessions.filter(
+      (session) => !oldLessons.has(session.scope),
+    );
+  for (const lessonId of oldLessons) {
+    delete state.lesson_passwords?.[lessonId];
+    delete state.password_attempts?.[lessonId];
+  }
+  const signature = "1학년 7반";
   const synopsis = synopsisExamples["동백꽃|김유정"];
   const original = seedData();
   const publishedAt = "2026-11-21T00:00:00.000Z";
   const activity = {
     ...original.activities[0],
     id,
-    class_name: "",
-    course_name: "동백꽃 · 예시 전시",
-    introduction: "가상 학생의 동백꽃 해석과 예시 삽화로 만든 포스터입니다.",
-    synopsis,
-    signature,
-    expected_student_count: 1,
-    stage: "CLOSED",
-    created_at: publishedAt,
-    updated_at: publishedAt,
-    finalized_at: publishedAt,
-    worksheet_token: `${id}-analysis`,
-    submission_token: `${id}-submit`,
   };
   const worksheet = {
     ...original.worksheets[0],
@@ -271,11 +276,7 @@ export function seedExhibition(existing) {
     approval_status: "approved",
     created_at: publishedAt,
   }));
-  activity.final_selection = {
-    character: pictures[0].id,
-    scene: pictures[1].id,
-  };
-  activity.final_result = finalResult(activity, [worksheet], pictures, {
+  const result = finalResult(activity, [worksheet], pictures, {
     character_image_id: pictures[0].id,
     scene_image_id: pictures[1].id,
     synopsis,
@@ -285,8 +286,20 @@ export function seedExhibition(existing) {
     scene_summary: worksheet.scene.reason,
     signature,
   });
-  state.activities.push(activity);
-  state.worksheets.push(worksheet);
-  state.images.push(...pictures);
+  state.standalone_posters = [
+    {
+      id,
+      title: activity.title,
+      author: activity.author,
+      signature,
+      finalized_at: publishedAt,
+      final_result: result,
+      images: pictures.map(({ id, image_type, image_url }) => ({
+        id,
+        image_type,
+        image_url,
+      })),
+    },
+  ];
   return state;
 }

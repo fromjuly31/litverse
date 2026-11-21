@@ -177,6 +177,8 @@ test("archive migration atomically preserves the pair, locks finalized classes a
     "001_litverse",
     "002_background_discussion",
     "003_exhibition_archive",
+    "004_deepening",
+    "20261121035139_standalone_posters",
   ])
     await db.exec(
       await readFile(
@@ -392,5 +394,43 @@ test("archive migration atomically preserves the pair, locks finalized classes a
     (await db.query("select count(*)::int n from worksheets")).rows[0].n,
     2,
   );
-  await call("queue_deletion", [teacher, id, "activity", [], id]);
+  const characterPath = `exhibition/${id}/character.webp`;
+  const scenePath = `exhibition/${id}/scene.webp`;
+  await db.query(
+    "insert into standalone_posters(id,final_result,character_image_path,scene_image_path) values($1,$2,$3,$4)",
+    [
+      id,
+      JSON.stringify({ ...result, signature: "1학년 7반" }),
+      characterPath,
+      scenePath,
+    ],
+  );
+  const poster = {
+    id,
+    signature: "1학년 7반",
+    character_image_path: characterPath,
+    scene_image_path: scenePath,
+  };
+  const exhibition = () =>
+    db.query(
+      "select id,signature,character_image_path,scene_image_path from exhibition_posters",
+    );
+  assert.deepEqual((await exhibition()).rows, [poster]);
+  await db.exec("set role anon");
+  await assert.rejects(exhibition(), /permission denied/);
+  await db.exec("reset role");
+  const lessonDeletion = await call("queue_deletion", [
+    teacher,
+    id,
+    "activity",
+    [],
+    id,
+  ]);
+  assert.ok(!lessonDeletion.image_paths.includes(characterPath));
+  assert.ok(!lessonDeletion.image_paths.includes(scenePath));
+  await call("claim_deletion", [lessonDeletion.id]);
+  await call("finish_deletion", [lessonDeletion.id]);
+  assert.equal((await db.query("select id from activities")).rows.length, 0);
+  assert.equal((await db.query("select id from worksheets")).rows.length, 0);
+  assert.deepEqual((await exhibition()).rows, [poster]);
 });

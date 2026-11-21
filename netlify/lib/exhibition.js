@@ -28,7 +28,7 @@ async function availableWorks(db) {
   const [posters, perspectives] = await Promise.all([
     metadata(() =>
       db
-        .from("activities")
+        .from("exhibition_posters")
         .select("id,title,author,signature,finalized_at")
         .eq("deletion_pending", false)
         .not("finalized_at", "is", null)
@@ -41,36 +41,69 @@ async function availableWorks(db) {
   return groupExhibits(posters, perspectives);
 }
 
-async function readPosters(db, ids) {
-  if (!ids.length) return new Map();
-  const rows = check(
-    await db
-      .from("activities")
-      .select("id,signature,final_result")
-      .eq("deletion_pending", false)
-      .not("finalized_at", "is", null)
-      .not("final_result", "is", null)
-      .in("id", ids),
-  );
+export async function readPosterImages(db, rows) {
   const itemIds = (row) => [
     row.final_result.character.image_id,
     row.final_result.scene.image_id,
   ];
   if (!rows.length) return new Map();
-  const photoRows = check(
-    await db
-      .from("image_submissions")
-      .select("id,activity_id,image_type,image_path")
-      .eq("submission_status", "complete")
-      .in("id", rows.flatMap(itemIds))
-      .in(
-        "activity_id",
-        rows.map(({ id }) => id),
-      ),
-  );
+  const lessons = rows.filter((row) => !row.character_image_path);
+  const uploads = lessons.length
+    ? check(
+        await db
+          .from("image_submissions")
+          .select("id,activity_id,image_type,image_path")
+          .eq("submission_status", "complete")
+          .in("id", lessons.flatMap(itemIds))
+          .in(
+            "activity_id",
+            lessons.map(({ id }) => id),
+          ),
+      )
+    : [];
+  const standaloneImages = rows
+    .filter((row) => row.character_image_path)
+    .flatMap((row) =>
+      ["character", "scene"].map((type) => ({
+        id: row.final_result[type].image_id,
+        activity_id: row.id,
+        image_type: type,
+        image_path: row[`${type}_image_path`],
+      })),
+    );
   const photos = new Map(
-    (await signedImages(db, photoRows)).map((photo) => [photo.id, photo]),
+    (await signedImages(db, [...uploads, ...standaloneImages])).map((photo) => [
+      photo.id,
+      photo,
+    ]),
   );
+  return new Map(
+    rows.map((row) => [
+      row.id,
+      itemIds(row)
+        .map((id) => photos.get(id))
+        .filter((photo) => photo?.activity_id === row.id)
+        .map(({ id, image_type, image_url }) => ({
+          id,
+          image_type,
+          image_url,
+        })),
+    ]),
+  );
+}
+
+async function readPosters(db, ids) {
+  if (!ids.length) return new Map();
+  const rows = check(
+    await db
+      .from("exhibition_posters")
+      .select("id,signature,final_result,character_image_path,scene_image_path")
+      .eq("deletion_pending", false)
+      .not("finalized_at", "is", null)
+      .not("final_result", "is", null)
+      .in("id", ids),
+  );
+  const images = await readPosterImages(db, rows);
   return new Map(
     rows.map((row) => [
       row.id,
@@ -78,14 +111,7 @@ async function readPosters(db, ids) {
         id: row.id,
         signature: row.signature,
         result: row.final_result,
-        images: itemIds(row)
-          .map((id) => photos.get(id))
-          .filter((photo) => photo?.activity_id === row.id)
-          .map(({ id, image_type, image_url }) => ({
-            id,
-            image_type,
-            image_url,
-          })),
+        images: images.get(row.id),
       },
     ]),
   );
