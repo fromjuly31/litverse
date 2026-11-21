@@ -17,6 +17,7 @@ await build({
     "import.meta.env.VITE_ROUTER_MODE": JSON.stringify("hash"),
     "import.meta.env.VITE_PUBLIC_SITE_URL": JSON.stringify(""),
     "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(""),
+    "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(""),
     "import.meta.env.VITE_SUPABASE_ANON_KEY": JSON.stringify(""),
   },
   build: {

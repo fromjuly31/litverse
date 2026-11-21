@@ -45,6 +45,57 @@
 .deep-editor .panel {
   margin-bottom: 24px;
 }
+.class-questions {
+  width: min(100%, 760px);
+  margin-inline: auto;
+}
+.class-questions .field {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.class-questions :is(summary, #class-response-count) {
+  color: var(--muted);
+}
+.class-questions summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.class-question-list {
+  padding-inline-start: 1.5rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.class-response,
+.class-submitted-answers {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 16px;
+}
+.class-submitted-answers {
+  margin-top: 18px;
+  padding-block: 16px;
+}
+.class-response dt,
+.class-submitted-answers dt {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.class-response dd,
+.class-submitted-answers dd {
+  margin: 4px 0 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.class-questions-qr {
+  width: min(100%, 300px);
+  margin-inline: auto;
+}
+.class-questions #class-answer-form textarea {
+  min-height: 104px;
+}
 .deep-editor details {
   margin: 16px 0;
 }
@@ -455,75 +506,46 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.collection-types {
-  justify-content: center;
-  margin: 0 auto 22px;
-}
-.collection-is-empty .collection-types {
-  margin: 0 auto;
-  padding-bottom: 5px;
-}
-.collection-is-empty .collection-types a {
-  min-height: 36px;
-  font-size: 12px;
-}
-.deep-exhibit-frame {
-  display: block;
-}
 .deep-exhibit-mat {
   padding: 30px 24px;
-  min-height: 370px;
+  min-height: 275px;
   background: #f5f1e4;
   color: #45473d;
   display: flex;
   flex-direction: column;
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.deep-exhibit-mat > svg {
+  color: #756b50;
+  width: 35px;
+  height: 35px;
 }
 .deep-exhibit-mat > h2 {
-  font: 32px/1.5 var(--serif);
+  font: clamp(22px, 3vw, 32px)/1.5 var(--serif);
   margin: 18px 0 4px;
 }
 .deep-exhibit-mat > p {
   font-size: 11px;
   color: var(--muted);
 }
-.deep-exhibit-thought {
-  border-top: 1px solid #c9c3ae;
-  margin-top: 24px;
-  padding-top: 20px;
-}
-.deep-exhibit-thought > span {
-  font: 9px/1.4 var(--sans);
-  letter-spacing: 2px;
-  color: #6f836e;
-}
-.deep-exhibit-thought p {
-  font: 16px/1.8 var(--serif);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin: 8px 0 15px;
+.work-perspectives {
+  max-width: 850px;
+  margin: clamp(36px, 7vw, 80px) auto 0;
+  border-top: 1px solid var(--line);
+  padding-top: 28px;
   overflow-wrap: anywhere;
 }
-.deep-exhibit-count {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  font-size: 11px;
+.work-perspectives > h2 {
+  font: 28px/1.5 var(--serif);
 }
-.deep-public-detail {
-  width: 100%;
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 0 40px;
+.work-perspective-round + .work-perspective-round {
+  margin-top: 32px;
 }
-.deep-public-detail > section {
-  margin: 35px 0;
-}
-.deep-public-detail .collection-title {
-  margin: 35px 0;
+.work-perspective-round > a {
+  margin-top: 20px;
 }
 @media (max-width: 1000px) {
   .perspective-grid {
@@ -653,14 +675,6 @@
   .collection-is-empty > .collection-page {
     gap: 9px;
   }
-  .collection-is-empty .collection-types {
-    width: 100%;
-  }
-  .collection-is-empty .collection-types a {
-    font-size: 11px;
-    padding: 5px 8px;
-    min-height: 30px;
-  }
   .collection-is-empty .collection-empty {
     gap: 10px;
   }
@@ -669,12 +683,6 @@
   }
   .collection-empty-copy p {
     margin-bottom: 12px;
-  }
-  .deep-public-detail {
-    margin-top: 20px;
-  }
-  .deep-public-detail .collection-title h1 {
-    font-size: 28px;
   }
 }
 @media (max-width: 600px) and (max-height: 680px) {
@@ -714,12 +722,6 @@
   }
   .classroom-overview .lesson-list-heading {
     margin-bottom: 4px !important;
-  }
-  .collection-is-empty .collection-types a {
-    min-height: 28px;
-  }
-  .collection-is-empty .collection-types {
-    padding: 0;
   }
   .collection-empty .empty-gallery-art {
     height: 90px;

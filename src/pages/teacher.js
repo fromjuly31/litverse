@@ -29,7 +29,8 @@ import {
   bindLessonWizard,
 } from "../components/lesson-editor.js";
 import { learningTabs } from "../components/deepening.js";
-import { deepeningTeacher, deepeningEditor } from "./deepening-teacher.js";
+import { deepeningTeacher } from "./deepening-teacher.js";
+import { classQuestionsEditor } from "./class-questions-teacher.js";
 import { textStudyPage } from "./text-study.js";
 import { bindTextStudyEditor } from "../components/text-study-editor.js";
 import { saveLessonPdf } from "../services/lesson-pdf.js";
@@ -119,7 +120,7 @@ function statistics(data) {
   );
 }
 export async function teacherPage(root, path) {
-  if (path === "/teacher/deepening/new") return deepeningEditor(root);
+  if (path === "/teacher/deepening/new") return classQuestionsEditor(root);
   if (path === "/teacher/activities/new") return activityEditor(root, null);
   if (path === "/teacher/settings") {
     if (!(await request("admin/session")).authenticated) return adminPage(root);
@@ -136,7 +137,10 @@ export async function teacherPage(root, path) {
       if (error.status === 401) return unlockPage(root, id, path);
       throw error;
     }
-    if (parts[4] === "deepening") return deepeningTeacher(root, data);
+    if (parts[4] === "deepening") {
+      if (parts[5] === "new") return classQuestionsEditor(root, data.activity);
+      return deepeningTeacher(root, data, parts[5]);
+    }
     if (data.activity.lesson_kind === "deepening")
       return navigate(`/teacher/activity/${id}/deepening`, true);
     if (data.activity.finalized_at) return completedLesson(root, data);
@@ -385,6 +389,14 @@ async function livePage(root, data) {
   const id = data.activity.id;
   let stopped = false;
   let liveType = "character";
+  const snapshot = ({ activity, worksheets, images }) =>
+    JSON.stringify([
+      activity.updated_at,
+      worksheets,
+      images.map(({ image_url, ...image }) => image),
+    ]);
+  let lastUpdate = snapshot(data),
+    lastDraw = Date.now();
   teacherShell(
     root,
     "live",
@@ -415,6 +427,10 @@ async function livePage(root, data) {
     const next = await request("teacher/get", { id });
     if (stopped) return;
     data = next;
+    const updated = snapshot(next);
+    if (updated === lastUpdate && Date.now() - lastDraw < 60000) return;
+    lastUpdate = updated;
+    lastDraw = Date.now();
     draw();
   };
   root.querySelectorAll("[data-live-type]").forEach(
@@ -497,10 +513,11 @@ async function livePage(root, data) {
             state === "demo"
               ? "같은 브라우저의 데모 탭 연결"
               : state === "connected"
-                ? "실시간 연결됨"
+                ? "자동 갱신 중"
                 : "연결 복구 중 · 주기적으로 동기화";
       }
     },
+    { pollInterval: 5000 },
   );
   return () => {
     stopped = true;

@@ -12,10 +12,11 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/unit.test.js tests/server.test.js tests/archive.test.js tests/deepening.test.js tests/text-study.test.js",
     "test:e2e": "playwright test",
+    "check:supabase": "node scripts/check-supabase.mjs",
     "dev:netlify": "npx --yes netlify-cli dev"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0",
+    "@supabase/supabase-js": "2.118.0",
     "@tesseract.js-data/eng": "1.0.0",
     "@tesseract.js-data/kor": "1.0.0",
     "gsap": "^3.0.0",

@@ -210,6 +210,13 @@ for (const [name, entry, embedded] of entries) {
     ).toBe(1);
     await page.goto(`${entry}#/exhibition`);
     await expect(page.locator(".exhibit-card")).toHaveCount(1);
+    await page.getByRole("link", { name: "동백꽃 전시작 자세히 보기" }).click();
+    await expect(page).toHaveURL(/#\/exhibition\/work-/);
+    await page.reload();
+    await expect(page.locator(".literary-poster img")).toHaveCount(2);
+    await expect(
+      page.getByRole("heading", { name: "이해 심화", exact: true }),
+    ).toHaveCount(0);
     if (name === "Live Server injected HTML")
       expect(await page.evaluate(() => globalThis.__LIVE_RELOAD_TEST__)).toBe(
         true,

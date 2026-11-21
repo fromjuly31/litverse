@@ -1,5 +1,7 @@
 # LITVERSE
 
+운영 사이트: **https://litverse-fromjuly31.netlify.app** · [관리자 로그인](https://litverse-fromjuly31.netlify.app/admin)
+
 **한 편의 문학, 서로 다른 시선.** 배경·본문·인물·사건을 함께 읽는 **작품 파악하기**, 작품의 의미를 삶과 연결하는 **이해 심화하기**, 두 활동의 결과를 나누는 문학 전시관입니다.
 
 학생은 모바일, 교사는 노트북·데스크톱을 중심으로 사용합니다. 밝은 종이색 배경과 작품을 크게 건 전시 벽, 명조 제목으로 문학 전시관을 표현합니다. Vanilla JavaScript ES Modules, Vite, GSAP, Lucide, Supabase, Netlify Functions로 구성했습니다. 앱 안에서는 이미지 생성 API를 호출하지 않습니다.
@@ -21,7 +23,7 @@
 7. **취합·토론·전시**: 교사는 인물·사건 탭에서 각각의 작품을 확인하고 승인합니다. 학생별 두 사진 제출 상태, 성격 태그, 본문 근거, 사건 선택 이유를 살펴보며 비교·전시합니다.
 
 8. **최종본·포스터 완성**: **수업 마무리**에서 인물 1장·사건 1장을 선택합니다. 줄거리·배경·성격·사건을 다듬고 **전시작 제작자 이름**을 입력합니다. 원작 작가와 제작자 서명은 구분됩니다. 미리보기 후 최종 완료하면 나머지 사진을 삭제하고, 정확히 두 장과 분석 글을 보관합니다.
-9. **관람하기**: 완성 포스터를 액자 형태로 전시합니다. 작품·원작 작가·제작자 검색과 24점 단위 추가 조회를 지원합니다. 클릭하면 전체 포스터를 보고, 이미지까지 내장한 HTML로 저장하거나 한 장의 A3 PDF로 인쇄할 수 있습니다. 긴 글은 인쇄 때 한 장에 맞춰 축소됩니다.
+9. **관람하기**: 작품명과 원작 작가가 같은 공개 자료를 한 카드로 모아 전시합니다. 상세 화면에는 저장한 포스터와 공개된 이해 심화 기록이 함께 나타납니다. 작품·원작 작가·제작자 검색과 24점 단위 추가 조회를 지원합니다. 포스터는 이미지를 내장한 HTML로 저장하거나 한 장의 A3 PDF로 인쇄할 수 있습니다.
 
 단계는 `DRAFT → BACKGROUND → ANALYSIS → SUBMISSION → CLOSED`입니다. 단순 제출 마감과 최종 전시 완료는 구분됩니다. 전시 완료는 사진과 포스터를 확정한 수업입니다.
 
@@ -41,30 +43,12 @@
 
 ## 이해 심화하기 사용 방법
 
-기존 프로젝트는 Firebase가 아닌 **Supabase + Netlify Functions** 구조입니다. 기존 인증·비밀번호·QR·사진 저장소를 유지하고 심화 기능을 추가했습니다. Firestore나 Cloud Functions로 전환하지 않으며 새로운 라이브러리도 추가하지 않았습니다.
+1. **수업하기 → 이해 심화하기 → 심화 수업 만들기**를 선택합니다. 진행 중인 작품 파악 수업의 **이해 심화하기** 탭에서도 시작할 수 있습니다.
+2. **질문 수**를 1~10개 중에서 선택하고 질문을 직접 작성합니다. **시작하기**를 누르면 해당 회차의 **학생 참여 QR**이 바로 열립니다.
+3. 학생은 QR로 들어와 번호나 별칭과 모든 질문의 답변을 한 번에 제출합니다. 입력 중인 글은 같은 브라우저에서 임시저장됩니다.
+4. 교사 화면의 **학생 답변**에 제출 인원과 답변이 자동으로 갱신됩니다. **마감하기**를 누르면 새 제출이 닫히고 **새 회차 만들기**에서 새 질문으로 시작할 수 있습니다.
 
-### 기존 수업에서 연결
-
-1. **수업하기 → 작품 파악하기**에서 진행 중인 수업을 엽니다.
-2. 수업 상단 **이해 심화하기**를 누릅니다. 같은 수업 ID, 작품명·작가·줄거리, 기존 배경 정리와 참여 기록이 연결됩니다.
-3. **작품 분석하기**로 초안을 받고, 갈래·분석 항목·최초 판단·세 공통 질문을 원문과 대조해 수정합니다. 확인란을 선택한 뒤 **이 분석으로 수업 만들기**를 누릅니다.
-4. **심화 활동 시작**을 누릅니다. 기존 참여 링크로 접속 중인 학생에게 이동 안내가 나타납니다. 작성 중인 화면을 강제로 새로고침하지 않으며, 기존 인물·사건 초안을 유지합니다.
-5. 필요하면 **학생에게 작품 파악 안내**로 돌아갑니다. 심화 시작·종료가 기존 작품 파악 단계를 완료하거나 잠그지 않습니다.
-
-### 심화 수업만 개설
-
-1. **수업하기 → 이해 심화하기 → 심화 수업 만들기**에서 작품명과 작가명을 입력합니다.
-2. **작품 분석하기** 후 교사가 검토·수정하고 수업을 확정합니다. 불확실한 작품은 줄거리·지문·교과서 수록본을 보충하거나 분석 항목을 직접 작성합니다.
-3. 수업 비밀번호는 선택 입력입니다. 비워 두면 자동 생성되며, 생성 직후 **이 수업의 비밀번호**에서 복사해 보관합니다. 비밀번호 표시 정보는 현재 브라우저 탭에만 임시 보관합니다.
-4. **심화 활동 시작 → 학생 참여 QR**로 공유합니다. 학생은 계정이나 작품 파악 활동 없이 번호·별칭으로 참여합니다.
-
-### 학생 활동과 공개
-
-**최초 판단 → 세 심화 질문 → 다른 관점 감상 → 최종 성찰** 순서입니다. 소설·시·희곡·수필·고전의 탐구 시작점이 다르며, 질문의 목적은 현실과 맥락 / 가치 판단 / 문학과 삶으로 고정합니다. 최초 판단은 별도 보존하고, 질문별 답변은 자동 저장합니다. 새로고침 시 질문과 초안을 복원하며 저장 충돌 시 기존 초안을 내려받거나 비교해 선택할 수 있습니다.
-
-교사는 학생별 진행·답변·성찰을 자동 갱신되는 화면에서 확인하고 공개 범위를 **교사만 / 같은 수업 / 문학 전시관**으로 정합니다. 같은 수업의 다른 관점은 세 답변을 제출한 뒤 공개됩니다. 전시관은 성찰 완료 기록만 익명 ‘관점’ 이름으로 보여 주며, BEFORE/AFTER 상세보기를 제공합니다. 처음과 같은 생각을 유지한 성찰도 동일하게 완료 처리합니다.
-
-**심화 활동 종료**는 해당 회차의 수정을 막습니다. 다시 열거나 **새 회차 만들기**를 사용할 수 있으며, 새 회차는 분석 버전·학생 기록을 새로 저장하고 이전 기록을 덮어쓰지 않습니다. 기존 코드에 댓글 기능은 없어 별도 댓글 시스템을 추가하지 않았습니다. 기존 사진·분석·삭제 기능은 유지합니다.
+독립 심화 수업을 만들면 교사 화면의 **수업 비밀번호**에서 자동 생성된 비밀번호를 복사할 수 있습니다. QR 링크는 생성 당시 회차를 여므로 이전에 공유한 링크도 해당 회차의 질문과 제출 기록에 연결됩니다. 기존 AI 분석형 회차와 그 전시 기록은 해당 회차에서 계속 확인할 수 있습니다.
 
 ## 로컬 실행
 
@@ -88,7 +72,6 @@ npm run dev
 - 심화 수업 만들기: `/teacher/deepening/new`
 - 연결 심화 수업: `/teacher/activity/:id/deepening`
 - 심화 학생 활동: `/activity/:token/deepening`
-- 심화 전시: `/exhibition?type=deepening`
 - 배경 수업: `/teacher/activity/demo-dongbaek/background`에서 **배경 탐구 시작**
 - 등장인물 갤러리: `/teacher/activity/demo-dongbaek/gallery`
 - 사건 분석: `/teacher/activity/demo-dongbaek/scenes`
@@ -118,6 +101,7 @@ supabase/migrations/
   004_deepening.sql
   005_submission_questions.sql
   006_text_study.sql
+  20261121015654_deepening_class_questions.sql
 public/art/       전시용 AI 예시 삽화와 기존 데모 자산
 tests/            도메인·보안·SQL·Playwright 테스트
 docs/             아키텍처와 검증 기록
@@ -125,8 +109,10 @@ docs/             아키텍처와 검증 기록
 
 ## Supabase 설정
 
+현재 연결 프로젝트와 실행·검증 절차는 [Supabase 연결 안내](docs/SUPABASE.md)에 정리했습니다.
+
 1. Supabase 프로젝트를 생성합니다.
-2. SQL Editor에서 `supabase/migrations/001_litverse.sql`, `002_background_discussion.sql`, `003_exhibition_archive.sql`, `004_deepening.sql`, `005_submission_questions.sql`, `006_text_study.sql`을 **순서대로 한 번씩** 실행합니다. 기존 설치는 백업 후 아직 적용하지 않은 마이그레이션만 실행하며 데이터 초기화나 기존 마이그레이션 재실행은 하지 않습니다.
+2. SQL Editor에서 `supabase/migrations/`의 마이그레이션을 이름 순서대로 적용합니다. 기존 설치에서는 아직 적용하지 않은 마이그레이션만 실행합니다. 새 질문형 심화 수업에는 `20261121015654_deepening_class_questions.sql`이 필요합니다.
 3. 테이블, 인덱스, 소유권 RLS, 서비스 전용 함수가 생성됩니다. Realtime publication이 있는 Supabase 프로젝트에서는 관련 테이블도 등록됩니다.
 4. `literature-images` Storage 버킷이 SQL에 의해 **Private**으로 생성됩니다. 허용 형식은 JPEG·PNG·WebP, 저장 파일 한도는 5MB입니다. 이미 같은 이름의 버킷이 있으면 기존 공개 정책이 없는지 확인합니다. 학생용 공개 읽기/쓰기 정책을 추가하지 않습니다.
 5. Authentication 설정에서 **공개 신규 가입을 비활성화**합니다. 앱에는 가입 화면이 없습니다.
@@ -148,10 +134,12 @@ values ('생성한-관리자-사용자-UUID', 'admin@example.school', true);
 | --------------------------- | ------------------------ | -------------------------------------- |
 | `VITE_APP_MODE`             | 브라우저 빌드            | 데모 `demo`, 실서비스 `live`           |
 | `VITE_SUPABASE_URL`         | 브라우저 빌드            | Supabase 프로젝트 URL                  |
-| `VITE_SUPABASE_ANON_KEY`    | 브라우저 빌드            | 공개 anon/publishable 키               |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | 브라우저 빌드         | 공개 publishable 키 (`sb_publishable_`) |
+| `VITE_SUPABASE_ANON_KEY`    | 브라우저 빌드            | 기존 anon 키 호환용, 새 키 사용 시 생략 |
 | `VITE_PUBLIC_SITE_URL`      | 브라우저 빌드            | 실제 HTTPS Netlify 주소, 끝의 `/` 제외 |
 | `SUPABASE_URL`              | 서버 Functions 전용      | 같은 Supabase URL                      |
-| `SUPABASE_SERVICE_ROLE_KEY` | 서버 Functions 전용·비밀 | 서비스 역할 키                         |
+| `SUPABASE_SECRET_KEY`       | 서버 Functions 전용·비밀 | 서버 secret 키 (`sb_secret_`)          |
+| `SUPABASE_SERVICE_ROLE_KEY` | 서버 Functions 전용·비밀 | 기존 서비스 역할 키 호환용             |
 | `TOKEN_SECRET`              | 서버 Functions 전용·비밀 | 최소 32바이트의 무작위 비밀            |
 | `SITE_URL`                  | 서버 Functions 전용      | 실제 HTTPS 배포 주소                   |
 | `OPENAI_API_KEY`            | 서버 Functions 전용·비밀 | AI 줄거리·심화 분석용 OpenAI API 키    |
@@ -180,7 +168,9 @@ npm run dev:netlify
 
 ## GitHub 연결과 Netlify 배포
 
-코드는 비공개 저장소 [fromjuly31/litverse](https://github.com/fromjuly31/litverse)에 보관합니다. [GitHub Pages 데모](https://fromjuly31.github.io/litverse/)는 GitHub Actions에서 수동 배포합니다. `main`에 푸시해도 자동 배포되지 않으며, **Deploy LITVERSE to GitHub Pages → Run workflow**를 실행해야 합니다. Supabase 프로젝트 연결과 Netlify 배포는 보류 중이며, 아래 절차는 실서비스를 연결할 때 사용합니다.
+코드는 비공개 저장소 [fromjuly31/litverse](https://github.com/fromjuly31/litverse)에 보관합니다. Supabase는 서울 리전의 `litverse` 프로젝트에 연결했고, [Netlify 운영 사이트](https://litverse-fromjuly31.netlify.app)에 실서비스 모드로 배포했습니다. 배포는 로컬 소스를 CLI로 올리는 방식이며 `main`에 푸시해도 사이트가 자동 배포되지 않습니다. 환경변수와 재배포 방법은 [운영 배포 기록](docs/DEPLOYMENT.md)에 있습니다.
+
+[GitHub Pages 데모](https://fromjuly31.github.io/litverse/)는 GitHub Actions에서 수동 배포합니다. `main`에 푸시해도 자동 배포되지 않으며, **Deploy LITVERSE to GitHub Pages → Run workflow**를 실행해야 합니다.
 
 1. 이 프로젝트를 사용자의 GitHub 저장소에 커밋·푸시합니다. `.env`, `node_modules`, `dist`, 테스트 산출물은 제외합니다.
 2. Netlify에서 해당 저장소를 연결합니다.
@@ -208,7 +198,7 @@ npm run dev:netlify
 
 HTML·데모에서는 동백꽃, 메밀꽃 필 무렵, 소나기의 **내장 예시 요약**만 제공합니다. 실제 AI 호출로 표시하지 않으며 다른 작품은 직접 입력하거나 운영 서버 연결이 필요합니다. 실제 OpenAI API 호출과 비용은 운영 키 설정 후 발생합니다.
 
-## 심화 AI 연결·대체 동작
+## 기존 AI 분석형 심화 수업의 연결·대체 동작
 
 운영 서버의 작품 분석은 OpenAI Responses API의 구조화 출력과 서버 Zod 검증을 사용합니다. 제목·작가·추가 지문·수록본·모델·프롬프트 버전을 포함한 키로 분석을 캐시하고, 교사가 수정한 분석은 별도 버전으로 보관합니다. 학생 질문은 최초 판단 제출 후 한 번 생성·저장하며, 매 입력이나 새로고침마다 AI를 호출하지 않습니다. DB 작업 잠금으로 중복 생성을 막습니다.
 

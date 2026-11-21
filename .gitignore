@@ -6,6 +6,7 @@ release/
 .env.*
 !.env.example
 .netlify/
+supabase/.temp/
 test-results/
 playwright-report/
 *.log

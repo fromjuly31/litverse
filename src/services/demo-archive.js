@@ -4,12 +4,40 @@ import {
   synopsisExamples,
 } from "../utils/archive.js";
 import {
+  alternatePosters,
+  findWork,
+  groupExhibits,
+  matchWorks,
+  workSummary,
+  WORKS_PER_PAGE,
+} from "../utils/exhibition-catalog.js";
+import {
+  demoPublicDeepeningExhibit,
+  demoPublicDeepeningSessions,
+} from "./demo-deepening.js";
+import {
   passwordHash,
   checkPassword,
   issueDemoAccess,
   hasDemoAccess,
   accessError,
 } from "./demo-access.js";
+
+function demoPoster(state, activity) {
+  if (!activity) return null;
+  const result = activity.final_result;
+  const imageIds = [result.character.image_id, result.scene.image_id];
+  return {
+    ...publicLesson(activity),
+    result,
+    images: state.images
+      .filter(
+        (image) =>
+          image.activity_id === activity.id && imageIds.includes(image.id),
+      )
+      .map(({ id, image_type, image_url }) => ({ id, image_type, image_url })),
+  };
+}
 
 export async function demoArchive(state, action, p) {
   state.lesson_passwords ||= {};
@@ -50,6 +78,40 @@ export async function demoArchive(state, action, p) {
         needs_password_setup: !state.lesson_passwords[a.id],
       })),
     );
+  if (action === "public/collection" || action === "public/work") {
+    const works = groupExhibits(
+      state.activities.filter(
+        (activity) =>
+          activity.finalized_at &&
+          activity.final_result &&
+          !activity.deletion_pending,
+      ),
+      demoPublicDeepeningSessions(state),
+    );
+    if (action === "public/collection") {
+      const matched = matchWorks(works, p.query);
+      if (p.count_only) return done({ total: matched.length });
+      const offset = Math.max(0, Number(p.offset) || 0);
+      return done({
+        total: matched.length,
+        items: matched
+          .slice(offset, offset + WORKS_PER_PAGE)
+          .map((work) => workSummary(work, demoPoster(state, work.posters[0]))),
+      });
+    }
+    const work = findWork(works, p);
+    if (!work) throw new Error("아직 전시 중인 자료가 없는 작품이에요.");
+    const poster = p.poster_id
+      ? work.posters.find(({ id }) => id === p.poster_id)
+      : work.posters[0];
+    return done({
+      ...workSummary(work, demoPoster(state, poster)),
+      posters: alternatePosters(work),
+      perspectives: work.perspectives.map((session) =>
+        demoPublicDeepeningExhibit(state, session),
+      ),
+    });
+  }
   if (action === "public/exhibits") {
     const query = String(p.query || "")
         .replace(/[^\p{L}\p{N}\s]/gu, "")
@@ -72,44 +134,14 @@ export async function demoArchive(state, action, p) {
       );
     return done({
       total: all.length,
-      items: all.slice(offset, offset + 24).map((a) => ({
-        ...publicLesson(a),
-        result: a.final_result,
-        images: state.images
-          .filter((i) =>
-            [
-              a.final_result.character.image_id,
-              a.final_result.scene.image_id,
-            ].includes(i.id),
-          )
-          .map(({ id, image_type, image_url }) => ({
-            id,
-            image_type,
-            image_url,
-          })),
-      })),
+      items: all.slice(offset, offset + 24).map((a) => demoPoster(state, a)),
     });
   }
   if (action === "public/exhibit") {
     const a = lesson();
     if (!a.finalized_at || !a.final_result)
       throw new Error("아직 전시되지 않은 수업이에요.");
-    return done({
-      ...publicLesson(a),
-      result: a.final_result,
-      images: state.images
-        .filter((i) =>
-          [
-            a.final_result.character.image_id,
-            a.final_result.scene.image_id,
-          ].includes(i.id),
-        )
-        .map(({ id, image_type, image_url }) => ({
-          id,
-          image_type,
-          image_url,
-        })),
-    });
+    return done(demoPoster(state, a));
   }
   if (action === "public/synopsis") {
     const synopsis =

@@ -26,6 +26,14 @@ export async function backgroundTeacher(root, data) {
   ({ questions, responses: answers } = await request("teacher/background", {
     id,
   }));
+  const snapshot = (activity, questions, responses) =>
+    JSON.stringify([
+      activity.temporal_background,
+      activity.spatial_background,
+      questions,
+      responses,
+    ]);
+  let lastUpdate = snapshot(data.activity, questions, answers);
   teacherShell(
     root,
     "background",
@@ -59,6 +67,13 @@ export async function backgroundTeacher(root, data) {
   const reload = async () => {
     const result = await request("teacher/background", { id });
     if (stopped) return;
+    const updated = snapshot(
+      result.activity,
+      result.questions,
+      result.responses,
+    );
+    if (lastUpdate === updated) return;
+    lastUpdate = updated;
     questions = result.questions;
     answers = result.responses;
     data.activity = result.activity;
@@ -136,6 +151,7 @@ export async function backgroundTeacher(root, data) {
       );
     } catch (error) {
       toast(error.message, "error");
+    } finally {
       btn.disabled = false;
     }
   };
@@ -177,9 +193,10 @@ export async function backgroundTeacher(root, data) {
           state === "demo"
             ? "같은 브라우저 데모"
             : state === "connected"
-              ? "실시간 연결됨"
-              : "연결 복구 중";
+              ? "자동 갱신 중"
+              : "연결 복구 중 · 자동 갱신";
     },
+    { pollInterval: 5000 },
   );
   return () => {
     stopped = true;

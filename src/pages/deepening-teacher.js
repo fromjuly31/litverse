@@ -32,6 +32,12 @@ import {
 import { rememberAccess } from "../services/access.js";
 import { navigate } from "../main.js";
 import { STAGES } from "../utils/domain.js";
+import { currentRoute } from "../utils/paths.js";
+import { isClassQuestions } from "../utils/class-questions.js";
+import {
+  classQuestionsEditor,
+  classQuestionsTeacher,
+} from "./class-questions-teacher.js";
 
 function temporaryPassword(key, value) {
   try {
@@ -236,12 +242,19 @@ export async function deepeningEditor(
   };
 }
 
-export async function deepeningTeacher(root, linked) {
+export async function deepeningTeacher(root, linked, sessionId) {
   const a = linked.activity;
-  let data = await request("deepening/get", { id: a.id }),
+  let data = await request("deepening/get", {
+      id: a.id,
+      session_id: sessionId,
+    }),
     stopped = false,
     busy = false;
-  if (!data.session) return deepeningEditor(root, linked);
+  if (!data.session) return classQuestionsEditor(root, a);
+  if (isClassQuestions(data.work.reviewed_analysis)) {
+    const showQr = new URLSearchParams(currentRoute().split("?")[1]).has("qr");
+    return classQuestionsTeacher(root, a, data, showQr);
+  }
   let selected = data.session.id,
     connection = "진행 현황 연결 중";
   const controls = async (values) => {
@@ -344,8 +357,9 @@ export async function deepeningTeacher(root, linked) {
       draw();
     });
     root.querySelector("[name=deep_round]").onchange = async (event) => {
-      selected = event.target.value;
-      await reload(true);
+      const id = event.target.value;
+      const base = `/teacher/activity/${a.id}/deepening`;
+      await navigate(id === a.deepening_session_id ? base : `${base}/${id}`);
     };
     root.querySelector("#deep-publish").onclick = () => {
       const visibility = root.querySelector("[name=deep_visibility]").value;
@@ -365,10 +379,9 @@ export async function deepeningTeacher(root, linked) {
     });
     root
       .querySelector("#deep-new-round")
-      ?.addEventListener("click", async () => {
-        dispose();
-        editorCleanup = await deepeningEditor(root, linked, data, true);
-      });
+      ?.addEventListener("click", () =>
+        navigate(`/teacher/activity/${a.id}/deepening/new`),
+      );
     root.querySelector("#deep-export").onclick = () =>
       downloadText(
         JSON.stringify(

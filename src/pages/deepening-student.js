@@ -12,6 +12,8 @@ import {
 } from "../components/ui.js";
 import { e, safeStorage, randomCode, downloadText } from "../utils/helpers.js";
 import { PURPOSES, REFLECTIONS } from "../utils/deepening.js";
+import { isClassQuestions } from "../utils/class-questions.js";
+import { classQuestionsStudent } from "./class-questions-student.js";
 import {
   analysisSummary,
   recordDetail,
@@ -19,7 +21,12 @@ import {
   reflectionMarkup,
 } from "../components/deepening.js";
 
-export async function deepeningStudent(root, activity, token) {
+export async function deepeningStudent(
+  root,
+  activity,
+  token,
+  requestedSession,
+) {
   const previousWork = safeStorage(`litverse-draft:${token}`);
   let code =
     safeStorage(`litverse-code:${activity.id}`) ||
@@ -30,8 +37,14 @@ export async function deepeningStudent(root, activity, token) {
     previousWork?.worksheet?.student_label ||
     "";
   safeStorage(`litverse-code:${activity.id}`, code);
-  let data = await request("deepening/student-get", { token, code }),
-    stopped = false,
+  let data = await request("deepening/student-get", {
+    token,
+    code,
+    session_id: requestedSession,
+  });
+  if (isClassQuestions(data.analysis))
+    return classQuestionsStudent(root, activity, token, code, label, data);
+  let stopped = false,
     busy = false,
     saveTimer,
     saving = Promise.resolve(),
@@ -361,7 +374,7 @@ export async function deepeningStudent(root, activity, token) {
   }
   function complete() {
     frame(
-      `<div class="success-mark">${icon("check")}</div><h2>한 번 더 깊어진, 나의 생각.</h2><p class="step-hint">생각의 방향보다 작품과 근거로 설명한 과정이 중요합니다.</p>${reflectionMarkup(data.record)}<details><summary>나의 세 질문과 답변 모두 보기</summary>${recordDetail(data.record)}</details><div class="deep-code"><p>다른 기기에서 기록을 다시 볼 때 사용하는 개인 제출 코드</p><code>${e(code)}</code>${button("개인 코드 복사", "copy", "secondary", 'id="copy-deep-code"')}${button("내 활동 내려받기", "download", "ghost", 'id="download-deep-result"')}</div><a class="btn secondary" href="/exhibition?type=deepening">문학 전시관 관람하기 ${icon("arrow-up-right")}</a>`,
+      `<div class="success-mark">${icon("check")}</div><h2>한 번 더 깊어진, 나의 생각.</h2><p class="step-hint">생각의 방향보다 작품과 근거로 설명한 과정이 중요합니다.</p>${reflectionMarkup(data.record)}<details><summary>나의 세 질문과 답변 모두 보기</summary>${recordDetail(data.record)}</details><div class="deep-code"><p>다른 기기에서 기록을 다시 볼 때 사용하는 개인 제출 코드</p><code>${e(code)}</code>${button("개인 코드 복사", "copy", "secondary", 'id="copy-deep-code"')}${button("내 활동 내려받기", "download", "ghost", 'id="download-deep-result"')}</div><a class="btn secondary" href="/exhibition">문학 전시관 관람하기 ${icon("arrow-up-right")}</a>`,
     );
     root.querySelector("#copy-deep-code").onclick = () => copyText(code);
     root.querySelector("#download-deep-result").onclick = () =>

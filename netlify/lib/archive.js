@@ -19,6 +19,7 @@ import {
 } from "./lesson-access.js";
 import { finalResult, publicLesson } from "../../src/utils/archive.js";
 import { generateSynopsis } from "./synopsis.js";
+import { publicCollection, publicWork } from "./exhibition.js";
 
 export async function archiveAction(db, req, context, action, p) {
   const done = (value) => ({ handled: true, value });
@@ -33,6 +34,9 @@ export async function archiveAction(db, req, context, action, p) {
     await limit(db, `synopsis:${context.ip || "local"}`, 12, 3600);
     return done(await generateSynopsis(p));
   }
+  if (action === "public/collection")
+    return done(await publicCollection(db, p));
+  if (action === "public/work") return done(await publicWork(db, p));
   if (["public/list", "public/exhibits", "public/exhibit"].includes(action)) {
     const fields =
       "id,title,author,course_name,class_name,stage,created_at,updated_at,finalized_at,signature,lesson_kind,active_phase,deepening_session_id";

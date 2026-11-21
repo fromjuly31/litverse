@@ -11,7 +11,8 @@ export const fail = (status, message) => {
 };
 export function createServer() {
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   const secret = process.env.TOKEN_SECRET;
   if (!url || !key || !secret || secret.length < 32)
     fail(503, "서버 연결 설정이 필요합니다. 관리자에게 문의해 주세요.");
@@ -240,6 +241,8 @@ export function errorResponse(error) {
       { status: 400, headers: { "Cache-Control": "no-store" } },
     );
   const messages = {
+    CLASS_RESPONSE_SUBMITTED: "이미 이 회차에 답변을 제출했어요. 화면을 다시 열어 제출한 답변을 확인해 주세요.",
+    INVALID_CLASS_RESPONSE: "모든 질문에 답변해 주세요.",
     REVISION_CONFLICT:
       "다른 창에서 기록이 변경되었습니다. 임시저장 내용을 유지하고 최신 기록을 불러와 주세요.",
     INITIAL_IMMUTABLE: "최초 판단은 성찰과 비교하기 위해 보존됩니다.",

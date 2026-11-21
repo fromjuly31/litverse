@@ -5,16 +5,17 @@ import { backgroundStudent } from "./background.js";
 import { deepeningStudent } from "./deepening-student.js";
 import { watchStudentPhase } from "../services/student-phase.js";
 export async function studentPage(root, path) {
-  const token = decodeURIComponent(path.split("/")[2] || "");
+  const [, , rawToken, mode, sessionId] = path.split("/");
+  const token = decodeURIComponent(rawToken || "");
   const activity = await request("student/activity", { token });
   let dispose;
   if (
-    path.endsWith("/deepening") ||
+    mode === "deepening" ||
     (activity.deepening_session_id &&
       activity.active_phase === "deepening" &&
       !path.endsWith("/understanding"))
   )
-    dispose = await deepeningStudent(root, activity, token);
+    dispose = await deepeningStudent(root, activity, token, sessionId);
   else if (path.startsWith("/submit/"))
     dispose = submissionPage(root, activity, token);
   else if (activity.stage === "BACKGROUND")

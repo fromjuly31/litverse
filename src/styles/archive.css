@@ -268,6 +268,16 @@
   max-width: 460px;
   margin: 0 auto 50px;
 }
+.work-poster-list {
+  max-width: 850px;
+  margin: 0 auto 20px;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+.work-poster-list a[aria-current="page"] {
+  background: var(--surface-hover, #eee9dd);
+  font-weight: 700;
+}
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

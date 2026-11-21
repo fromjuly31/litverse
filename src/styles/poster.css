@@ -365,6 +365,8 @@
   .archive-header,
   .archive-footer,
   .exhibit-toolbar,
+  .work-poster-list,
+  .work-perspectives,
   .toast-container {
     display: none !important;
   }

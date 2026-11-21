@@ -5,22 +5,23 @@ async function choose(page, label, option) {
   await page.getByRole("combobox", { name: label, exact: true }).click();
   await page.getByRole("option", { name: option, exact: true }).click();
 }
-async function analyze(page, title = "운수 좋은 날", author = "현진건") {
-  await page.getByLabel("문학 작품명", { exact: true }).fill(title);
-  await page.getByLabel("작가명", { exact: true }).fill(author);
-  await page
-    .getByRole("button", { name: "작품 분석하기", exact: true })
-    .click();
-  await expect(page.locator("#deep-review")).toBeVisible();
-}
-async function confirmAnalysis(page) {
-  await page.locator('[name="reviewed"]').check();
-  await page
-    .getByRole("button", { name: "이 분석으로 수업 만들기", exact: true })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "심화 활동 시작", exact: true }),
-  ).toBeVisible();
+async function seedLegacyLesson(page) {
+  await page.goto("/teacher?tab=deepening");
+  const id = await page.evaluate(async () => {
+    const { request } = await import("/src/services/api.js");
+    const input = { title: "운수 좋은 날", author: "현진건" };
+    const { analysis, source } = await request("deepening/analyze", input);
+    const lesson = await request("deepening/save", {
+      activity_id: crypto.randomUUID(),
+      request_id: crypto.randomUUID(),
+      password: "legacy-lesson-password",
+      input,
+      analysis,
+      source,
+    });
+    return lesson.id;
+  });
+  await page.goto(`/teacher/activity/${id}/deepening`);
 }
 async function startAndLink(page) {
   await page
@@ -55,19 +56,14 @@ async function joinAndJudge(page) {
     .click();
   await expect(page.getByLabel("현실과 맥락 탐구 답변")).toBeVisible();
 }
-test("standalone deepening: personalized questions, durable answers, live teacher progress, peers and public reflection", async ({
+test("legacy deepening retains personalized questions, live progress, peers and public reflection", async ({
   page,
   context,
 }) => {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await mkdir("test-results/deepening", { recursive: true });
-  await page.goto("/teacher?tab=deepening");
-  await page
-    .getByRole("link", { name: "심화 수업 만들기", exact: true })
-    .click();
-  await analyze(page);
-  await confirmAnalysis(page);
+  await seedLegacyLesson(page);
   const teacherUrl = page.url(),
     id = teacherUrl.split("/").at(-2),
     link = await startAndLink(page);
@@ -212,12 +208,18 @@ test("standalone deepening: personalized questions, durable answers, live teache
   await page
     .getByRole("button", { name: "새 회차 만들기", exact: true })
     .click();
-  await page.locator('[name="reviewed"]').check();
-  await page.getByRole("button", { name: "새 회차로 보관하기" }).click();
-  await expect(page.getByRole("combobox", { name: "활동 회차" })).toContainText(
+  await page
+    .getByLabel("질문 1", { exact: true })
+    .fill("인물의 선택을 어떻게 보았나요?");
+  await page.getByRole("button", { name: "시작하기", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "학생 참여 QR" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("combobox", { name: "회차" })).toContainText(
     "2회차",
   );
-  await choose(page, "활동 회차", "1회차 · 종료");
+  await choose(page, "회차", "1회차");
   await expect(page.locator("#deep-progress")).toContainText("성찰 완료 1명");
   await page
     .getByRole("navigation", { name: "수업 분야", exact: true })
@@ -256,7 +258,6 @@ test("linked lessons retain worksheets and QR identity while switching without l
   await student
     .getByRole("button", { name: "나의 해석 시작하기", exact: true })
     .click();
-  const character = student.getByLabel("분석할 인물", { exact: true });
   // The field name is stable across the existing character form.
   const nameField = student.locator('[name="character_name"]');
   await nameField.fill("작성 중인 인물 해석");
@@ -264,15 +265,16 @@ test("linked lessons retain worksheets and QR identity while switching without l
     .getByRole("navigation", { name: "수업 분야", exact: true })
     .getByRole("link", { name: "이해 심화하기" })
     .click();
-  await expect(page.getByLabel("문학 작품명", { exact: true })).toHaveValue(
-    "동백꽃",
-  );
-  await expect(page.getByLabel("작가명", { exact: true })).toHaveValue(
-    "김유정",
-  );
-  await analyze(page, "동백꽃", "김유정");
-  await confirmAnalysis(page);
-  await startAndLink(page);
+  await page
+    .getByLabel("질문 1", { exact: true })
+    .fill("점순이는 왜 감자를 건넸나요?");
+  await page.getByRole("button", { name: "시작하기", exact: true }).click();
+  const qr = page.getByRole("dialog", { name: "학생 참여 QR" });
+  await expect(qr).toBeVisible();
+  await expect(
+    qr.getByRole("link", { name: "학생 화면 열기" }),
+  ).toHaveAttribute("href", /\/activity\/demo-dongbaek-analysis\/deepening\//);
+  await page.keyboard.press("Escape");
   await expect(student.locator(".student-phase-notice")).toContainText(
     "이해 심화하기",
   );
@@ -281,11 +283,10 @@ test("linked lessons retain worksheets and QR identity while switching without l
   await expect(student.getByLabel("학생 번호 또는 별칭")).toHaveValue(
     "새 관점",
   );
-  await student
-    .getByRole("button", { name: "심화 활동 참여하기", exact: true })
-    .click();
-  await expect(student.getByLabel("나의 선택", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "학생에게 작품 파악 안내" }).click();
+  await expect(
+    student.getByLabel("1. 점순이는 왜 감자를 건넸나요?", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "마감하기" }).click();
   await expect(student.locator(".student-phase-notice")).toContainText(
     "작품 파악하기",
   );
@@ -308,8 +309,9 @@ test("linked lessons retain worksheets and QR identity while switching without l
   await student.close();
 });
 
-test("poetry and uncertain works use distinct drafts and teaching-tab preference is remembered", async ({
+test("teacher questions open with a round QR and answers appear without a reload", async ({
   page,
+  context,
 }) => {
   await page.goto("/teacher?tab=deepening");
   await page.getByRole("link", { name: "관람하기", exact: true }).click();
@@ -320,23 +322,23 @@ test("poetry and uncertain works use distinct drafts and teaching-tab preference
   await page
     .getByRole("link", { name: "심화 수업 만들기", exact: true })
     .click();
-  await analyze(page, "서시", "윤동주");
-  await expect(page.getByRole("combobox", { name: "문학 갈래" })).toHaveText(
-    "시",
-  );
-  await expect(page.getByLabel("최초 판단 질문")).toHaveValue(/화자/);
-  await analyze(page, "확인되지 않은 문학 작품", "미상");
-  await expect(page.locator("#deep-review .notice")).toContainText(
-    "확실히 식별하지 못했습니다",
-  );
-  await expect(page.getByLabel("주요 인물 또는 화자")).toHaveValue("");
   await page
-    .getByRole("button", { name: "이 분석으로 수업 만들기", exact: true })
-    .click();
-  await expect(page.locator("#deep-review")).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "심화 활동 시작", exact: true }),
-  ).toHaveCount(0);
+    .getByLabel("수업 이름 (선택)", { exact: true })
+    .fill("동백꽃 함께 읽기");
+  const first = "점순이는 왜 감자를 건넸을까요?";
+  const second = "마지막 장면에서 둘은 어떤 마음이었을까요?";
+  const start = page.getByRole("button", { name: "시작하기", exact: true });
+  await choose(page, "질문 수", "2개");
+  await page.getByLabel("질문 1", { exact: true }).fill(first);
+  await start.click();
+  await expect(page.getByLabel("질문 2", { exact: true })).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  await page.getByLabel("질문 2", { exact: true }).fill(second);
+  await choose(page, "질문 수", "1개");
+  await choose(page, "질문 수", "2개");
+  await expect(page.getByLabel("질문 2", { exact: true })).toHaveValue(second);
   for (const width of [320, 390, 768, 1366]) {
     await page.setViewportSize({ width, height: 844 });
     expect(
@@ -345,4 +347,52 @@ test("poetry and uncertain works use distinct drafts and teaching-tab preference
       ),
     ).toBe(true);
   }
+  await start.click();
+  const qr = page.getByRole("dialog", { name: "학생 참여 QR" });
+  await expect(
+    qr.getByRole("img", { name: "심화 수업 참여 QR 코드" }),
+  ).toBeVisible();
+  const link = await qr
+    .getByRole("link", { name: "학생 화면 열기" })
+    .getAttribute("href");
+  expect(link).toMatch(/\/deepening\/[a-f0-9-]{36}$/);
+  await page.keyboard.press("Escape");
+  await expect(page.getByText("0명 제출", { exact: true })).toBeVisible();
+  const student = await context.newPage();
+  await student.setViewportSize({ width: 390, height: 844 });
+  await student.goto(link);
+  await student.getByLabel("학생 번호 또는 별칭", { exact: true }).fill("12번");
+  await student
+    .getByLabel(`1. ${first}`, { exact: true })
+    .fill("따뜻한 감자를 챙겨 주며 마음을 표현했어요.");
+  await student.reload();
+  await expect(student.getByLabel(`1. ${first}`, { exact: true })).toHaveValue(
+    /마음을 표현/,
+  );
+  await student
+    .getByLabel(`2. ${second}`, { exact: true })
+    .fill("둘 다 쑥스럽지만 이제는 안심했을 것 같아요.");
+  await student.getByRole("button", { name: "답변 제출하기" }).click();
+  await expect(student.getByText("답변을 제출했어요.")).toBeVisible();
+  await expect(page.getByText("1명 제출", { exact: true })).toBeVisible();
+  await expect(page.getByText("12번", { exact: true })).toBeVisible();
+  await expect(
+    page
+      .locator("#class-responses")
+      .getByText("이제는 안심했을 것 같아요.", { exact: false }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "마감하기" }).click();
+  await expect(page.getByText("마감", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "새 회차 만들기" }).click();
+  await page.getByLabel("질문 1", { exact: true }).fill("새 회차 질문");
+  await start.click();
+  await expect(
+    page.getByRole("dialog", { name: "학생 참여 QR" }),
+  ).toBeVisible();
+  await student.reload();
+  await expect(student.getByText(second, { exact: false })).toBeVisible();
+  await expect(student.getByText("새 회차 질문", { exact: false })).toHaveCount(
+    0,
+  );
+  await student.close();
 });

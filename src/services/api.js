@@ -2,14 +2,12 @@ import { createClient } from "@supabase/supabase-js";
 import { demoRequest, demoSubscribe } from "./demo.js";
 import { accessToken, forgetAccess } from "./access.js";
 export const isDemo = (import.meta.env.VITE_APP_MODE || "demo") === "demo";
+const publicKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const supabase =
-  !isDemo &&
-  import.meta.env.VITE_SUPABASE_URL &&
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-    ? createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY,
-      )
+  !isDemo && import.meta.env.VITE_SUPABASE_URL && publicKey
+    ? createClient(import.meta.env.VITE_SUPABASE_URL, publicKey)
     : null;
 export async function request(action, payload = {}) {
   if (isDemo)
@@ -74,7 +72,12 @@ export async function signOut() {
   forgetAccess();
   if (supabase) await supabase.auth.signOut();
 }
-export function subscribe(activityId, callback, onState = () => {}) {
+export function subscribe(
+  activityId,
+  callback,
+  onState = () => {},
+  { pollInterval = 60000 } = {},
+) {
   if (isDemo) {
     onState("demo");
     return demoSubscribe(callback);
@@ -167,11 +170,17 @@ export function subscribe(activityId, callback, onState = () => {}) {
       onState(status === "SUBSCRIBED" ? "connected" : "reconnecting");
       if (status === "SUBSCRIBED") refresh();
     });
-  const timer = setInterval(refresh, 60000); // Also refresh expiring signed URLs.
+  const refreshWhenVisible = () => {
+    if (!document.hidden) void refresh();
+  };
+  // Password-only teachers can read via the API even when row policies block Realtime.
+  const timer = setInterval(refreshWhenVisible, pollInterval);
+  document.addEventListener("visibilitychange", refreshWhenVisible);
   window.addEventListener("online", refresh);
   return () => {
     stopped = true;
     clearInterval(timer);
+    document.removeEventListener("visibilitychange", refreshWhenVisible);
     window.removeEventListener("online", refresh);
     supabase.removeChannel(channel);
   };

@@ -8,6 +8,11 @@ import {
   publicRecord,
 } from "../utils/deepening.js";
 import {
+  classQuestionAnalysis,
+  classResponseSchema,
+  isClassQuestions,
+} from "../utils/class-questions.js";
+import {
   hasDemoAccess,
   accessError,
   passwordHash,
@@ -16,6 +21,48 @@ import {
 } from "./demo-access.js";
 import { randomCode } from "../utils/helpers.js";
 import { DEFAULT_TASKS, DEFAULT_TAGS } from "../utils/domain.js";
+
+export function demoPublicDeepeningSessions(state) {
+  const activities = new Set(state.activities.map(({ id }) => id));
+  const completed = new Set(
+    (state.deepening_records || [])
+      .filter((record) => record.completed_at)
+      .map((record) => record.session_id),
+  );
+  const works = new Map(
+    (state.literary_work_versions || []).map((work) => [work.id, work]),
+  );
+  return (state.deepening_sessions || []).flatMap((session) => {
+    const work = works.get(session.work_version_id);
+    return session.visibility === "public" &&
+      work &&
+      activities.has(session.activity_id) &&
+      completed.has(session.id)
+      ? [{ ...session, title: work.title, author: work.author }]
+      : [];
+  });
+}
+
+export function demoPublicDeepeningExhibit(state, session) {
+  const work = state.literary_work_versions.find(
+    (entry) => entry.id === session.work_version_id,
+  );
+  return {
+    id: session.id,
+    activity_id: session.activity_id,
+    title: work.title,
+    author: work.author,
+    round: session.round,
+    analysis: work.reviewed_analysis,
+    records: state.deepening_records
+      .filter(
+        (record) => record.session_id === session.id && record.completed_at,
+      )
+      .map(publicRecord),
+    type: "deepening",
+    published_at: session.published_at,
+  };
+}
 
 export async function demoDeepening(state, action, p) {
   if (!action.startsWith("deepening/")) return { handled: false };
@@ -50,28 +97,6 @@ export async function demoDeepening(state, action, p) {
       (w) => w.id === session.work_version_id,
     ),
   });
-  const isExhibited = (s) =>
-    s.visibility === "public" &&
-    state.activities.some((a) => a.id === s.activity_id) &&
-    state.deepening_records.some(
-      (r) => r.session_id === s.id && r.completed_at,
-    );
-  const exhibit = (s) => {
-    const { work } = bundle(s);
-    return {
-      id: s.id,
-      activity_id: s.activity_id,
-      title: work.title,
-      author: work.author,
-      round: s.round,
-      analysis: work.reviewed_analysis,
-      records: state.deepening_records
-        .filter((r) => r.session_id === s.id && r.completed_at)
-        .map(publicRecord),
-      type: "deepening",
-      published_at: s.published_at,
-    };
-  };
   if (action === "deepening/analyze") {
     if (p.id) await teacher(p.id);
     const input = analysisInputSchema.parse(p),
@@ -82,23 +107,22 @@ export async function demoDeepening(state, action, p) {
     return done(state.deepening_analysis_cache[key], true);
   }
   if (["deepening/public-list", "deepening/public-count"].includes(action)) {
-    const all = state.deepening_sessions
-      .filter((s) => isExhibited(s))
-      .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+    const all = demoPublicDeepeningSessions(state).sort(
+      (a, b) => new Date(b.published_at) - new Date(a.published_at),
+    );
     const query = String(p.query || "")
       .replace(/[^\p{L}\p{N}\s]/gu, "")
       .trim()
       .toLowerCase();
-    const filtered = all.filter((s) => {
-      const { work } = bundle(s);
-      return `${work.title} ${work.author}`.toLowerCase().includes(query);
-    });
+    const filtered = all.filter((s) =>
+      `${s.title} ${s.author}`.toLowerCase().includes(query),
+    );
     if (action === "deepening/public-count")
       return done({ total: filtered.length });
     const offset = Math.max(0, Number(p.offset) || 0);
     return done({
       items: filtered.slice(offset, offset + 24).map((s) => {
-        const item = exhibit(s);
+        const item = demoPublicDeepeningExhibit(state, s);
         return {
           ...item,
           record_count: item.records.length,
@@ -109,18 +133,27 @@ export async function demoDeepening(state, action, p) {
     });
   }
   if (action === "deepening/public-exhibit") {
-    const session = state.deepening_sessions.find(
-      (s) => s.id === p.session_id && isExhibited(s),
+    const session = demoPublicDeepeningSessions(state).find(
+      (s) => s.id === p.session_id,
     );
     if (!session) fail("공개되지 않은 심화 전시입니다.");
     activity(session.activity_id);
-    return done(exhibit(session));
+    return done(demoPublicDeepeningExhibit(state, session));
   }
-  if (action === "deepening/save") {
-    const input = analysisInputSchema.parse(p.input),
-      analysis = reviewedSchema.parse(p.analysis),
-      draft = analysisSchema.parse(p.draft || p.analysis);
+  if (action === "deepening/save" || action === "deepening/questions-start") {
+    const startsQuestions = action === "deepening/questions-start";
     const standalone = !p.id;
+    const analysis = startsQuestions
+      ? classQuestionAnalysis(p.questions)
+      : reviewedSchema.parse(p.analysis);
+    const draft = startsQuestions
+      ? analysis
+      : analysisSchema.parse(p.draft || p.analysis);
+    let input =
+      !startsQuestions || standalone
+        ? analysisInputSchema.parse(p.input)
+        : null;
+    const newRound = startsQuestions || p.new_round;
     let a;
     if (standalone) {
       a = state.activities.find((a) => a.id === p.activity_id);
@@ -156,10 +189,18 @@ export async function demoDeepening(state, action, p) {
         };
         state.activities.push(a);
       }
-    } else a = await teacher(p.id);
+    } else {
+      a = await teacher(p.id);
+      if (startsQuestions) input = { title: a.title, author: a.author };
+    }
     const retried = state.deepening_sessions.find((s) => s.id === p.request_id);
     if (retried) {
       if (retried.activity_id !== a.id) accessError();
+      if (
+        startsQuestions &&
+        !isClassQuestions(bundle(retried).work.reviewed_analysis)
+      )
+        accessError();
       return done(
         {
           id: a.id,
@@ -174,12 +215,12 @@ export async function demoDeepening(state, action, p) {
     );
     if (
       session &&
-      !p.new_round &&
+      !newRound &&
       (session.status !== "DRAFT" ||
         state.deepening_records.some((r) => r.session_id === session.id))
     )
       fail("진행한 회차는 보존됩니다. 새 회차를 만들어 주세요.");
-    if (session?.status === "OPEN" && p.new_round)
+    if (session?.status === "OPEN" && newRound)
       fail("현재 회차를 먼저 종료해 주세요.");
     const work = {
       id: crypto.randomUUID(),
@@ -190,11 +231,11 @@ export async function demoDeepening(state, action, p) {
       ...input,
       ai_draft: draft,
       reviewed_analysis: analysis,
-      analysis_source: p.source,
+      analysis_source: startsQuestions ? "manual" : p.source,
       created_at: new Date().toISOString(),
     };
     state.literary_work_versions.push(work);
-    if (session && !p.new_round) session.work_version_id = work.id;
+    if (session && !newRound) session.work_version_id = work.id;
     else {
       session = {
         id: p.request_id,
@@ -203,13 +244,17 @@ export async function demoDeepening(state, action, p) {
         round:
           state.deepening_sessions.filter((s) => s.activity_id === a.id)
             .length + 1,
-        status: "DRAFT",
+        status: startsQuestions ? "OPEN" : "DRAFT",
         visibility: "private",
         created_at: new Date().toISOString(),
       };
       state.deepening_sessions.push(session);
     }
     a.deepening_session_id = session.id;
+    if (startsQuestions) {
+      a.active_phase = "deepening";
+      if (standalone) a.stage = "ANALYSIS";
+    }
     return done(
       {
         id: a.id,
@@ -236,6 +281,11 @@ export async function demoDeepening(state, action, p) {
           .map(safeRecord),
       });
     if (!session) fail("심화 수업을 찾을 수 없습니다.");
+    if (
+      isClassQuestions(bundle(session).work.reviewed_analysis) &&
+      p.visibility !== "private"
+    )
+      accessError("학생 답변은 교사 화면에서만 볼 수 있습니다.");
     if (
       !["DRAFT", "OPEN", "CLOSED"].includes(p.status) ||
       !["private", "class", "public"].includes(p.visibility) ||
@@ -293,6 +343,49 @@ export async function demoDeepening(state, action, p) {
         (r) => r.session_id === session.id && r.participant_hash === p.code,
       ),
       changed = false;
+    const studentBundle = () => ({
+      session,
+      analysis: work.reviewed_analysis,
+      record: record ? safeRecord(record) : null,
+      title: work.title,
+      author: work.author,
+    });
+    if (isClassQuestions(work.reviewed_analysis)) {
+      if (action === "deepening/student-get") return done(studentBundle());
+      if (action !== "deepening/student-submit")
+        fail("이 수업에서는 질문에 대한 답변을 제출해 주세요.");
+      const { student_label, answers } = classResponseSchema.parse(p);
+      if (answers.length !== work.reviewed_analysis.questions.length)
+        fail("모든 질문에 답변해 주세요.");
+      if (record) {
+        if (answers.every((answer, index) => answer === record.answers[index]))
+          return done(safeRecord(record));
+        fail(
+          "이미 이 회차에 답변을 제출했어요. 화면을 다시 열어 확인해 주세요.",
+        );
+      }
+      if (session.status !== "OPEN") fail("선생님이 답변 제출을 마감했어요.");
+      const worksheet = state.worksheets.find(
+        (w) => w.activity_id === a.id && w.submission_code === p.code,
+      );
+      const now = new Date().toISOString();
+      record = {
+        id: crypto.randomUUID(),
+        session_id: session.id,
+        activity_id: a.id,
+        participant_hash: p.code,
+        student_label: worksheet?.student_label || student_label,
+        worksheet_id: worksheet?.id || null,
+        answers,
+        answers_submitted_at: now,
+        completed_at: now,
+        revision: 1,
+        created_at: now,
+        updated_at: now,
+      };
+      state.deepening_records.push(record);
+      return done(safeRecord(record), true);
+    }
     if (action === "deepening/student-join" && !record) {
       if (
         session.status !== "OPEN" ||
@@ -321,16 +414,7 @@ export async function demoDeepening(state, action, p) {
       changed = true;
     }
     if (["deepening/student-get", "deepening/student-join"].includes(action))
-      return done(
-        {
-          session,
-          analysis: work.reviewed_analysis,
-          record: record ? safeRecord(record) : null,
-          title: work.title,
-          author: work.author,
-        },
-        changed,
-      );
+      return done(studentBundle(), changed);
     if (!record) fail("학생 번호나 별칭으로 먼저 참여해 주세요.");
     if (action === "deepening/student-write") {
       if (record.revision !== p.revision)

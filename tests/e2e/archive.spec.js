@@ -1,6 +1,137 @@
 import { test, expect } from "@playwright/test";
 import { mkdir, readFile } from "node:fs/promises";
 
+test("collection groups posters and public perspectives by work and author", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator(".museum-choices")).toBeVisible();
+  await page.evaluate(async () => {
+    const { seedData } = await import("/src/services/seed.js");
+    const { finalResult } = await import("/src/utils/archive.js");
+    const { demoAnalysis } = await import("/src/utils/deepening.js");
+    const state = seedData();
+    const base = state.activities[0];
+    const portrait = state.images.find(
+      (image) => image.image_type === "character",
+    );
+    const scene = state.images.find((image) => image.image_type === "scene");
+    const snapshot = finalResult(base, state.worksheets, state.images, {
+      character_image_id: portrait.id,
+      scene_image_id: scene.id,
+      synopsis: "감자와 노란 꽃이 등장하는 이야기입니다.",
+      temporal_background: "봄",
+      spatial_background: "산기슭",
+      character_summary: "점순이는 감자로 마음을 전합니다.",
+      scene_summary: "감자를 매개로 두 인물의 태도가 달라집니다.",
+      signature: "첫 번째 반",
+    });
+    for (const [id, author, signature, date] of [
+      ["first-poster", "김유정", "첫 번째 반", "2026-01-01T00:00:00Z"],
+      ["second-poster", "김유정", "두 번째 반", "2026-02-01T00:00:00Z"],
+      ["different-author", "다른 작가", "다른 작품", "2026-01-15T00:00:00Z"],
+    ]) {
+      state.activities.push({
+        ...base,
+        id,
+        author,
+        signature,
+        finalized_at: date,
+        final_result: {
+          ...snapshot,
+          author,
+          signature,
+          character: { ...snapshot.character, image_id: `${id}-character` },
+          scene: { ...snapshot.scene, image_id: `${id}-scene` },
+        },
+      });
+      state.images.push(
+        { ...portrait, id: `${id}-character`, activity_id: id },
+        { ...scene, id: `${id}-scene`, activity_id: id },
+      );
+    }
+    const work = { title: base.title, author: base.author };
+    const { analysis } = demoAnalysis(work);
+    state.literary_work_versions = [
+      { ...work, id: "dongbaek-version", reviewed_analysis: analysis },
+    ];
+    state.deepening_sessions = ["public", "private"].map((visibility) => ({
+      id: `dongbaek-${visibility}`,
+      activity_id: base.id,
+      work_version_id: "dongbaek-version",
+      visibility,
+      round: 1,
+      published_at: "2026-03-01T00:00:00Z",
+    }));
+    state.deepening_records = state.deepening_sessions.map((session) => ({
+      id: `answer-${session.id}`,
+      session_id: session.id,
+      completed_at: session.published_at,
+      student_label: "숨겨야 할 번호",
+      initial: {
+        choice:
+          session.visibility === "public"
+            ? "감자는 마음을 전하는 선물"
+            : "비공개 답변",
+      },
+      reflection: { answer: "서툰 표현이 오해로 이어진다는 걸 알았습니다." },
+    }));
+    await new Promise((resolve, reject) => {
+      const request = indexedDB.open("litverse-demo-v1", 1);
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction("state", "readwrite");
+        tx.objectStore("state").put(state, "app");
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  });
+  await page.reload();
+  await expect(page.locator(".inventory-summary")).toHaveText(
+    "전시 중인 작품2점",
+  );
+  await page.goto("/exhibition?type=deepening");
+  await expect(page.getByRole("navigation", { name: "전시 유형" })).toHaveCount(
+    0,
+  );
+  await expect(page.locator(".exhibit-card")).toHaveCount(2);
+  await page
+    .getByRole("searchbox", { name: "전시 작품 검색" })
+    .fill("첫 번째 반");
+  await expect(page.locator(".exhibit-card")).toHaveCount(1);
+  await page.getByRole("link", { name: "동백꽃 전시작 자세히 보기" }).click();
+  await expect(page.locator(".poster-signature")).toContainText("두 번째 반");
+  await expect(
+    page.getByRole("heading", { name: "이해 심화", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("감자는 마음을 전하는 선물")).toBeVisible();
+  await expect(page.getByText("비공개 답변")).toHaveCount(0);
+  await expect(page.getByText("숨겨야 할 번호")).toHaveCount(0);
+  await page.getByRole("link", { name: "첫 번째 반" }).click();
+  await expect(page.locator(".poster-signature")).toContainText("첫 번째 반");
+  await expect(page.getByText("감자는 마음을 전하는 선물")).toBeVisible();
+  const pdf = await page.pdf({
+    preferCSSPageSize: true,
+    printBackground: true,
+  });
+  expect(
+    (pdf.toString("latin1").match(/\/Type\s*\/Page\b/g) || []).length,
+  ).toBe(1);
+  await page.goto("/exhibition/deep-dongbaek-public");
+  await expect(page.locator(".literary-poster")).toBeVisible();
+  await expect(page.getByText("감자는 마음을 전하는 선물")).toBeVisible();
+  await page.goto("/exhibition/different-author");
+  await expect(page.locator(".literary-poster")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "이해 심화", exact: true }),
+  ).toHaveCount(0);
+});
+
 test("museum entrance, password gate, final pair, public poster, reopen and administrator controls", async ({
   page,
   context,

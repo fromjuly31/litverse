@@ -209,6 +209,8 @@ test("deepening SQL migration preserves lessons, separates rounds and enforces p
     "002_background_discussion.sql",
     "003_exhibition_archive.sql",
     "004_deepening.sql",
+    "20261104010332_supabase_connection_indexes.sql",
+    "20261121015654_deepening_class_questions.sql",
   ])
     await db.exec(
       await readFile(
@@ -426,6 +428,78 @@ test("deepening SQL migration preserves lessons, separates rounds and enforces p
     /permission denied/,
   );
   await db.exec("reset role");
+  const classSession = randomUUID();
+  const startClass = () =>
+    rpc("start_deepening_class_questions", [
+      teacher,
+      activity,
+      classSession,
+      input,
+      {
+        mode: "class_questions",
+        questions: ["왜 그렇게 생각했나요?", "본문에서 근거를 찾아보세요."],
+      },
+      null,
+      {},
+    ]);
+  const classResponse = (hash, answers) =>
+    rpc("submit_deepening_class_response", [
+      activity,
+      classSession,
+      hash,
+      "12번",
+      JSON.stringify(answers),
+    ]);
+  await db.exec("set role service_role");
+  assert.equal((await startClass()).status, "OPEN");
+  assert.equal((await startClass()).id, classSession);
+  await assert.rejects(
+    classResponse("missing-answer", ["한 답변"]),
+    /INVALID_CLASS_RESPONSE/,
+  );
+  await assert.rejects(
+    classResponse("invalid-answer", ["한 답변", " "]),
+    /INVALID_CLASS_RESPONSE/,
+  );
+  const answers = [
+    "작품의 배경을 생각했어요.",
+    "인물의 행동에서 근거를 찾았어요.",
+  ];
+  const submitted = await Promise.all([
+    classResponse("class-student", answers),
+    classResponse("class-student", answers),
+  ]);
+  assert.equal(submitted[0].id, submitted[1].id);
+  assert.deepEqual(submitted[0].answers, answers);
+  await assert.rejects(
+    classResponse("class-student", ["변경", answers[1]]),
+    /CLASS_RESPONSE_SUBMITTED/,
+  );
+  assert.equal(
+    (await db.query("select count(*)::int n from deepening_exhibit_index"))
+      .rows[0].n,
+    1,
+  );
+  await rpc("control_deepening", [
+    teacher,
+    activity,
+    classSession,
+    "CLOSED",
+    "private",
+    "understanding",
+  ]);
+  assert.equal((await startClass()).status, "CLOSED");
+  assert.equal(
+    (await classResponse("class-student", answers)).id,
+    submitted[0].id,
+  );
+  await assert.rejects(classResponse("late-student", answers), /STAGE_CLOSED/);
+  await db.exec("reset role; set role anon");
+  await assert.rejects(
+    classResponse("anonymous-rpc", answers),
+    /permission denied/,
+  );
+  await db.exec("reset role");
   const claims = await Promise.all([
     rpc("claim_deepening_ai", ["same-request"]),
     rpc("claim_deepening_ai", ["same-request"]),
@@ -451,7 +525,7 @@ test("deepening SQL migration preserves lessons, separates rounds and enforces p
   await db.query("delete from worksheets where id=$1", [worksheet.id]);
   assert.equal(
     (await db.query("select * from deepening_records")).rows.length,
-    0,
+    1,
   );
   assert.equal(
     (
